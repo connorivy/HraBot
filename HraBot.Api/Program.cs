@@ -1,0 +1,57 @@
+using HraBot.Api.Services;
+using HraBot.Api.Services.Ingestion;
+using Microsoft.Extensions.AI;
+using Scalar.AspNetCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddOpenApi();
+
+builder.AddServiceDefaults();
+
+var openai = builder.AddAzureOpenAIClient("openai");
+openai.AddChatClient("gpt-41")
+    .UseFunctionInvocation()
+    .UseOpenTelemetry(configure: c =>
+        c.EnableSensitiveData = builder.Environment.IsDevelopment());
+openai.AddEmbeddingGenerator("text-embedding-3-small");
+
+builder.AddQdrantClient("vectordb");
+builder.Services.AddQdrantVectorStore();
+builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
+builder.Services.AddSingleton<DataIngestor>();
+builder.Services.AddSingleton<SemanticSearch>();
+builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data")));
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
+
+app.UseHttpsRedirection();
+
+app.MapPost("/api/SemanticSearch/load-documents", async (SemanticSearch semanticSearch) =>
+{
+    await semanticSearch.LoadDocumentsAsync();
+    return Results.Ok();
+});
+
+app.MapGet("/api/SemanticSearch/search", async (SemanticSearch semanticSearch, string text, string? documentIdFilter, int maxResults) =>
+{
+    var results = await semanticSearch.SearchAsync(text, documentIdFilter, maxResults);
+    return Results.Ok(results);
+});
+
+app.MapDefaultEndpoints();
+
+var sp = app.Services.CreateScope().ServiceProvider;
+var semanticSearch = sp.GetRequiredService<SemanticSearch>();
+await semanticSearch.LoadDocumentsAsync();
+
+app.Run();
