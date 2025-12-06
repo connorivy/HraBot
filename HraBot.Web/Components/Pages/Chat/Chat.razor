@@ -2,7 +2,7 @@
 @using System.ComponentModel
 @inject IChatClient ChatClient
 @inject NavigationManager Nav
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 @implements IDisposable
 
 <PageTitle>Chat</PageTitle>
@@ -47,9 +47,11 @@ Don't refer to the presence of citations; just emit these tags right at the end,
     private ChatMessage? currentResponseMessage;
     private ChatInput? chatInput;
     private ChatSuggestions? chatSuggestions;
+    private HttpClient httpClient;
 
     protected override void OnInitialized()
     {
+        httpClient = HttpClientFactory.CreateClient("HraBot.Api");
         statefulMessageCount = 0;
         messages.Add(new(ChatRole.System, SystemPrompt));
         chatOptions.Tools = [
@@ -119,7 +121,7 @@ Don't refer to the presence of citations; just emit these tags right at the end,
         var url =
         $"/api/SemanticSearch/search?text={Uri.EscapeDataString(searchPhrase)}&documentIdFilter={Uri.EscapeDataString(filenameFilter
         ?? "")}&maxResults=5";
-        var results = await Http.GetFromJsonAsync<List<IngestedChunk>>(url);
+        var results = await httpClient.GetFromJsonAsync<List<IngestedChunk>>(url);
         return results?.Select(result => $"<result filename=\"{result.DocumentId}\">{result.Text}</result>") ??
         Enumerable.Empty<string>();
     }

@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\HraBot.Web\HraBot.Web.csproj" />
     <ProjectReference Include="..\HraBot.Api\HraBot.Api.csproj" />
   </ItemGroup>

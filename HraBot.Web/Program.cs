@@ -3,13 +3,15 @@ using OpenAI;
 using HraBot.Web.Components;
 using HraBot.Web.Services;
 using HraBot.Web.Services.Ingestion;
+using HraBot.ServiceDefaults;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 
-var openai = builder.AddAzureOpenAIClient("openai");
-openai.AddChatClient("gpt-4o-mini")
+// var openai = builder.AddAzureOpenAIClient("openai");
+var openai = builder.AddAzureOpenAIClient(HraServices.openai);
+openai.AddChatClient("gpt-4.1")
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: c =>
         c.EnableSensitiveData = builder.Environment.IsDevelopment());
@@ -21,6 +23,11 @@ builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.Collecti
 builder.Services.AddSingleton<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();
 builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.WebRootPath, "Data")));
+
+builder.Services.AddHttpClient("HraBot.Api", client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["HraBotApiBaseUrl"] ?? throw new InvalidOperationException("HraBotApi:BaseUrl configuration is missing"));
+});
 
 var app = builder.Build();
 

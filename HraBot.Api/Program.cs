@@ -1,5 +1,6 @@
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
+using HraBot.ServiceDefaults;
 using Microsoft.Extensions.AI;
 using Scalar.AspNetCore;
 
@@ -11,8 +12,9 @@ builder.Services.AddOpenApi();
 
 builder.AddServiceDefaults();
 
-var openai = builder.AddAzureOpenAIClient("openai");
-openai.AddChatClient("gpt-41")
+// var openai = builder.AddAzureOpenAIClient("openai");
+var openai = builder.AddAzureOpenAIClient(HraServices.openai);
+openai.AddChatClient("gpt-4.1")
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: c =>
         c.EnableSensitiveData = builder.Environment.IsDevelopment());
@@ -50,8 +52,8 @@ app.MapGet("/api/SemanticSearch/search", async (SemanticSearch semanticSearch, s
 
 app.MapDefaultEndpoints();
 
-var sp = app.Services.CreateScope().ServiceProvider;
-var semanticSearch = sp.GetRequiredService<SemanticSearch>();
-await semanticSearch.LoadDocumentsAsync();
+// var sp = app.Services.CreateScope().ServiceProvider;
+// var semanticSearch = sp.GetRequiredService<SemanticSearch>();
+// await semanticSearch.LoadDocumentsAsync();
 
 app.Run();

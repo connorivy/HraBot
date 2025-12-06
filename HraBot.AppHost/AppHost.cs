@@ -1,10 +1,14 @@
+using HraBot.ServiceDefaults;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 // You will need to set the connection string to your own value
 // You can do this using Visual Studio's "Manage User Secrets" UI, or on the command line:
 //   cd this-project-directory
 //   dotnet user-secrets set ConnectionStrings:openai "Endpoint=https://models.inference.ai.azure.com;Key=YOUR-API-KEY"
-var openai = builder.AddConnectionString("openai");
+// var openai = builder.AddConnectionString("openai");
+var openai = builder.AddConnectionString(HraServices.openai);
 
 var vectorDB = builder.AddQdrant("vectordb")
     .WithDataVolume()
@@ -17,8 +21,8 @@ var markitdown = builder.AddContainer("markitdown", "mcp/markitdown")
 var webApi = builder.AddProject<Projects.HraBot_Api>("api");
 webApi
     .WithReference(openai)
-    .WithReference(vectorDB)
     .WaitFor(openai)                
+    .WithReference(vectorDB)
     .WaitFor(vectorDB)
     .WithUrls(context =>
     {
@@ -37,11 +41,11 @@ webApi
     .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
 
 var webApp = builder.AddProject<Projects.HraBot_Web>("aichatweb-app");
-webApp.WithReference(openai);
-webApp
+webApp.WithReference(openai)
     .WithReference(vectorDB)
-    .WaitFor(vectorDB);
-webApp
+    .WaitFor(vectorDB)
+    .WithReference(webApi)
+    .WaitFor(webApi)
     .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
 
 builder.Build().Run();
