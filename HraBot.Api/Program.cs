@@ -1,4 +1,5 @@
 using HraBot.Api.Services;
+using HraBot.Api;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
 using Microsoft.Extensions.AI;
@@ -28,6 +29,9 @@ builder.Services.AddSingleton<SemanticSearch>();
 builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data")));
 
 var app = builder.Build();
+
+// Register SSE Chat Endpoint
+app.MapSseChatEndpoint();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
