@@ -1,11 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- <PublishAot>true</PublishAot> -->
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,11 +21,6 @@
     <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.67.1" />
     <PackageReference Include="PdfPig" Version="0.1.12" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.10.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../HraBot.Shared/HraBot.Shared.csproj" />
-    <ProjectReference Include="..\HraBot.ServiceDefaults\HraBot.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

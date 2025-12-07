@@ -76,7 +76,7 @@ Don't refer to the presence of citations; just emit these tags right at the end,
                     {
                         ReconnectionInterval = System.Diagnostics.Debugger.IsAttached ? TimeSpan.FromSeconds(100) : TimeSpan.FromSeconds(10)
                     };
-                    await Task.Delay(500, cancellationToken);
+                    await Task.Delay(200, cancellationToken);
                 }
             }
     
@@ -102,4 +102,15 @@ Don't refer to the presence of citations; just emit these tags right at the end,
         var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
         return chatClient;
     }
+}
+
+public static class ChatRoleMapper
+{
+    public static Microsoft.Extensions.AI.ChatRole Map(ChatRole role) => role switch
+    {
+        ChatRole.System => Microsoft.Extensions.AI.ChatRole.System,
+        ChatRole.User => Microsoft.Extensions.AI.ChatRole.User,
+        ChatRole.Assistant => Microsoft.Extensions.AI.ChatRole.Assistant,
+        _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+    };
 }
