@@ -42,7 +42,7 @@ public class DataIngestor(
             }
         }
 
-        using var writer = new VectorStoreWriterDebug<string>(vectorStore, dimensionCount: IngestedChunk.VectorDimensions, new()
+        using var writer = new VectorStoreWriter<string>(vectorStore, dimensionCount: IngestedChunk.VectorDimensions, new()
         {
             CollectionName = IngestedChunk.CollectionName,
             DistanceFunction = IngestedChunk.VectorDistanceFunction,
@@ -72,7 +72,7 @@ public class VerySlowSemanticSimilarityChunker(
     IngestionChunkerOptions options,
     float? thresholdPercentile = null) : IngestionChunker<string>
 {
-    private readonly SemanticSimilarityChunkerDebug _innerChunker = new SemanticSimilarityChunkerDebug(embeddingGenerator, options, thresholdPercentile);
+    private readonly SemanticSimilarityChunker _innerChunker = new(embeddingGenerator, options, thresholdPercentile);
 
     /// <inheritdoc/>
     public override async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(IngestionDocument document,

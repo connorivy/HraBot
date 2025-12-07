@@ -35,6 +35,10 @@ public class SetupTestsAi
     }
 
     private static List<string> OpenAiApiKeys;
+
+    /// <summary>
+    /// Please don't judge me for using multiple API keys
+    /// </summary>
     private static void InitOpenAiKeys()
     {
         var config = AppHost.Services.GetRequiredService<IConfiguration>();
@@ -58,5 +62,16 @@ public class SetupTestsAi
         var rand = new Random();
         int index = rand.Next(OpenAiApiKeys.Count);
         return OpenAiApiKeys[index];
+    }
+
+    [After(HookType.Assembly)]
+    public static async Task AssemblyTeardown()
+    {
+        if (AppHost != null)
+        {
+            await AppHost.StopAsync(CancellationToken.None);
+            AppHost.Dispose();
+        }
+        ApiClient?.Dispose();
     }
 }
