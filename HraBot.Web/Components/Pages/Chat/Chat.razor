@@ -51,8 +51,6 @@
         currentResponseMessage = new ChatMessage(ChatRole.Assistant, [responseText]);
         currentResponseCancellation = new();
 
-        messages.Add(currentResponseMessage!);
-
         try
         {
             await foreach (var update in StreamChatResponseSse(messages.Skip(statefulMessageCount).ToList(),
@@ -60,10 +58,13 @@
             {
                 responseText.Text += update;
                 ChatMessageItem.NotifyChanged(currentResponseMessage);
+                await InvokeAsync(StateHasChanged);
             }
         }
         catch (OperationCanceledException) { }
 
+        // Store the final response in the conversation, and begin getting suggestions
+        messages.Add(currentResponseMessage!);
         // Note: ConversationId is not updated here, as SSE endpoint may not return it; adjust if needed
         statefulMessageCount = 0;
         currentResponseMessage = null;

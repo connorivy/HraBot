@@ -15,13 +15,7 @@ public static class SseChatEndpoint
         {
             var chatClient = context.RequestServices.GetRequiredService<IChatClient>();
 
-            // deserialize request to string
-            var requestJson = await new StreamReader(context.Request.Body).ReadToEndAsync();
-
-            // var request = await context.Request.ReadFromJsonAsync<ChatRequestDto>();
-            var x = "{\"role\":1,\"text\":\"what is an ichra\"}";
-            var y = JsonSerializer.Deserialize<ChatMessageDto>(x);
-            var request = System.Text.Json.JsonSerializer.Deserialize<ChatRequestDto>(requestJson);
+            var request = await context.Request.ReadFromJsonAsync<ChatRequestDto>();
             if (request is null || request.Messages is null || request.Messages.Count == 0)
             {
                 context.Response.StatusCode = 400;
@@ -33,7 +27,7 @@ public static class SseChatEndpoint
                 new ChatMessage(
                     Microsoft.Extensions.AI.ChatRole.System, 
     @"
-You are an assistant who answers questions about health insurance related topics.
+You are an assistant who answers questions about health insurance.
 Do not answer questions about anything else.
 Use only simple markdown to format your responses.
 
@@ -78,7 +72,7 @@ Don't refer to the presence of citations; just emit these tags right at the end,
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    yield return new SseItem<string>($"Dummy chunk {i + 1}/10", eventType: "chat")
+                    yield return new SseItem<string>($"Dummy chunk {i + 1}/10\n", eventType: "chat")
                     {
                         ReconnectionInterval = System.Diagnostics.Debugger.IsAttached ? TimeSpan.FromSeconds(100) : TimeSpan.FromSeconds(10)
                     };
