@@ -1,5 +1,5 @@
-using HraBot.Api.Services;
 using HraBot.Api;
+using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
 using Microsoft.Extensions.AI;
@@ -13,12 +13,11 @@ builder.Services.AddOpenApi();
 
 builder.AddServiceDefaults();
 
-// var openai = builder.AddAzureOpenAIClient("openai");
 var openai = builder.AddAzureOpenAIClient(HraServices.openai);
-openai.AddChatClient("gpt-4.1")
+openai
+    .AddChatClient("gpt-4.1")
     .UseFunctionInvocation()
-    .UseOpenTelemetry(configure: c =>
-        c.EnableSensitiveData = builder.Environment.IsDevelopment());
+    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 openai.AddEmbeddingGenerator("text-embedding-3-small");
 
 builder.AddQdrantClient("vectordb");
@@ -26,7 +25,11 @@ builder.Services.AddQdrantVectorStore();
 builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
 builder.Services.AddSingleton<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();
-builder.Services.AddKeyedSingleton("ingestion_directory", new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data")));
+builder.Services.AddKeyedSingleton(
+    "ingestion_directory",
+    new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data"))
+);
+builder.Services.RegisterAiServices();
 
 var app = builder.Build();
 
@@ -42,17 +45,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/api/SemanticSearch/load-documents", async (SemanticSearch semanticSearch) =>
-{
-    await semanticSearch.LoadDocumentsAsync();
-    return Results.Ok();
-});
+app.MapPost(
+    "/api/SemanticSearch/load-documents",
+    async (SemanticSearch semanticSearch) =>
+    {
+        await semanticSearch.LoadDocumentsAsync();
+        return Results.Ok();
+    }
+);
 
-app.MapGet("/api/SemanticSearch/search", async (SemanticSearch semanticSearch, string text, string? documentIdFilter, int maxResults) =>
-{
-    var results = await semanticSearch.SearchAsync(text, documentIdFilter, maxResults);
-    return Results.Ok(results);
-});
+app.MapGet(
+    "/api/SemanticSearch/search",
+    async (SemanticSearch semanticSearch, string text, string? documentIdFilter, int maxResults) =>
+    {
+        var results = await semanticSearch.SearchAsync(text, documentIdFilter, maxResults);
+        return Results.Ok(results);
+    }
+);
 
 app.MapDefaultEndpoints();
 
