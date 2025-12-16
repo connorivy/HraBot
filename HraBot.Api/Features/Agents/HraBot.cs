@@ -10,6 +10,15 @@ public static class HraBot
 {
     public static AIAgent Create(IChatClient chatClient, SemanticSearch semanticSearch)
     {
+        // JsonElement responseSchema = AIJsonUtilities.CreateJsonSchema(typeof(HraBotResponse));
+        // ChatOptions chatOptions = new()
+        // {
+        //     ResponseFormat = ChatResponseFormat.ForJsonSchema(
+        //         schema: responseSchema,
+        //         schemaName: "HraBotResponse",
+        //         schemaDescription: "Response from HraBot including the original question, the bot's answer to the question, and citations"
+        //     ),
+        // };
         return chatClient.CreateAIAgent(
             name: "HraBot",
             instructions: @"
@@ -17,7 +26,7 @@ You are an assistant who answers questions about health insurance.
 Do not answer questions about anything else.
 Use only simple markdown to format your responses.
 
-Use the Search tool to find relevant information. 
+Use the SearchAsync tool to find relevant information. 
 
 You must reply in JSON format as follows:
 
@@ -33,7 +42,7 @@ You must reply in JSON format as follows:
 }
 
 The quote must be max 10 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-Don't refer to the presence of citations; just emit the citations in the 
+Don't refer to the presence of citations; just emit the citations in the JSON response.
 ",
             tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
         );

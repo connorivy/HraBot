@@ -9,11 +9,12 @@ namespace HraBot.Tests.Ai;
 public class SetupTestsAi
 {
     public static DistributedApplication AppHost { get; private set; }
+
     private static async Task<DistributedApplication> CreateAppHost()
     {
-        var hostBuilder = await DistributedApplicationTestingBuilder
-            .CreateAsync<Projects.HraBot_AppHost>();
-        
+        var hostBuilder =
+            await DistributedApplicationTestingBuilder.CreateAsync<Projects.HraBot_AppHost>();
+
         var app = await hostBuilder.BuildAsync().WaitAsync(CancellationToken.None);
         await app.StartAsync(CancellationToken.None);
         return app;
@@ -45,14 +46,14 @@ public class SetupTestsAi
 
         OpenAiApiKeys = [];
         int keyNum = 0;
-        while (config[$"ConnectionStrings:openai{(keyNum == 0 ? "" : keyNum.ToString())}"] is string apiKey)
+        while (
+            config[$"ConnectionStrings:openai{(keyNum == 0 ? "" : keyNum.ToString())}"]
+                is string apiKey
+        )
         {
             // will get api key in this format "Endpoint=<endpoint>;Key=<key>"
             // extract just the key part without the "Key=" prefix
-            OpenAiApiKeys
-                .Add(apiKey.Split(';')
-                .First(part => part.StartsWith("Key="))
-                [4..]);
+            OpenAiApiKeys.Add(apiKey.Split(';').First(part => part.StartsWith("Key="))[4..]);
             keyNum++;
         }
     }
