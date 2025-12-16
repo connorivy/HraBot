@@ -26,13 +26,40 @@ public class ReturnApprovedResponse(
             cancellationToken: ct
         );
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
+        HraBotResponse? finalResponse = null;
+        List<CitationValidationResponse> citationValidations = [];
         await foreach (WorkflowEvent evt in run.WatchStreamAsync(ct))
         {
             Console.WriteLine($"{evt}");
-            if (evt is WorkflowOutputEvent outputEvent)
+            Console.WriteLine($"evt type = {evt.GetType().Name}");
+            if (evt.Data is HraBotResponse hraBotResponse)
             {
-                return outputEvent.As<HraBotResponse>()?.Answer;
+                finalResponse = hraBotResponse;
             }
+            if (evt.Data is CitationValidationResponse citationValidation)
+            {
+                citationValidations.Add(citationValidation);
+            }
+        }
+
+        if (finalResponse is null)
+        {
+            throw new InvalidOperationException("HraBot did not produce a valid response.");
+        }
+        Console.WriteLine($"Final Answer: {finalResponse.Answer}");
+        foreach (var citation in finalResponse.Citations)
+        {
+            Console.WriteLine($"Citation: Filename={citation.Filename}, Quote={citation.Quote}");
+        }
+
+        foreach (var issue in citationValidations.SelectMany(cv => cv.Issues))
+        {
+            Console.WriteLine($"Citation issue: {issue}");
+        }
+
+        if (citationValidations.All(cv => cv.IsValid))
+        {
+            return finalResponse?.Answer;
         }
         return null;
     }

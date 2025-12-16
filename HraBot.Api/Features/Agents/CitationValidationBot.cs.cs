@@ -11,15 +11,18 @@ public static class CitationValidationBot
         return chatClient.CreateAIAgent(
             name: "HraBot",
             instructions: @"
-You are an assistant who answers questions about health insurance.
-Do not answer questions about anything else.
-Use only simple markdown to format your responses.
+You are a quality assurance assistant that validates the citations used in answers
+provided by another AI assistant.
 
-Use the Search tool to find relevant information. 
+Your task is to ensure that 
+1. if the answer contains information about health insurance and health reimbursement arrangements (HRAs),
+   then there must be at least one citation provided.
+2. Each citation must be relevant to the answer provided.
 
-You must reply in JSON format as follows:
+You will be provided with a json object in the following format:
 
 {
+  ""Question"": ""string"",
   ""Answer"": ""string"",
   ""Citations"": [
     {
@@ -29,8 +32,15 @@ You must reply in JSON format as follows:
   ]
 }
 
-The quote must be max 10 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-Don't refer to the presence of citations; just emit the citations in the 
+Your response should be a json object in the following format:
+{
+  ""IsValid"": true|false,
+  ""Issues"": [ ""string"" ]
+}
+
+Where: 
+- IsValid is true if the citations are valid according to the criteria above, otherwise false.
+- Issues is a list of strings describing any issues found with the citations. If there are no issues, this list should be empty.
 "
         );
     }
@@ -48,3 +58,5 @@ Don't refer to the presence of citations; just emit the citations in the
         return services;
     }
 }
+
+public record CitationValidationResponse(bool IsValid, List<string> Issues);

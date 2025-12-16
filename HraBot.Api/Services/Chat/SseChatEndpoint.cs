@@ -20,7 +20,7 @@ public static class SseChatEndpoint
                 [FromServices] IChatClient chatClient,
                 [FromBody] ChatRequestDto request,
                 CancellationToken ct
-            ) => NewMethod(chatClient, request, ct)
+            ) => StreamHraBotResponse(chatClient, request, ct)
         );
         app.MapPost(
             "/api/chat/workflow",
@@ -39,7 +39,7 @@ public static class SseChatEndpoint
         );
     }
 
-    private static IResult NewMethod(
+    private static IResult StreamHraBotResponse(
         IChatClient chatClient,
         ChatRequestDto request,
         CancellationToken ct

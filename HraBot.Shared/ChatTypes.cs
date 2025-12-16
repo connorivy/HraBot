@@ -6,7 +6,7 @@ public enum ChatRole
 {
     System,
     Assistant,
-    User
+    User,
 }
 
 public class ChatMessageDto

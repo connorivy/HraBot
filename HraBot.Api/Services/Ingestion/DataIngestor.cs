@@ -11,8 +11,17 @@ public class DataIngestor(
     ILogger<DataIngestor> logger,
     ILoggerFactory loggerFactory,
     VectorStore vectorStore,
-    IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator)
+    IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator
+)
 {
+    // private static readonly string[] nameFragmentsToIngest =
+    // [
+    //     "What is an ICHRA",
+    //     "Where did the ICHRA",
+    //     "ICHRA and a Traditional HRA",
+    //     "QSEHRA and an ICHRA",
+    // ];
+
     public async Task IngestDataAsync(DirectoryInfo directory, string searchPattern)
     {
         var files = directory.GetFiles(searchPattern, SearchOption.TopDirectoryOnly);
@@ -24,6 +33,14 @@ public class DataIngestor(
 
         foreach (var file in files)
         {
+            // if (
+            //     !nameFragmentsToIngest.Any(fragment =>
+            //         file.Name.Contains(fragment, StringComparison.OrdinalIgnoreCase)
+            //     )
+            // )
+            // {
+            //     continue;
+            // }
             if (file.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase))
             {
                 logger.LogInformation("Skipping txt file '{file}'.", file.FullName);
@@ -36,28 +53,44 @@ public class DataIngestor(
             }
             if (!uploadedFilesCache.IsUploaded(file.Name))
             {
-                logger.LogInformation("No existing vectors for file '{file}'. Adding for ingestion.", file.FullName);
+                logger.LogInformation(
+                    "No existing vectors for file '{file}'. Adding for ingestion.",
+                    file.FullName
+                );
                 filesToAdd.Add(file);
                 continue;
             }
         }
 
-        using var writer = new VectorStoreWriter<string>(vectorStore, dimensionCount: IngestedChunk.VectorDimensions, new()
-        {
-            CollectionName = IngestedChunk.CollectionName,
-            DistanceFunction = IngestedChunk.VectorDistanceFunction,
-            IncrementalIngestion = false,
-        });
+        using var writer = new VectorStoreWriter<string>(
+            vectorStore,
+            dimensionCount: IngestedChunk.VectorDimensions,
+            new()
+            {
+                CollectionName = IngestedChunk.CollectionName,
+                DistanceFunction = IngestedChunk.VectorDistanceFunction,
+                IncrementalIngestion = false,
+            }
+        );
 
         using var pipeline = new IngestionPipeline<string>(
             reader: new DocumentReader(directory),
-            chunker: new VerySlowSemanticSimilarityChunker(logger, embeddingGenerator, new(TiktokenTokenizer.CreateForModel("gpt-4o"))),
+            chunker: new VerySlowSemanticSimilarityChunker(
+                logger,
+                embeddingGenerator,
+                new(TiktokenTokenizer.CreateForModel("gpt-4o"))
+            ),
             writer: writer,
-            loggerFactory: loggerFactory);
+            loggerFactory: loggerFactory
+        );
 
         await foreach (var result in pipeline.ProcessAsync(filesToAdd, CancellationToken.None))
         {
-            logger.LogInformation("Completed processing '{id}'. Succeeded: '{succeeded}'.", result.DocumentId, result.Succeeded);
+            logger.LogInformation(
+                "Completed processing '{id}'. Succeeded: '{succeeded}'.",
+                result.DocumentId,
+                result.Succeeded
+            );
             if (result.Succeeded)
             {
                 uploadedFilesCache.AddFile(result.DocumentId);
@@ -70,19 +103,30 @@ public class VerySlowSemanticSimilarityChunker(
     ILogger logger,
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator,
     IngestionChunkerOptions options,
-    float? thresholdPercentile = null) : IngestionChunker<string>
+    float? thresholdPercentile = null
+) : IngestionChunker<string>
 {
-    private readonly SemanticSimilarityChunker _innerChunker = new(embeddingGenerator, options, thresholdPercentile);
+    private readonly SemanticSimilarityChunker _innerChunker = new(
+        embeddingGenerator,
+        options,
+        thresholdPercentile
+    );
 
     /// <inheritdoc/>
-    public override async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(IngestionDocument document,
-        [EnumeratorCancellation] CancellationToken cancellationToken = default) {
-            await foreach (var chunk in _innerChunker.ProcessAsync(document, cancellationToken))
-            {
-                yield return chunk;
-                logger.LogInformation("Processed a chunk for document '{documentId}'.", document.Identifier);
-                // Delay to work around rate limits
-                await Task.Delay(10_000, cancellationToken);
-            }
+    public override async IAsyncEnumerable<IngestionChunk<string>> ProcessAsync(
+        IngestionDocument document,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default
+    )
+    {
+        await foreach (var chunk in _innerChunker.ProcessAsync(document, cancellationToken))
+        {
+            yield return chunk;
+            logger.LogInformation(
+                "Processed a chunk for document '{documentId}'.",
+                document.Identifier
+            );
+            // Delay to work around rate limits
+            await Task.Delay(10_000, cancellationToken);
         }
+    }
 }

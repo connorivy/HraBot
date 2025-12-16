@@ -22,6 +22,7 @@ Use the Search tool to find relevant information.
 You must reply in JSON format as follows:
 
 {
+  ""Question"": ""string"",
   ""Answer"": ""string"",
   ""Citations"": [
     {
@@ -53,7 +54,7 @@ Don't refer to the presence of citations; just emit the citations in the
     }
 }
 
-public record HraBotResponse(string Answer, List<Citation> Citations);
+public record HraBotResponse(string Question, string Answer, List<Citation> Citations);
 
 public record Citation(string Filename, string Quote);
 
@@ -81,19 +82,23 @@ public sealed class HraBotExecutor([FromKeyedServices(AgentNames.HraBot)] AIAgen
 
 public sealed class CitationValidatorExecutor(
     [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator
-) : Executor<HraBotResponse, bool>(AgentNames.CitationValidator + "Executor")
+) : Executor<HraBotResponse, CitationValidationResponse>(AgentNames.CitationValidator + "Executor")
 {
-    public override async ValueTask<bool> HandleAsync(
-        HraBotResponse response,
+    public override async ValueTask<CitationValidationResponse> HandleAsync(
+        HraBotResponse hraBotResponse,
         IWorkflowContext context,
         CancellationToken cancellationToken = default
     )
     {
         var result = await citationValidator.RunAsync(
-            response.ToString(),
+            JsonSerializer.Serialize(hraBotResponse),
             cancellationToken: cancellationToken
         );
-        // return structuredResponse.Citations.All(c => !string.IsNullOrEmpty(c.Quote));
-        return true;
+        var structuredResponse =
+            JsonSerializer.Deserialize<CitationValidationResponse>(result.Text)
+            ?? throw new InvalidOperationException(
+                $"Failed to parse CitationValidator response, {result.Text}."
+            );
+        return structuredResponse;
     }
 }
