@@ -10,18 +10,20 @@ var builder = DistributedApplication.CreateBuilder(args);
 // var openai = builder.AddConnectionString("openai");
 var openai = builder.AddConnectionString(HraServices.openai);
 
-var vectorDB = builder.AddQdrant("vectordb")
+var vectorDB = builder
+    .AddQdrant("vectordb")
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
-var markitdown = builder.AddContainer("markitdown", "mcp/markitdown")
+var markitdown = builder
+    .AddContainer("markitdown", "mcp/markitdown")
     .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
     .WithHttpEndpoint(targetPort: 3001, name: "http");
 
 var webApi = builder.AddProject<Projects.HraBot_Api>("api");
 webApi
     .WithReference(openai)
-    .WaitFor(openai)                
+    .WaitFor(openai)
     .WithReference(vectorDB)
     .WaitFor(vectorDB)
     .WithUrls(context =>
@@ -31,17 +33,30 @@ webApi
             u.DisplayLocation = UrlDisplayLocation.DetailsOnly;
         }
 
-        context.Urls.Add(new()
-        {
-            Url = "/scalar",
-            DisplayText = "API Reference",
-            Endpoint = context.GetEndpoint("https")
-        });
+        context.Urls.Add(
+            new()
+            {
+                Url = "/scalar",
+                DisplayText = "API Reference",
+                Endpoint = context.GetEndpoint("https"),
+            }
+        );
+
+        context.Urls.Add(
+            new()
+            {
+                Url = "/devui",
+                DisplayText = "Dev UI",
+                Endpoint = context.GetEndpoint("https"),
+            }
+        );
     })
-    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
+    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"))
+    .WithEnvironment("ENABLE_OTEL", "true");
 
 var webApp = builder.AddProject<Projects.HraBot_Web>("aichatweb-app");
-webApp.WithReference(openai)
+webApp
+    .WithReference(openai)
     .WithReference(vectorDB)
     .WaitFor(vectorDB)
     .WithReference(webApi)
