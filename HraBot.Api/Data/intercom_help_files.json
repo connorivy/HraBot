@@ -242,7 +242,7 @@
     "blogPostTitle": "Extra-Step Carrier: Instructions & Carrier List",
     "link": "https://intercom.help/take-command-health/en/articles/9529332-extra-step-carrier-instructions-carrier-list",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Administering my Company's Plan",
@@ -270,7 +270,7 @@
     "blogPostTitle": "How does the IRS define \"part-time\" and \"seasonal\" employees for QSEHRA eligibility or exclusion?",
     "link": "https://intercom.help/take-command-health/en/articles/1831822-how-does-the-irs-define-part-time-and-seasonal-employees-for-qsehra-eligibility-or-exclusion",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Administering my Company's Plan",
@@ -312,7 +312,7 @@
     "blogPostTitle": "Employers: how do I explain QSEHRA to my employees?",
     "link": "https://intercom.help/take-command-health/en/articles/1690216-employers-how-do-i-explain-qsehra-to-my-employees",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Administering my Company's Plan",
@@ -494,28 +494,28 @@
     "blogPostTitle": "W-2 Reporting: What QSEHRA data should be reported on employees' Form W-2?",
     "link": "https://intercom.help/take-command-health/en/articles/1716706-w-2-reporting-what-qsehra-data-should-be-reported-on-employees-form-w-2",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Tax Reporting",
     "blogPostTitle": "W-2 Reporting: Where & How do I report QSEHRA reimbursements on my employees' W-2?",
     "link": "https://intercom.help/take-command-health/en/articles/1716690-w-2-reporting-where-how-do-i-report-qsehra-reimbursements-on-my-employees-w-2",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Tax Reporting",
     "blogPostTitle": "W-2 Reporting: How will Take Command support us in reporting year end QSEHRA amounts?",
     "link": "https://intercom.help/take-command-health/en/articles/6296018-w-2-reporting-how-will-take-command-support-us-in-reporting-year-end-qsehra-amounts",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Tax Reporting",
     "blogPostTitle": "W-2 Reporting: How do I report the benefit if the employee failed to have health insurance during the year?",
     "link": "https://intercom.help/take-command-health/en/articles/1716739-w-2-reporting-how-do-i-report-the-benefit-if-the-employee-failed-to-have-health-insurance-during-the-year",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: Tax Reporting",
@@ -627,7 +627,7 @@
     "blogPostTitle": "How to Re-Upload Declined Proof of Coverage/ Medical Expenses.",
     "link": "https://intercom.help/take-command-health/en/articles/9448790-how-to-re-upload-declined-proof-of-coverage-medical-expenses",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Using My HRA Employee Member Portal",
@@ -830,7 +830,7 @@
     "blogPostTitle": "W-2 Reporting: How is the benefit calculated for an eligible employee who changes benefit levels during the year?",
     "link": "https://intercom.help/take-command-health/en/articles/1716734-w-2-reporting-how-is-the-benefit-calculated-for-an-eligible-employee-who-changes-benefit-levels-during-the-year",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "HRA Resimbursement FAQs",
@@ -977,14 +977,14 @@
     "blogPostTitle": "Company Configuration Changes: ICHRA",
     "link": "https://intercom.help/take-command-health/en/articles/9540069-company-configuration-changes-ichra",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "ICHRA: Designing my Company's Plan",
     "blogPostTitle": "Company Configuration Changes: QSEHRA",
     "link": "https://intercom.help/take-command-health/en/articles/9540323-company-configuration-changes-qsehra",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "ICHRA: Administering my Company's Plan",
@@ -1425,7 +1425,7 @@
     "blogPostTitle": "Opting Out of Your HRA: A Step-by-Step Guide",
     "link": "https://intercom.help/take-command-health/en/articles/9456800-opting-out-of-your-hra-a-step-by-step-guide",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -1467,7 +1467,7 @@
     "blogPostTitle": "Is my condition considered a \"pre-existing condition?\"",
     "link": "https://intercom.help/take-command-health/en/articles/1644013-is-my-condition-considered-a-pre-existing-condition",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -1544,7 +1544,7 @@
     "blogPostTitle": "What is \"Proof of Loss of Coverage?\"",
     "link": "https://intercom.help/take-command-health/en/articles/1646812-what-is-proof-of-loss-of-coverage",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -1733,7 +1733,7 @@
     "blogPostTitle": "HMOs and PPOs and EPOs oh my!?",
     "link": "https://intercom.help/take-command-health/en/articles/1638614-hmos-and-ppos-and-epos-oh-my",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -2013,7 +2013,7 @@
     "blogPostTitle": "HRA Hub; My Info - Family: Add, Edit, and Delete a Family Member",
     "link": "https://intercom.help/take-command-health/en/articles/9948885-hra-hub-my-info-family-add-edit-and-delete-a-family-member",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "HRAHub",
