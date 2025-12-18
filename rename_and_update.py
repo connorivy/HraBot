@@ -11,7 +11,7 @@ files = set(os.listdir(data_dir))
 count = 0
 for entry in data:
     if not entry.get('renamed', False) and count < 30:
-        old = entry['blogPostTitle'].strip() + '.md'
+        old = entry['blogPostTitle'].strip().replace('?', '') + '.md'
         if 'articles/' in entry['link']:
             new = entry['link'].split('articles/')[1] + '.md'
             old_path = os.path.join(data_dir, old)
