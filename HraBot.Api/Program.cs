@@ -1,9 +1,12 @@
+using System.Data.Common;
+using Aspire.Qdrant.Client;
 using HraBot.Api;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Extensions.AI;
+using Qdrant.Client;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +24,7 @@ openai
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 openai.AddEmbeddingGenerator("text-embedding-3-small");
 
-builder.AddQdrantClient("vectordb");
+builder.AddQdrantClient(HraServices.vectorDb);
 builder.Services.AddQdrantVectorStore();
 builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
 builder.Services.AddSingleton<DataIngestor>();
@@ -54,8 +57,8 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
-// var sp = app.Services.CreateScope().ServiceProvider;
-// var semanticSearch = sp.GetRequiredService<SemanticSearch>();
-// await semanticSearch.LoadDocumentsAsync();
+var sp = app.Services.CreateScope().ServiceProvider;
+var semanticSearch = sp.GetRequiredService<SemanticSearch>();
+await semanticSearch.LoadDocumentsAsync();
 
 app.Run();

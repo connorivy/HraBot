@@ -12,6 +12,6 @@ public static class HraServices
 
     public const string API = "api";
 
-    public const string qdrantLocal = "vectordb";
-    public const string qdrantCloud = "qdrantCloud";
+    // public const string vectorDb = "qdrantLocal";
+    public const string vectorDb = "qdrantCloud";
 }

@@ -14,14 +14,6 @@ public class DataIngestor(
     IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator
 )
 {
-    // private static readonly string[] nameFragmentsToIngest =
-    // [
-    //     "What is an ICHRA",
-    //     "Where did the ICHRA",
-    //     "ICHRA and a Traditional HRA",
-    //     "QSEHRA and an ICHRA",
-    // ];
-
     public async Task IngestDataAsync(DirectoryInfo directory, string searchPattern)
     {
         var files = directory.GetFiles(searchPattern, SearchOption.TopDirectoryOnly);
@@ -33,14 +25,6 @@ public class DataIngestor(
 
         foreach (var file in files)
         {
-            // if (
-            //     !nameFragmentsToIngest.Any(fragment =>
-            //         file.Name.Contains(fragment, StringComparison.OrdinalIgnoreCase)
-            //     )
-            // )
-            // {
-            //     continue;
-            // }
             if (file.Extension.Equals(".txt", StringComparison.OrdinalIgnoreCase))
             {
                 logger.LogInformation("Skipping txt file '{file}'.", file.FullName);
@@ -78,7 +62,7 @@ public class DataIngestor(
             chunker: new VerySlowSemanticSimilarityChunker(
                 logger,
                 embeddingGenerator,
-                new(TiktokenTokenizer.CreateForModel("gpt-4o"))
+                new(TiktokenTokenizer.CreateForModel("gpt-4.1"))
             ),
             writer: writer,
             loggerFactory: loggerFactory

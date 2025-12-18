@@ -10,10 +10,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 var openai = builder.AddConnectionString(HraServices.openai);
 
 // You will need to set the connection string to your own value
-//   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>;Key=<qdrant-cloud-key>"
-var vectorDB = builder.AddConnectionString(HraServices.qdrantCloud);
+//   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>:6334;Key=<qdrant-cloud-key>"
+// Make sure to include the port number!!!
+var vectorDb = builder.AddConnectionString(HraServices.vectorDb);
 
-// var vectorDB = builder
+// var vectorDb = builder
 //     .AddQdrant(HraServices.qdrantLocal)
 //     .WithDataVolume()
 //     .WithLifetime(ContainerLifetime.Persistent);
@@ -27,8 +28,8 @@ var webApi = builder.AddProject<Projects.HraBot_Api>("api");
 webApi
     .WithReference(openai)
     .WaitFor(openai)
-    .WithReference(vectorDB)
-    .WaitFor(vectorDB)
+    .WithReference(vectorDb)
+    .WaitFor(vectorDb)
     .WithUrls(context =>
     {
         foreach (var u in context.Urls)
@@ -59,8 +60,8 @@ webApi
 var webApp = builder.AddProject<Projects.HraBot_Web>("aichatweb-app");
 webApp
     .WithReference(openai)
-    .WithReference(vectorDB)
-    .WaitFor(vectorDB)
+    .WithReference(vectorDb)
+    .WaitFor(vectorDb)
     .WithReference(webApi)
     .WaitFor(webApi)
     .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
