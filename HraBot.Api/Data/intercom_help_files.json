@@ -81,7 +81,7 @@
     "blogPostTitle": "If the \"Individual Mandate\" no longer applies, why is MEC still a requirement for QSEHRA?",
     "link": "https://intercom.help/take-command-health/en/articles/2742045-if-the-individual-mandate-no-longer-applies-why-is-mec-still-a-requirement-for-qsehra",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: FAQ",
@@ -102,7 +102,7 @@
     "blogPostTitle": "Why haven't I heard of HRAs like this before? Will it work with Obamacare or \"Trumpcare\"?",
     "link": "https://intercom.help/take-command-health/en/articles/1643762-why-haven-t-i-heard-of-hras-like-this-before-will-it-work-with-obamacare-or-trumpcare",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "QSEHRA: FAQ",
@@ -596,24 +596,10 @@
   },
   {
     "collectionName": "Using My HRA Employee Member Portal",
-    "blogPostTitle": "How do I reset my password?",
-    "link": "https://intercom.help/take-command-health/en/articles/4529712-how-do-i-reset-my-password",
-    "postConvertedToMd": true,
-    "renamed": true
-  },
-  {
-    "collectionName": "Using My HRA Employee Member Portal",
     "blogPostTitle": "What is my unclaimed allowance?",
     "link": "https://intercom.help/take-command-health/en/articles/2480711-what-is-my-unclaimed-allowance",
     "postConvertedToMd": true,
     "renamed": true
-  },
-  {
-    "collectionName": "Using My HRA Employee Member Portal",
-    "blogPostTitle": "How do I reset my password?",
-    "link": "https://intercom.help/take-command-health/en/articles/2823132-how-do-i-reset-my-password",
-    "postConvertedToMd": true,
-    "renamed": false
   },
   {
     "collectionName": "Using My HRA Employee Member Portal",
@@ -670,13 +656,6 @@
     "link": "https://intercom.help/take-command-health/en/articles/4529597-can-i-get-reimbursed-for-medical-expenses-if-i-don-t-have-health-insurance",
     "postConvertedToMd": true,
     "renamed": true
-  },
-  {
-    "collectionName": "Using My HRA Employee Member Portal",
-    "blogPostTitle": "How do I submit a medical expense for reimbursement?",
-    "link": "https://intercom.help/take-command-health/en/articles/2284624-how-do-i-submit-a-medical-expense-for-reimbursement",
-    "postConvertedToMd": true,
-    "renamed": false
   },
   {
     "collectionName": "Using My HRA Employee Member Portal",
@@ -809,7 +788,7 @@
     "blogPostTitle": "How do I update my reimbursement statement date/frequency?",
     "link": "https://intercom.help/take-command-health/en/articles/4529626-how-do-i-update-my-reimbursement-statement-date-frequency",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "HRA Resimbursement FAQs",
@@ -1236,7 +1215,7 @@
     "blogPostTitle": "ICHRA ACA (1094/1095) IRS Reporting FAQs",
     "link": "https://intercom.help/take-command-health/en/articles/4892063-ichra-aca-1094-1095-irs-reporting-faqs",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "ICHRA: ACA (1094/1095) IRS Reporting",
@@ -1257,7 +1236,7 @@
     "blogPostTitle": "Letter of Medical Necessity Guidance",
     "link": "https://intercom.help/take-command-health/en/articles/9448766-letter-of-medical-necessity-guidance",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Using Take Command Health to Find Individual Insurance",
@@ -1383,7 +1362,7 @@
     "blogPostTitle": "My doctor's information about what insurance plans he/she accepts is different than yours. Why?",
     "link": "https://intercom.help/take-command-health/en/articles/2453868-my-doctor-s-information-about-what-insurance-plans-he-she-accepts-is-different-than-yours-why",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -1726,7 +1705,7 @@
     "blogPostTitle": "What's an \"on-exchange\" or \"marketplace\" insurance plan?",
     "link": "https://intercom.help/take-command-health/en/articles/1638577-what-s-an-on-exchange-or-marketplace-insurance-plan",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "Individual Insurance FAQs",
@@ -1866,7 +1845,7 @@
     "blogPostTitle": "HRA Hub; Payroll/Reimbursement Reports",
     "link": "https://intercom.help/take-command-health/en/articles/9952746-hra-hub-payroll-reimbursement-reports",
     "postConvertedToMd": true,
-    "renamed": false
+    "renamed": true
   },
   {
     "collectionName": "HRAHub",
