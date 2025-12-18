@@ -1,12 +1,12 @@
 using HraBot.Api.Features.Agents;
+using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
 namespace HraBot.Api.Features.Workflows;
 
 public class ReturnApprovedResponse(
-    HraBotExecutor hraBot,
-    CitationValidatorExecutor citationValidator
+    [FromKeyedServices(WorkflowNames.Review)] Workflow reviewWorkflow
 )
 {
     public async Task<string?> GetApprovedResponse(
@@ -14,10 +14,8 @@ public class ReturnApprovedResponse(
         CancellationToken ct
     )
     {
-        var workflow = new WorkflowBuilder(hraBot).AddEdge(hraBot, citationValidator).Build();
-
         await using StreamingRun run = await InProcessExecution.StreamAsync(
-            workflow,
+            (Workflow)reviewWorkflow,
             messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
             cancellationToken: ct
         );

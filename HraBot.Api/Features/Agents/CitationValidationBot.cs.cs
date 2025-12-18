@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Hosting;
 using Microsoft.Extensions.AI;
 
 namespace HraBot.Api.Features.Agents;
@@ -9,7 +10,7 @@ public static class CitationValidationBot
     public static AIAgent Create(IChatClient chatClient)
     {
         return chatClient.CreateAIAgent(
-            name: "HraBot",
+            name: AgentNames.CitationValidator,
             instructions: @"
 You are a quality assurance assistant that validates the citations used in answers
 provided by another AI assistant.
@@ -47,7 +48,7 @@ Where:
 
     public static IServiceCollection AddCitationValidationBot(this IServiceCollection services)
     {
-        services.AddKeyedScoped<AIAgent>(
+        services.AddAIAgent(
             AgentNames.CitationValidator,
             (sp, _) =>
             {

@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HraBot.Api.Services;
 using Microsoft.Agents.AI;
+using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
@@ -20,7 +21,7 @@ public static class HraBot
         //     ),
         // };
         return chatClient.CreateAIAgent(
-            name: "HraBot",
+            name: AgentNames.HraBot,
             instructions: @"
 You are an assistant who answers questions about health insurance.
 Do not answer questions about anything else.
@@ -50,7 +51,7 @@ Don't refer to the presence of citations; just emit the citations in the JSON re
 
     public static IServiceCollection AddHraBotAgent(this IServiceCollection services)
     {
-        services.AddKeyedScoped<AIAgent>(
+        services.AddAIAgent(
             AgentNames.HraBot,
             (sp, _) =>
             {
@@ -86,6 +87,36 @@ public sealed class HraBotExecutor([FromKeyedServices(AgentNames.HraBot)] AIAgen
                 $"Failed to parse HraBot response, {response.Text}."
             );
         return structuredResponse;
+    }
+}
+
+sealed class StartExecutor() : Executor("ConcurrentStartExecutor")
+{
+    protected override Microsoft.Agents.AI.Workflows.RouteBuilder ConfigureRoutes(
+        Microsoft.Agents.AI.Workflows.RouteBuilder routeBuilder
+    )
+    {
+        return routeBuilder
+            .AddHandler<List<ChatMessage>>(this.RouteMessages)
+            .AddHandler<TurnToken>(this.RouteTurnTokenAsync);
+    }
+
+    private ValueTask RouteMessages(
+        List<ChatMessage> messages,
+        IWorkflowContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        return context.SendMessageAsync(messages, cancellationToken: cancellationToken);
+    }
+
+    private ValueTask RouteTurnTokenAsync(
+        TurnToken token,
+        IWorkflowContext context,
+        CancellationToken cancellationToken
+    )
+    {
+        return context.SendMessageAsync(token, cancellationToken: cancellationToken);
     }
 }
 

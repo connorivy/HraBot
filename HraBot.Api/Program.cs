@@ -2,6 +2,7 @@ using HraBot.Api;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
+using Microsoft.Agents.AI.DevUI;
 using Microsoft.Extensions.AI;
 using Scalar.AspNetCore;
 
@@ -29,39 +30,27 @@ builder.Services.AddKeyedSingleton(
     "ingestion_directory",
     new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data"))
 );
-builder.Services.RegisterAiServices();
+builder.RegisterAiServices();
+builder.Services.AddOpenAIResponses();
+builder.Services.AddOpenAIConversations();
 
 var app = builder.Build();
 
 // Register SSE Chat Endpoint
 app.MapSseChatEndpoint();
 
+app.MapOpenAIResponses();
+app.MapOpenAIConversations();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapDevUI();
     app.MapScalarApiReference();
 }
 
 app.UseHttpsRedirection();
-
-app.MapPost(
-    "/api/SemanticSearch/load-documents",
-    async (SemanticSearch semanticSearch) =>
-    {
-        await semanticSearch.LoadDocumentsAsync();
-        return Results.Ok();
-    }
-);
-
-app.MapGet(
-    "/api/SemanticSearch/search",
-    async (SemanticSearch semanticSearch, string text, string? documentIdFilter, int maxResults) =>
-    {
-        var results = await semanticSearch.SearchAsync(text, documentIdFilter, maxResults);
-        return Results.Ok(results);
-    }
-);
 
 app.MapDefaultEndpoints();
 
