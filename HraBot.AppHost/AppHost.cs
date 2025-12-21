@@ -7,7 +7,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 // You can do this using Visual Studio's "Manage User Secrets" UI, or on the command line:
 //   cd this-project-directory
 //   dotnet user-secrets set ConnectionStrings:openai "Endpoint=https://models.inference.ai.azure.com;Key=YOUR-API-KEY"
-var openai = builder.AddConnectionString(HraServices.openai);
+// var openai = builder.AddConnectionString(HraServices.openai);
 
 // You will need to set the connection string to your own value
 //   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>:6334;Key=<qdrant-cloud-key>"
@@ -26,8 +26,8 @@ var markitdown = builder
 
 var webApi = builder.AddProject<Projects.HraBot_Api>("api");
 webApi
-    .WithReference(openai)
-    .WaitFor(openai)
+    // .WithReference(openai)
+    // .WaitFor(openai)
     .WithReference(vectorDb)
     .WaitFor(vectorDb)
     .WithUrls(context =>
@@ -59,7 +59,7 @@ webApi
 
 var webApp = builder.AddProject<Projects.HraBot_Web>("aichatweb-app");
 webApp
-    .WithReference(openai)
+    // .WithReference(openai)
     .WithReference(vectorDb)
     .WaitFor(vectorDb)
     .WithReference(webApi)
