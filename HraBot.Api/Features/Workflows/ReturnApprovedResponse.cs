@@ -1,4 +1,5 @@
 using HraBot.Api.Features.Agents;
+using HraBot.Api.Services;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
@@ -55,6 +56,6 @@ public class ReturnApprovedResponse(
         {
             return finalResponse?.Answer;
         }
-        return null;
+        return string.Join(';', citationValidations.SelectMany(cv => cv.Issues));
     }
 }

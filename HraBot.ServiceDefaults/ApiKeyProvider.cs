@@ -3,6 +3,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace HraBot.ServiceDefaults;
 
+/// <summary>
+/// Please don't judge me for using multiple API keys
+/// </summary>
 public class ApiKeyProvider(IConfiguration config)
 {
     private List<string> OpenAiApiKeys
@@ -11,9 +14,24 @@ public class ApiKeyProvider(IConfiguration config)
         set;
     }
 
-    /// <summary>
-    /// Please don't judge me for using multiple API keys
-    /// </summary>
+    private List<string> GeminiApiKeys
+    {
+        get => field ??= GetGeminiApiKeysFromConfig();
+        set;
+    }
+
+    private List<string> GetGeminiApiKeysFromConfig()
+    {
+        List<string> geminiApiKeys = [];
+        int keyNum = 0;
+        while (config[$"ApiKeys:gemini{(keyNum == 0 ? "" : keyNum.ToString())}"] is string apiKey)
+        {
+            geminiApiKeys.Add(apiKey);
+            keyNum++;
+        }
+        return geminiApiKeys;
+    }
+
     private List<string> GetOpenAiApiKeysFromConfig()
     {
         List<string> openAiApiKeys = [];

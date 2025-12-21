@@ -62,7 +62,8 @@ public class DataIngestor(
             chunker: new VerySlowSemanticSimilarityChunker(
                 logger,
                 embeddingGenerator,
-                new(TiktokenTokenizer.CreateForModel("gpt-4.1"))
+                // new(TiktokenTokenizer.CreateForModel("gpt-4.1"))
+                new(TiktokenTokenizer.CreateForModel("gpt-4o-mini"))
             ),
             writer: writer,
             loggerFactory: loggerFactory

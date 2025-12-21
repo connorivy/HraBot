@@ -1,6 +1,7 @@
 using System;
 using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Workflows;
+using HraBot.Shared;
 using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
 
@@ -31,5 +32,7 @@ public static class Di_Api
         app.Services.AddTransient<ReturnApprovedResponse>();
         app.Services.AddTransient<HraBotExecutor>();
         app.Services.AddTransient<CitationValidatorExecutor>();
+        app.Services.AddSingleton<AiServiceProvider>();
+        app.Services.AddSingleton<AiConfigInfoProvider>();
     }
 }

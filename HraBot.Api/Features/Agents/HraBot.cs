@@ -68,8 +68,10 @@ public record HraBotResponse(string Question, string Answer, List<Citation> Cita
 
 public record Citation(string Filename, string Quote);
 
-public sealed class HraBotExecutor([FromKeyedServices(AgentNames.HraBot)] AIAgent hraBot)
-    : Executor<List<ChatMessage>, HraBotResponse>(AgentNames.HraBot + "Executor")
+public sealed class HraBotExecutor(
+    [FromKeyedServices(AgentNames.HraBot)] AIAgent hraBot,
+    ILogger<HraBotExecutor> logger
+) : Executor<List<ChatMessage>, HraBotResponse>(AgentNames.HraBot + "Executor")
 {
     public override async ValueTask<HraBotResponse> HandleAsync(
         List<ChatMessage> messages,
@@ -77,10 +79,12 @@ public sealed class HraBotExecutor([FromKeyedServices(AgentNames.HraBot)] AIAgen
         CancellationToken cancellationToken = default
     )
     {
+        logger.LogInformation("Retreiving response from HraBot");
         var response = await hraBot.RunAsync(
             messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
             cancellationToken: cancellationToken
         );
+        logger.LogInformation("HraBot executor response: {response}", response);
         var structuredResponse =
             JsonSerializer.Deserialize<HraBotResponse>(response.Text)
             ?? throw new InvalidOperationException(
@@ -121,7 +125,8 @@ sealed class StartExecutor() : Executor("ConcurrentStartExecutor")
 }
 
 public sealed class CitationValidatorExecutor(
-    [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator
+    [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator,
+    ILogger<CitationValidatorExecutor> logger
 ) : Executor<HraBotResponse, CitationValidationResponse>(AgentNames.CitationValidator + "Executor")
 {
     public override async ValueTask<CitationValidationResponse> HandleAsync(
@@ -130,15 +135,45 @@ public sealed class CitationValidatorExecutor(
         CancellationToken cancellationToken = default
     )
     {
-        var result = await citationValidator.RunAsync(
+        logger.LogInformation("Retreiving response from CitationValidator");
+        var response = await citationValidator.RunAsync(
             JsonSerializer.Serialize(hraBotResponse),
             cancellationToken: cancellationToken
         );
+        logger.LogInformation("CitationValidatorExecutor response: {response}", response);
         var structuredResponse =
-            JsonSerializer.Deserialize<CitationValidationResponse>(result.Text)
+            JsonSerializer.Deserialize<CitationValidationResponse>(response.Text)
             ?? throw new InvalidOperationException(
-                $"Failed to parse CitationValidator response, {result.Text}."
+                $"Failed to parse CitationValidator response, {response.Text}."
             );
         return structuredResponse;
     }
 }
+
+public sealed class SearchBotExecutor(
+    [FromKeyedServices(AgentNames.SearchBot)] AIAgent agent,
+    ILogger<SearchBotExecutor> logger
+) : Executor<List<ChatMessage>, SearchBotResponse>(AgentNames.SearchBot + "Executor")
+{
+    public override async ValueTask<SearchBotResponse> HandleAsync(
+        List<ChatMessage> messages,
+        IWorkflowContext context,
+        CancellationToken cancellationToken = default
+    )
+    {
+        logger.LogInformation("Retreiving response from SearchBot");
+        var response = await agent.RunAsync(
+            messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
+            cancellationToken: cancellationToken
+        );
+        logger.LogInformation("SearchBotExecutor response: {response}", response);
+        var structuredResponse =
+            JsonSerializer.Deserialize<SearchBotResponse>(response.Text)
+            ?? throw new InvalidOperationException(
+                $"Failed to parse HraBot response, {response.Text}."
+            );
+        return structuredResponse;
+    }
+}
+
+public record SearchBotResponse(string DocumentId, string Text);

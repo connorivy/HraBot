@@ -1,9 +1,13 @@
 using System.Data.Common;
 using Aspire.Qdrant.Client;
+using Azure.AI.OpenAI;
+using GenerativeAI;
+using GenerativeAI.Microsoft;
 using HraBot.Api;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
+using HraBot.Shared;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Extensions.AI;
 using Qdrant.Client;
@@ -17,12 +21,25 @@ builder.Services.AddOpenApi();
 
 builder.AddServiceDefaults();
 
-var openai = builder.AddAzureOpenAIClient(HraServices.openai);
-openai
-    .AddChatClient("gpt-4.1")
+// var openai = builder.AddAzureOpenAIClient(HraServices.openai);
+// openai
+//     .AddChatClient("gpt-4o-mini")
+//     .UseFunctionInvocation()
+//     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
+// openai.AddEmbeddingGenerator("text-embedding-3-small");
+
+builder
+    .Services.AddChatClient(sp =>
+    {
+        ;
+        return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
+    })
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
-openai.AddEmbeddingGenerator("text-embedding-3-small");
+
+builder.Services.AddEmbeddingGenerator(sp =>
+    sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()
+);
 
 builder.AddQdrantClient(HraServices.vectorDb);
 builder.Services.AddQdrantVectorStore();
@@ -57,8 +74,8 @@ app.UseHttpsRedirection();
 
 app.MapDefaultEndpoints();
 
-var sp = app.Services.CreateScope().ServiceProvider;
-var semanticSearch = sp.GetRequiredService<SemanticSearch>();
-await semanticSearch.LoadDocumentsAsync();
+// var sp = app.Services.CreateScope().ServiceProvider;
+// var semanticSearch = sp.GetRequiredService<SemanticSearch>();
+// await semanticSearch.LoadDocumentsAsync();
 
 app.Run();
