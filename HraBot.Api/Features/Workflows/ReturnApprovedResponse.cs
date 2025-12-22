@@ -1,32 +1,45 @@
 using HraBot.Api.Features.Agents;
-using HraBot.Api.Services;
-using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
 namespace HraBot.Api.Features.Workflows;
 
 public class ReturnApprovedResponse(
-    [FromKeyedServices(WorkflowNames.Review)] Workflow reviewWorkflow
+    [FromKeyedServices(WorkflowNames.Review)] Workflow reviewWorkflow,
+    ILogger<ReturnApprovedResponse> logger
 )
 {
-    public async Task<string?> GetApprovedResponse(
+    public async Task<ApprovedResponse> GetApprovedResponse(
         IEnumerable<ChatMessage> messages,
         CancellationToken ct
     )
     {
         await using StreamingRun run = await InProcessExecution.StreamAsync(
-            (Workflow)reviewWorkflow,
+            reviewWorkflow,
             messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
             cancellationToken: ct
         );
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         HraBotResponse? finalResponse = null;
         List<CitationValidationResponse> citationValidations = [];
+        List<Citation>? citations = null;
+
+        // todo: unsubscribe
+        AgentLogger.CitationsRetrieved += (_, e) => citations = e;
         await foreach (WorkflowEvent evt in run.WatchStreamAsync(ct))
         {
-            Console.WriteLine($"{evt}");
-            Console.WriteLine($"evt type = {evt.GetType().Name}");
+            logger.LogInformation(
+                "Receive workflow event of type {eventType}\nData payload of type {dataType}\nValue = {value}",
+                evt.GetType().Name,
+                evt.Data?.GetType().Name,
+                evt.ToString()
+            );
+            if (evt is ExecutorFailedEvent failedEvt)
+            {
+                throw new InvalidOperationException(
+                    $"Executor {failedEvt.ExecutorId} failed with error {failedEvt.Data}"
+                );
+            }
             if (evt.Data is HraBotResponse hraBotResponse)
             {
                 finalResponse = hraBotResponse;
@@ -35,6 +48,10 @@ public class ReturnApprovedResponse(
             {
                 citationValidations.Add(citationValidation);
             }
+            // if (evt.Data is List<Citation> citationsData)
+            // {
+            //     citations = citationsData;
+            // }
         }
 
         if (finalResponse is null)
@@ -54,8 +71,40 @@ public class ReturnApprovedResponse(
 
         if (citationValidations.All(cv => cv.IsValid))
         {
-            return finalResponse?.Answer;
+            return new(ResponseType.Success, finalResponse.Answer, finalResponse.Citations);
         }
-        return string.Join(';', citationValidations.SelectMany(cv => cv.Issues));
+        return new(
+            ResponseType.Failure,
+            "Unable to find an answer in the company documents",
+            citations ?? []
+        );
     }
+
+    public static Workflow CreateWorkflow(IServiceProvider sp)
+    {
+        var startExecutor = new StartExecutor();
+        var searchBotExecutor = sp.GetRequiredService<SearchBotExecutor>();
+        var hraBotExecutor = sp.GetRequiredService<HraBotExecutor>();
+        var citationValidatorExecutor = sp.GetRequiredService<CitationValidatorExecutor>();
+        var workflowBuilder = new WorkflowBuilder(startExecutor)
+            // .AddEdge(startExecutor, searchBotExecutor)
+            // .AddEdge(searchBotExecutor, hraBotExecutor)
+            .AddEdge(startExecutor, hraBotExecutor)
+            .AddEdge(hraBotExecutor, citationValidatorExecutor);
+        workflowBuilder.WithName(WorkflowNames.Review);
+        return workflowBuilder.Build();
+    }
+}
+
+public record ApprovedResponse(
+    ResponseType ResponseType,
+    string? Response,
+    List<Citation> Citations
+);
+
+public enum ResponseType
+{
+    Undefined = 0,
+    Success,
+    Failure,
 }

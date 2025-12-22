@@ -1,3 +1,4 @@
+using System.Reflection.Metadata;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.VectorData;
 
@@ -25,7 +26,15 @@ public class IngestedChunk
     [JsonPropertyName("context")]
     public string? Context { get; set; }
 
-    [VectorStoreVector(VectorDimensions, DistanceFunction = VectorDistanceFunction, StorageName = "embedding")]
+    [VectorStoreVector(
+        VectorDimensions,
+        DistanceFunction = VectorDistanceFunction,
+        StorageName = "embedding"
+    )]
     [JsonPropertyName("embedding")]
     public string? Vector => Text;
+
+    public IngestedChunkDto ToDto() => new(this.DocumentId, this.Text);
 }
+
+public record IngestedChunkDto(string Filename, string Quote);

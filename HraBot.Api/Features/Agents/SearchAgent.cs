@@ -1,7 +1,9 @@
+using System.Text.Json;
 using HraBot.Api.Services;
 using Microsoft.Agents;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
 namespace HraBot.Api.Features.Agents;
@@ -21,7 +23,7 @@ public static class SearchAgent
         // };
         return chatClient
             .CreateAIAgent(
-                name: AgentNames.HraBot,
+                name: AgentNames.SearchBot,
                 instructions: @"
 You are an AI agent who receives questions from a user and then searches for relevant resources.
 
@@ -31,14 +33,20 @@ You must reply in JSON format as follows:
 
 [
   {
-    ""documentid"" : ""string"",
-    ""text"" : ""string""
+    ""Filename"" : ""string"",
+    ""Quote"" : ""string""
   }
 ]
 ",
                 tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
             )
-            .WithOpenTelemetry();
+            .AsBuilder()
+            .UseOpenTelemetry(AgentNames.SearchBot, 
+#if DEBUG 
+           c => c.EnableSensitiveData = true
+#endif
+             )
+            .Build();
     }
 
     public static IServiceCollection AddSearchAgent(this IServiceCollection services)
@@ -55,3 +63,39 @@ You must reply in JSON format as follows:
         return services;
     }
 }
+
+public sealed class SearchBotExecutor(
+    [FromKeyedServices(AgentNames.SearchBot)] AIAgent agent,
+    ILogger<SearchBotExecutor> logger
+) : Executor<List<ChatMessage>, HraBotState>(AgentNames.SearchBot + "Executor")
+{
+    public override async ValueTask<HraBotState> HandleAsync(
+        List<ChatMessage> messages,
+        IWorkflowContext context,
+        CancellationToken ct = default
+    )
+    {
+        logger.LogInformation("Retreiving response from SearchBot");
+        var state = new HraBotState()
+        {
+            Messages = messages
+        };
+        var response = await agent.RunAsync(
+            messages,
+            cancellationToken: ct
+        );
+        state.Messages.AddRange(response.Messages);
+        var threadId = Guid.NewGuid().ToString();
+        await context.QueueStateUpdateAsync(threadId, messages, cancellationToken: ct);
+        logger.LogInformation("SearchBotExecutor response: {response}", response);
+        var structuredResponse =
+            JsonSerializer.Deserialize<List<Citation>>(response.Text)
+            ?? throw new InvalidOperationException(
+                $"Failed to parse SearchBot response, {response.Text}."
+            );
+        await context.AddEventAsync(new SearchBotResponse(structuredResponse));
+        return state;
+    }
+}
+
+public class SearchBotResponse(List<Citation> citations) : WorkflowEvent(citations);

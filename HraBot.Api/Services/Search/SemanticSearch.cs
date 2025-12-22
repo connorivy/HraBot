@@ -19,23 +19,22 @@ public class SemanticSearch(
             )
         );
 
-    public async Task<IReadOnlyList<IngestedChunk>> SearchAsync(
-        string text,
-        string? documentIdFilter,
-        int maxResults
+    public async Task<IReadOnlyList<IngestedChunkDto>> SearchAsync(
+        string searchText
+    // string? documentIdFilter
+    // int maxResults
     )
     {
-        // await LoadDocumentsAsync();
         var nearest = vectorCollection.SearchAsync(
-            text,
-            maxResults,
+            searchText,
+            10,
             new VectorSearchOptions<IngestedChunk>
             {
-                Filter = documentIdFilter is { Length: > 0 }
-                    ? record => record.DocumentId == documentIdFilter
-                    : null,
+                //     Filter = documentIdFilter is { Length: > 0 }
+                //         ? record => record.DocumentId == documentIdFilter
+                //         : null,
             }
         );
-        return await nearest.Select(result => result.Record).ToListAsync();
+        return await nearest.Select(result => result.Record.ToDto()).ToListAsync();
     }
 }

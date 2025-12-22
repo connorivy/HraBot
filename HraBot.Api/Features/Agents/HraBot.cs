@@ -9,7 +9,12 @@ namespace HraBot.Api.Features.Agents;
 
 public static class HraBot
 {
-    public static AIAgent Create(IChatClient chatClient, SemanticSearch semanticSearch)
+    public static AIAgent Create(
+        IChatClient chatClient,
+        SemanticSearch semanticSearch,
+        AgentLogger agentLogger
+    )
+    // public static AIAgent Create(IChatClient chatClient)
     {
         // JsonElement responseSchema = AIJsonUtilities.CreateJsonSchema(typeof(HraBotResponse));
         // ChatOptions chatOptions = new()
@@ -20,9 +25,10 @@ public static class HraBot
         //         schemaDescription: "Response from HraBot including the original question, the bot's answer to the question, and citations"
         //     ),
         // };
-        return chatClient.CreateAIAgent(
-            name: AgentNames.HraBot,
-            instructions: @"
+        return chatClient
+            .CreateAIAgent(
+                name: AgentNames.HraBot,
+                instructions: @"
 You are an assistant who answers questions about health insurance.
 Do not answer questions about anything else.
 Use only simple markdown to format your responses.
@@ -45,8 +51,16 @@ You must reply in JSON format as follows:
 The quote must be max 10 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
 Don't refer to the presence of citations; just emit the citations in the JSON response.
 ",
-            tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
-        );
+                tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
+            )
+            .AsBuilder()
+            .Use(agentLogger.FunctionLoggingMiddleware)
+            .UseOpenTelemetry(AgentNames.HraBot
+#if DEBUG
+                , c => c.EnableSensitiveData = true
+#endif
+            )
+            .Build();
     }
 
     public static IServiceCollection AddHraBotAgent(this IServiceCollection services)
@@ -56,8 +70,10 @@ Don't refer to the presence of citations; just emit the citations in the JSON re
             (sp, _) =>
             {
                 var chatClient = sp.GetRequiredService<IChatClient>();
+                var agentLogger = sp.GetRequiredService<AgentLogger>();
                 var semanticSearch = sp.GetRequiredService<SemanticSearch>();
-                return Create(chatClient, semanticSearch);
+                return Create(chatClient, semanticSearch, agentLogger);
+                // return Create(chatClient);
             }
         );
         return services;
@@ -76,14 +92,11 @@ public sealed class HraBotExecutor(
     public override async ValueTask<HraBotResponse> HandleAsync(
         List<ChatMessage> messages,
         IWorkflowContext context,
-        CancellationToken cancellationToken = default
+        CancellationToken ct = default
     )
     {
         logger.LogInformation("Retreiving response from HraBot");
-        var response = await hraBot.RunAsync(
-            messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
-            cancellationToken: cancellationToken
-        );
+        var response = await hraBot.RunAsync(messages, cancellationToken: ct);
         logger.LogInformation("HraBot executor response: {response}", response);
         var structuredResponse =
             JsonSerializer.Deserialize<HraBotResponse>(response.Text)
@@ -91,36 +104,6 @@ public sealed class HraBotExecutor(
                 $"Failed to parse HraBot response, {response.Text}."
             );
         return structuredResponse;
-    }
-}
-
-sealed class StartExecutor() : Executor("ConcurrentStartExecutor")
-{
-    protected override Microsoft.Agents.AI.Workflows.RouteBuilder ConfigureRoutes(
-        Microsoft.Agents.AI.Workflows.RouteBuilder routeBuilder
-    )
-    {
-        return routeBuilder
-            .AddHandler<List<ChatMessage>>(this.RouteMessages)
-            .AddHandler<TurnToken>(this.RouteTurnTokenAsync);
-    }
-
-    private ValueTask RouteMessages(
-        List<ChatMessage> messages,
-        IWorkflowContext context,
-        CancellationToken cancellationToken
-    )
-    {
-        return context.SendMessageAsync(messages, cancellationToken: cancellationToken);
-    }
-
-    private ValueTask RouteTurnTokenAsync(
-        TurnToken token,
-        IWorkflowContext context,
-        CancellationToken cancellationToken
-    )
-    {
-        return context.SendMessageAsync(token, cancellationToken: cancellationToken);
     }
 }
 
@@ -150,30 +133,7 @@ public sealed class CitationValidatorExecutor(
     }
 }
 
-public sealed class SearchBotExecutor(
-    [FromKeyedServices(AgentNames.SearchBot)] AIAgent agent,
-    ILogger<SearchBotExecutor> logger
-) : Executor<List<ChatMessage>, SearchBotResponse>(AgentNames.SearchBot + "Executor")
+public class HraBotState
 {
-    public override async ValueTask<SearchBotResponse> HandleAsync(
-        List<ChatMessage> messages,
-        IWorkflowContext context,
-        CancellationToken cancellationToken = default
-    )
-    {
-        logger.LogInformation("Retreiving response from SearchBot");
-        var response = await agent.RunAsync(
-            messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
-            cancellationToken: cancellationToken
-        );
-        logger.LogInformation("SearchBotExecutor response: {response}", response);
-        var structuredResponse =
-            JsonSerializer.Deserialize<SearchBotResponse>(response.Text)
-            ?? throw new InvalidOperationException(
-                $"Failed to parse HraBot response, {response.Text}."
-            );
-        return structuredResponse;
-    }
+    public required List<ChatMessage> Messages { get; init; }
 }
-
-public record SearchBotResponse(string DocumentId, string Text);

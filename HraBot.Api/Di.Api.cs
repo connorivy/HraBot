@@ -13,26 +13,16 @@ public static class Di_Api
     {
         app.Services.AddHraBotAgent();
         app.Services.AddCitationValidationBot();
-        app.AddWorkflow(
-                WorkflowNames.Review,
-                (sp, _) =>
-                {
-                    var startExecutor = new StartExecutor();
-                    var hraBotExecutor = sp.GetRequiredService<HraBotExecutor>();
-                    var citationValidatorExecutor =
-                        sp.GetRequiredService<CitationValidatorExecutor>();
-                    var workflowBuilder = new WorkflowBuilder(startExecutor)
-                        .AddEdge(startExecutor, hraBotExecutor)
-                        .AddEdge(hraBotExecutor, citationValidatorExecutor);
-                    workflowBuilder.WithName(WorkflowNames.Review);
-                    return workflowBuilder.Build();
-                }
-            )
+        app.Services.AddSearchAgent();
+        app.AddWorkflow(WorkflowNames.Review, (sp, _) => ReturnApprovedResponse.CreateWorkflow(sp))
             .AddAsAIAgent();
         app.Services.AddTransient<ReturnApprovedResponse>();
+        app.Services.AddTransient<SearchBotExecutor>();
         app.Services.AddTransient<HraBotExecutor>();
-        app.Services.AddTransient<CitationValidatorExecutor>();
+        app.Services.AddSingleton<CitationValidatorExecutor>();
         app.Services.AddSingleton<AiServiceProvider>();
         app.Services.AddSingleton<AiConfigInfoProvider>();
+        // app.Services.AddScoped<ThreadProvider>();
+        app.Services.AddSingleton<AgentLogger>();
     }
 }
