@@ -9,7 +9,6 @@
     <Project Path="src/HraBot.AppHost/HraBot.AppHost.csproj" />
     <Project Path="src/HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
     <Project Path="src/HraBot.Shared/HraBot.Shared.csproj" />
-    <Project Path="src/HraBot.Web/HraBot.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/HraBot.Tests.Ai/HraBot.Tests.Ai.csproj" />
