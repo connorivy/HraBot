@@ -4,12 +4,14 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/src/">
+    <Project Path="src/HraBot.Api/HraBot.Api.csproj" />
+    <Project Path="src/HraBot.AppHost/HraBot.AppHost.csproj" />
+    <Project Path="src/HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
+    <Project Path="src/HraBot.Shared/HraBot.Shared.csproj" />
+    <Project Path="src/HraBot.Web/HraBot.Web.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/HraBot.Tests.Ai/HraBot.Tests.Ai.csproj" />
   </Folder>
-  <Project Path="HraBot.Api/HraBot.Api.csproj" />
-  <Project Path="HraBot.AppHost/HraBot.AppHost.csproj" Type="36bfac24-a629-4805-bc18-927b86e49bce" />
-  <Project Path="HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" Type="36bfac24-a629-4805-bc18-927b86e49bce" />
-  <Project Path="HraBot.Shared/HraBot.Shared.csproj" />
-  <Project Path="HraBot.Web/HraBot.Web.csproj" Type="36bfac24-a629-4805-bc18-927b86e49bce" />
 </Solution>

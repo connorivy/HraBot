@@ -51,22 +51,23 @@ builder.Services.AddKeyedSingleton(
     new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data"))
 );
 builder.RegisterAiServices();
-builder.Services.AddOpenAIResponses();
-builder.Services.AddOpenAIConversations();
+
+// builder.Services.AddOpenAIResponses();
+// builder.Services.AddOpenAIConversations();
 
 var app = builder.Build();
 
 // Register SSE Chat Endpoint
 app.MapSseChatEndpoint();
 
-app.MapOpenAIResponses();
-app.MapOpenAIConversations();
+// app.MapOpenAIResponses();
+// app.MapOpenAIConversations();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    app.MapDevUI();
+    // app.MapDevUI();
     app.MapScalarApiReference();
 }
 

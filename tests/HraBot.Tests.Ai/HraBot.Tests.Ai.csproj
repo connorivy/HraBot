@@ -20,8 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../HraBot.Api/HraBot.Api.csproj" />
-    <ProjectReference Include="../../HraBot.AppHost/HraBot.AppHost.csproj" />
+    <ProjectReference Include="../../src/HraBot.Api/HraBot.Api.csproj" />
+    <ProjectReference Include="../../src/HraBot.AppHost/HraBot.AppHost.csproj" />
   </ItemGroup>
 
 </Project>
