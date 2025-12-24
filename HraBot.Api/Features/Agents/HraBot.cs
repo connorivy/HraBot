@@ -54,7 +54,7 @@ Don't refer to the presence of citations; just emit the citations in the JSON re
                 tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
             )
             .AsBuilder()
-            .Use(agentLogger.FunctionLoggingMiddleware)
+            // .Use(agentLogger.FunctionLoggingMiddleware)
             .UseOpenTelemetry(AgentNames.HraBot
 #if DEBUG
                 , c => c.EnableSensitiveData = true
@@ -86,7 +86,8 @@ public record Citation(string Filename, string Quote);
 
 public sealed class HraBotExecutor(
     [FromKeyedServices(AgentNames.HraBot)] AIAgent hraBot,
-    ILogger<HraBotExecutor> logger
+    ILogger<HraBotExecutor> logger,
+    AgentLogger agentLogger
 ) : Executor<List<ChatMessage>, HraBotResponse>(AgentNames.HraBot + "Executor")
 {
     public override async ValueTask<HraBotResponse> HandleAsync(
@@ -95,8 +96,20 @@ public sealed class HraBotExecutor(
         CancellationToken ct = default
     )
     {
+        var hraBotWithMiddleware = hraBot
+            .AsBuilder()
+            .Use(
+                (agent, funcContext, next, cancellationToken) =>
+                    agentLogger.FunctionLoggingMiddleware(
+                        context.AddEventAsync,
+                        funcContext,
+                        next,
+                        cancellationToken
+                    )
+            )
+            .Build();
         logger.LogInformation("Retreiving response from HraBot");
-        var response = await hraBot.RunAsync(messages, cancellationToken: ct);
+        var response = await hraBotWithMiddleware.RunAsync(messages, cancellationToken: ct);
         logger.LogInformation("HraBot executor response: {response}", response);
         var structuredResponse =
             JsonSerializer.Deserialize<HraBotResponse>(response.Text)
@@ -107,33 +120,4 @@ public sealed class HraBotExecutor(
     }
 }
 
-public sealed class CitationValidatorExecutor(
-    [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator,
-    ILogger<CitationValidatorExecutor> logger
-) : Executor<HraBotResponse, CitationValidationResponse>(AgentNames.CitationValidator + "Executor")
-{
-    public override async ValueTask<CitationValidationResponse> HandleAsync(
-        HraBotResponse hraBotResponse,
-        IWorkflowContext context,
-        CancellationToken cancellationToken = default
-    )
-    {
-        logger.LogInformation("Retreiving response from CitationValidator");
-        var response = await citationValidator.RunAsync(
-            JsonSerializer.Serialize(hraBotResponse),
-            cancellationToken: cancellationToken
-        );
-        logger.LogInformation("CitationValidatorExecutor response: {response}", response);
-        var structuredResponse =
-            JsonSerializer.Deserialize<CitationValidationResponse>(response.Text)
-            ?? throw new InvalidOperationException(
-                $"Failed to parse CitationValidator response, {response.Text}."
-            );
-        return structuredResponse;
-    }
-}
-
-public class HraBotState
-{
-    public required List<ChatMessage> Messages { get; init; }
-}
+public class CitationsRetrievedEvent(List<Citation> citations) : WorkflowEvent(citations);

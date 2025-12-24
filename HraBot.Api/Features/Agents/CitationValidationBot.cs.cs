@@ -1,6 +1,7 @@
-using System;
+using System.Text.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
+using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 
 namespace HraBot.Api.Features.Agents;
@@ -61,3 +62,29 @@ Where:
 }
 
 public record CitationValidationResponse(bool IsValid, List<string> Issues);
+
+public sealed class CitationValidatorExecutor(
+    [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator,
+    ILogger<CitationValidatorExecutor> logger
+) : Executor<HraBotResponse, CitationValidationResponse>(AgentNames.CitationValidator + "Executor")
+{
+    public override async ValueTask<CitationValidationResponse> HandleAsync(
+        HraBotResponse hraBotResponse,
+        IWorkflowContext context,
+        CancellationToken cancellationToken = default
+    )
+    {
+        logger.LogInformation("Retreiving response from CitationValidator");
+        var response = await citationValidator.RunAsync(
+            JsonSerializer.Serialize(hraBotResponse),
+            cancellationToken: cancellationToken
+        );
+        logger.LogInformation("CitationValidatorExecutor response: {response}", response);
+        var structuredResponse =
+            JsonSerializer.Deserialize<CitationValidationResponse>(response.Text)
+            ?? throw new InvalidOperationException(
+                $"Failed to parse CitationValidator response, {response.Text}."
+            );
+        return structuredResponse;
+    }
+}

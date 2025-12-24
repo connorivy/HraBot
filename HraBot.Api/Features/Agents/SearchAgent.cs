@@ -93,9 +93,12 @@ public sealed class SearchBotExecutor(
             ?? throw new InvalidOperationException(
                 $"Failed to parse SearchBot response, {response.Text}."
             );
-        await context.AddEventAsync(new SearchBotResponse(structuredResponse));
+        await context.AddEventAsync(new CitationsRetrievedEvent(structuredResponse));
         return state;
     }
 }
 
-public class SearchBotResponse(List<Citation> citations) : WorkflowEvent(citations);
+public class HraBotState
+{
+    public required List<ChatMessage> Messages { get; init; }
+}

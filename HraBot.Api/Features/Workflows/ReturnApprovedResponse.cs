@@ -24,8 +24,6 @@ public class ReturnApprovedResponse(
         List<CitationValidationResponse> citationValidations = [];
         List<Citation>? citations = null;
 
-        // todo: unsubscribe
-        AgentLogger.CitationsRetrieved += (_, e) => citations = e;
         await foreach (WorkflowEvent evt in run.WatchStreamAsync(ct))
         {
             logger.LogInformation(
@@ -48,25 +46,19 @@ public class ReturnApprovedResponse(
             {
                 citationValidations.Add(citationValidation);
             }
-            // if (evt.Data is List<Citation> citationsData)
-            // {
-            //     citations = citationsData;
-            // }
+            if (evt.Data is List<Citation> citationsData)
+            {
+                citations = citationsData;
+            }
         }
 
         if (finalResponse is null)
         {
             throw new InvalidOperationException("HraBot did not produce a valid response.");
         }
-        Console.WriteLine($"Final Answer: {finalResponse.Answer}");
-        foreach (var citation in finalResponse.Citations)
+        if (citationValidations.Count == 0)
         {
-            Console.WriteLine($"Citation: Filename={citation.Filename}, Quote={citation.Quote}");
-        }
-
-        foreach (var issue in citationValidations.SelectMany(cv => cv.Issues))
-        {
-            Console.WriteLine($"Citation issue: {issue}");
+            throw new InvalidOperationException("No citation validations were created");
         }
 
         if (citationValidations.All(cv => cv.IsValid))
@@ -83,7 +75,7 @@ public class ReturnApprovedResponse(
     public static Workflow CreateWorkflow(IServiceProvider sp)
     {
         var startExecutor = new StartExecutor();
-        var searchBotExecutor = sp.GetRequiredService<SearchBotExecutor>();
+        // var searchBotExecutor = sp.GetRequiredService<SearchBotExecutor>();
         var hraBotExecutor = sp.GetRequiredService<HraBotExecutor>();
         var citationValidatorExecutor = sp.GetRequiredService<CitationValidatorExecutor>();
         var workflowBuilder = new WorkflowBuilder(startExecutor)
