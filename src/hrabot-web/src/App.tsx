@@ -33,9 +33,9 @@ const dummyReplies = [
 const theme = createTheme({
   palette: {
     mode: 'light',
-    primary: { main: '#f28c28' },
-    secondary: { main: '#1d7a6b' },
-    background: { default: '#f6f0e9' },
+    primary: { main: '#188A68' },
+    secondary: { main: '#f28c28' },
+    background: { default: '#f6f0e9', paper: '#fff9f2' },
     text: { primary: '#1f1d1a', secondary: '#4b4844' },
   },
   typography: {
@@ -109,66 +109,91 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Box className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f6f0e9] px-4 py-14">
-        <Box
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_10%_20%,rgba(242,140,40,0.28),transparent_55%),radial-gradient(circle_at_90%_10%,rgba(29,122,107,0.2),transparent_45%),linear-gradient(140deg,#fef7ec_0%,#f3e7d8_45%,#efe0d1_100%)]"
-        />
-        <Container maxWidth="sm" className="relative z-10">
-          <Paper className="flex flex-col overflow-hidden rounded-[28px] bg-[#fff9f2] shadow-[0_20px_60px_rgba(31,29,26,0.18)]">
-            <Box className="px-8 pb-5 pt-7 sm:px-9">
-              <Typography variant="overline" className="text-[#1d7a6b]">
+      <Box
+        className="flex h-screen items-stretch justify-center px-4"
+        sx={{ bgcolor: 'background.default' }}
+      >
+        <Container maxWidth={false} className="flex h-full w-full">
+          <Paper
+            elevation={10}
+            className="mx-auto flex h-full w-full max-w-5xl flex-col overflow-hidden"
+            sx={{ borderRadius: 4, bgcolor: 'background.paper' }}
+          >
+            <Box sx={{ px: { xs: 3, sm: 4 }, pt: 3, pb: 2 }}>
+              <Typography variant="overline" color="primary">
                 HraBot
               </Typography>
               <Typography variant="h4" className="mt-1">
                 HR answers, instantly.
               </Typography>
-              <Typography
-                variant="body2"
-                className="mt-1.5 text-[rgba(31,29,26,0.7)]"
-              >
+              <Typography variant="body2" color="text.secondary" className="mt-1.5">
                 Ask a question and get a fast, friendly response.
               </Typography>
             </Box>
             <Divider />
             <Box
               ref={streamRef}
-              className="flex max-h-[420px] min-h-[320px] flex-col gap-4 overflow-y-auto px-7 py-6 sm:px-8"
+              className="flex flex-1 flex-col gap-4 overflow-y-auto"
+              sx={{ px: { xs: 3, sm: 4 }, py: 3 }}
             >
               {messages.length === 0 ? (
-                <Box className="rounded-[20px] border border-dashed border-[rgba(31,29,26,0.2)] bg-white/60 px-4 py-12 text-center">
+                <Paper
+                  variant="outlined"
+                  className="px-4 py-12 text-center"
+                  sx={{
+                    borderRadius: 4,
+                    borderStyle: 'dashed',
+                    bgcolor: 'background.paper',
+                  }}
+                >
                   <Typography variant="subtitle1">No messages yet</Typography>
                   <Typography variant="body2">
                     Start a chat to see the conversation flow.
                   </Typography>
-                </Box>
+                </Paper>
               ) : (
                 messages.map((message) => (
                   <Stack
                     key={message.id}
                     direction="row"
                     spacing={1.5}
-                    className={`items-start ${
-                      message.role === 'user'
-                        ? 'flex-row-reverse self-end text-right'
-                        : ''
-                    }`}
+                    className={`items-start ${message.role === 'user'
+                      ? 'flex-row-reverse self-end text-right'
+                      : ''
+                      }`}
                   >
                     <Avatar
-                      className={`h-9 w-9 text-[0.65rem] font-semibold ${
+                      className="h-9 w-9 text-[0.65rem] font-semibold"
+                      sx={
                         message.role === 'user'
-                          ? 'bg-[rgba(242,140,40,0.18)] text-[#c45b16]'
-                          : 'bg-[rgba(29,122,107,0.15)] text-[#1d7a6b]'
-                      }`}
+                          ? {
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                          }
+                          : {
+                            bgcolor: 'grey.800',
+                            color: 'common.white',
+                          }
+                      }
                     >
                       {message.role === 'user' ? 'You' : 'HR'}
                     </Avatar>
                     <Box
-                      className={`flex max-w-[70%] flex-col gap-1.5 rounded-[18px] border border-[rgba(31,29,26,0.08)] px-4 py-3 ${
+                      className="flex max-w-[70%] flex-col gap-1.5 px-4 py-3"
+                      sx={
                         message.role === 'user'
-                          ? 'border-transparent bg-[#f28c28] text-white'
-                          : 'bg-white'
-                      }`}
+                          ? {
+                            borderRadius: 3,
+                            bgcolor: 'primary.main',
+                            color: 'primary.contrastText',
+                          }
+                          : {
+                            borderRadius: 3,
+                            border: 1,
+                            borderColor: 'divider',
+                            bgcolor: 'background.paper',
+                          }
+                      }
                     >
                       <Typography variant="body1">{message.text}</Typography>
                       <Typography variant="caption" className="opacity-60">
@@ -183,14 +208,25 @@ function App() {
               )}
               {isTyping && (
                 <Stack direction="row" spacing={1.5} className="items-start">
-                  <Avatar className="h-9 w-9 bg-[rgba(29,122,107,0.15)] text-[0.65rem] font-semibold text-[#1d7a6b]">
+                  <Avatar
+                    className="h-9 w-9 text-[0.65rem] font-semibold"
+                    sx={{ bgcolor: 'grey.800', color: 'common.white' }}
+                  >
                     HR
                   </Avatar>
-                  <Box className="flex max-w-[70%] flex-col gap-1.5 rounded-[18px] border border-[rgba(31,29,26,0.08)] bg-white px-4 py-3">
-                    <Box className="flex h-5 items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-[rgba(31,29,26,0.5)]" />
-                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-[rgba(31,29,26,0.5)] [animation-delay:0.15s]" />
-                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-[rgba(31,29,26,0.5)] [animation-delay:0.3s]" />
+                  <Box
+                    className="flex max-w-[70%] flex-col gap-1.5 px-4 py-3"
+                    sx={{
+                      borderRadius: 3,
+                      border: 1,
+                      borderColor: 'divider',
+                      bgcolor: 'background.paper',
+                    }}
+                  >
+                    <Box className="flex h-5 items-center gap-1.5" sx={{ color: 'text.secondary' }}>
+                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-current" />
+                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-current [animation-delay:0.15s]" />
+                      <span className="h-1.5 w-1.5 animate-[typing-bounce_1s_ease-in-out_infinite] rounded-full bg-current [animation-delay:0.3s]" />
                     </Box>
                   </Box>
                 </Stack>
@@ -200,7 +236,8 @@ function App() {
             <Box
               component="form"
               onSubmit={handleSubmit}
-              className="flex items-center gap-2.5 px-5 pb-5 pt-4"
+              className="flex items-center gap-2.5"
+              sx={{ px: { xs: 2, sm: 3 }, pb: 2.5, pt: 2 }}
             >
               <TextField
                 value={inputValue}
@@ -209,6 +246,7 @@ function App() {
                 fullWidth
                 size="small"
                 variant="outlined"
+                color="primary"
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' && !event.shiftKey) {
                     event.preventDefault()
@@ -220,7 +258,18 @@ function App() {
               <IconButton
                 type="submit"
                 color="primary"
-                className="rounded-[14px] bg-[#f28c28] text-white shadow-[0_10px_24px_rgba(242,140,40,0.35)] transition hover:bg-[#c45b16] disabled:bg-[rgba(31,29,26,0.2)] disabled:text-[rgba(31,29,26,0.5)] disabled:shadow-none"
+                sx={(muiTheme) => ({
+                  bgcolor: muiTheme.palette.primary.main,
+                  color: muiTheme.palette.primary.contrastText,
+                  borderRadius: 3,
+                  boxShadow: muiTheme.shadows[3],
+                  '&:hover': { bgcolor: muiTheme.palette.primary.dark },
+                  '&.Mui-disabled': {
+                    bgcolor: muiTheme.palette.action.disabledBackground,
+                    color: muiTheme.palette.action.disabled,
+                    boxShadow: 'none',
+                  },
+                })}
                 disabled={!inputValue.trim()}
               >
                 <SendRoundedIcon />
