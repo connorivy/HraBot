@@ -29,11 +29,14 @@ builder.AddServiceDefaults();
 // openai.AddEmbeddingGenerator("text-embedding-3-small");
 
 builder
-    .Services.AddChatClient(sp =>
-    {
-        ;
-        return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
-    })
+    .Services.AddChatClient(
+        sp =>
+        {
+            ;
+            return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
+        },
+        ServiceLifetime.Scoped
+    )
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
