@@ -18,6 +18,10 @@
     <PackageReference Include="Aspire.Azure.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DataIngestion" />
     <PackageReference Include="Microsoft.Extensions.DataIngestion.Markdig" />
     <PackageReference Include="Microsoft.Extensions.DataIngestion.MarkItDown" />
