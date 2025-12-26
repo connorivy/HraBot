@@ -1,4 +1,5 @@
 using System.Text.Json;
+using HraBot.Api.Features.Json;
 using HraBot.Api.Services;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
@@ -51,7 +52,15 @@ You must reply in JSON format as follows:
 The quote must be max 10 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
 Don't refer to the presence of citations; just emit the citations in the JSON response.
 ",
-                tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
+                tools:
+                [
+                    AIFunctionFactory.Create(
+                        semanticSearch.SearchAsync,
+                        "SearchAsync",
+                        "Searches a vector database for document fragments related to the searchText",
+                        HraBotJsonSerializerContext.DefaultOptions
+                    ),
+                ]
             )
             .AsBuilder()
             // .Use(agentLogger.FunctionLoggingMiddleware)
@@ -112,7 +121,10 @@ public sealed class HraBotExecutor(
         var response = await hraBotWithMiddleware.RunAsync(messages, cancellationToken: ct);
         logger.LogInformation("HraBot executor response: {response}", response);
         var structuredResponse =
-            JsonSerializer.Deserialize<HraBotResponse>(response.Text)
+            JsonSerializer.Deserialize(
+                response.Text,
+                HraBotJsonSerializerContext.Default.HraBotResponse
+            )
             ?? throw new InvalidOperationException(
                 $"Failed to parse HraBot response, {response.Text}."
             );

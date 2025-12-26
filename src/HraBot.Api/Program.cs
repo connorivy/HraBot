@@ -1,16 +1,11 @@
-using System.Data.Common;
-using Aspire.Qdrant.Client;
-using Azure.AI.OpenAI;
-using GenerativeAI;
-using GenerativeAI.Microsoft;
 using HraBot.Api;
+using HraBot.Api.Features.Json;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.ServiceDefaults;
 using HraBot.Shared;
 using Microsoft.Agents.AI.DevUI;
 using Microsoft.Extensions.AI;
-using Qdrant.Client;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,12 +16,11 @@ builder.Services.AddOpenApi();
 
 builder.AddServiceDefaults();
 
-// var openai = builder.AddAzureOpenAIClient(HraServices.openai);
-// openai
-//     .AddChatClient("gpt-4o-mini")
-//     .UseFunctionInvocation()
-//     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
-// openai.AddEmbeddingGenerator("text-embedding-3-small");
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.PropertyNameCaseInsensitive = true;
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, HraBotJsonSerializerContext.Default);
+});
 
 builder
     .Services.AddChatClient(sp =>
@@ -42,8 +36,12 @@ builder.Services.AddEmbeddingGenerator(sp =>
 );
 
 builder.AddQdrantClient(HraServices.vectorDb);
+#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 builder.Services.AddQdrantVectorStore();
 builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
+#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
+#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
 builder.Services.AddSingleton<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();
 builder.Services.AddKeyedSingleton(

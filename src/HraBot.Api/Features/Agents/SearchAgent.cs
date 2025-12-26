@@ -1,6 +1,6 @@
 using System.Text.Json;
+using HraBot.Api.Features.Json;
 using HraBot.Api.Services;
-using Microsoft.Agents;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
@@ -38,7 +38,14 @@ You must reply in JSON format as follows:
   }
 ]
 ",
-                tools: [AIFunctionFactory.Create(semanticSearch.SearchAsync)]
+                tools: [
+                    AIFunctionFactory.Create(
+                        semanticSearch.SearchAsync,
+                        "SearchAsync",
+                        "Searches a vector database for document fragments related to the searchText",
+                        HraBotJsonSerializerContext.DefaultOptions
+                    ),
+                ]
             )
             .AsBuilder()
             .UseOpenTelemetry(AgentNames.SearchBot, 
@@ -89,7 +96,10 @@ public sealed class SearchBotExecutor(
         await context.QueueStateUpdateAsync(threadId, messages, cancellationToken: ct);
         logger.LogInformation("SearchBotExecutor response: {response}", response);
         var structuredResponse =
-            JsonSerializer.Deserialize<List<Citation>>(response.Text)
+            JsonSerializer.Deserialize(
+                response.Text,
+                HraBotJsonSerializerContext.Default.ListCitation
+            )
             ?? throw new InvalidOperationException(
                 $"Failed to parse SearchBot response, {response.Text}."
             );

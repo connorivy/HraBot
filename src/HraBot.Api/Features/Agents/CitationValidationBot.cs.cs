@@ -1,4 +1,5 @@
 using System.Text.Json;
+using HraBot.Api.Features.Json;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
@@ -76,12 +77,18 @@ public sealed class CitationValidatorExecutor(
     {
         logger.LogInformation("Retreiving response from CitationValidator");
         var response = await citationValidator.RunAsync(
-            JsonSerializer.Serialize(hraBotResponse),
+            JsonSerializer.Serialize(
+                hraBotResponse,
+                HraBotJsonSerializerContext.Default.HraBotResponse
+            ),
             cancellationToken: cancellationToken
         );
         logger.LogInformation("CitationValidatorExecutor response: {response}", response);
         var structuredResponse =
-            JsonSerializer.Deserialize<CitationValidationResponse>(response.Text)
+            JsonSerializer.Deserialize(
+                response.Text,
+                HraBotJsonSerializerContext.Default.CitationValidationResponse
+            )
             ?? throw new InvalidOperationException(
                 $"Failed to parse CitationValidator response, {response.Text}."
             );
