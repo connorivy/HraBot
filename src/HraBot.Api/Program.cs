@@ -29,14 +29,11 @@ builder.AddServiceDefaults();
 // openai.AddEmbeddingGenerator("text-embedding-3-small");
 
 builder
-    .Services.AddChatClient(
-        sp =>
-        {
-            ;
-            return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
-        },
-        ServiceLifetime.Scoped
-    )
+    .Services.AddChatClient(sp =>
+    {
+        ;
+        return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
+    })
     .UseFunctionInvocation()
     .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
 
@@ -55,22 +52,28 @@ builder.Services.AddKeyedSingleton(
 );
 builder.RegisterAiServices();
 
-// builder.Services.AddOpenAIResponses();
-// builder.Services.AddOpenAIConversations();
+#if !GENERATING_OPENAPI
+builder.Services.AddOpenAIResponses();
+builder.Services.AddOpenAIConversations();
+#endif
 
 var app = builder.Build();
 
 // Register SSE Chat Endpoint
 app.MapSseChatEndpoint();
 
-// app.MapOpenAIResponses();
-// app.MapOpenAIConversations();
+#if !GENERATING_OPENAPI
+app.MapOpenAIResponses();
+app.MapOpenAIConversations();
+#endif
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-    // app.MapDevUI();
+#if !GENERATING_OPENAPI
+    app.MapDevUI();
+#endif
     app.MapScalarApiReference();
 }
 

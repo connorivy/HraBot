@@ -39,17 +39,12 @@ public static class SseChatEndpoint
         );
     }
 
-    private static IResult StreamHraBotResponse(
+    private static ServerSentEventsResult<string> StreamHraBotResponse(
         IChatClient chatClient,
         ChatRequestDto request,
         CancellationToken ct
     )
     {
-        if (request is null || request.Messages is null || request.Messages.Count == 0)
-        {
-            return Results.BadRequest("Request messages cannot be null or empty.");
-        }
-
         IEnumerable<ChatMessage> messages =
         [
             new ChatMessage(

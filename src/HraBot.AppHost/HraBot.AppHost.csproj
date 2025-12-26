@@ -4,20 +4,17 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
     <UserSecretsId>e631eeaf-0f72-4173-acc2-50223622584d</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.Qdrant" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="..\HraBot.Web\HraBot.Web.csproj" />
     <ProjectReference Include="..\HraBot.Api\HraBot.Api.csproj" />
   </ItemGroup>
 

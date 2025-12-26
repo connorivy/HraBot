@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- <PublishAot>true</PublishAot> -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <DefineConstants Condition="'$(GENERATING_OPENAPI)' == 'true'">$(DefineConstants);GENERATING_OPENAPI</DefineConstants>
+
+    <NoWarn>
+      TUnit0046 <!-- Data source method should return Func<T> for reference type parameters -->
+    </NoWarn> 
+  </PropertyGroup>
+</Project>

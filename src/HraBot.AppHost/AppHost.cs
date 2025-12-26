@@ -57,13 +57,10 @@ webApi
     })
     .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
 
-var webApp = builder.AddProject<Projects.HraBot_Web>("aichatweb-app");
-webApp
-    // .WithReference(openai)
-    .WithReference(vectorDb)
-    .WaitFor(vectorDb)
+var frontend = builder
+    .AddViteApp("frontend", "../hrabot-web")
+    .WithEnvironment("VITE_API_ENDPOINT", webApi.GetEndpoint("https"))
     .WithReference(webApi)
-    .WaitFor(webApi)
-    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
+    .WaitFor(webApi);
 
 builder.Build().Run();

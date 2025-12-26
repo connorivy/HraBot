@@ -6,7 +6,7 @@ api_project="$repo_root/src/HraBot.Api/HraBot.Api.csproj"
 api_openapi_json="$repo_root/src/HraBot.Api/obj/HraBot.Api.json"
 web_output_dir="$repo_root/src/hrabot-web/src/hraBotApiClient"
 
-dotnet build "$api_project"
+dotnet build "$api_project" /p:GENERATING_OPENAPI=true
 
 if [[ ! -f "$api_openapi_json" ]]; then
   echo "Expected OpenAPI document not found: $api_openapi_json" >&2

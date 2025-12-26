@@ -1,11 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <!-- <PublishAot>true</PublishAot> -->
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <UserSecretsId>ac2ea74c-42fc-401d-a878-ea274e0b6d06</UserSecretsId>
   </PropertyGroup>
 

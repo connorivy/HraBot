@@ -8,7 +8,11 @@ namespace HraBot.Tests.Ai;
 
 public class SetupTestsAi
 {
-    public static DistributedApplication AppHost { get; private set; }
+    public static DistributedApplication AppHost
+    {
+        get => field ?? throw new InvalidOperationException("Apphost has not been set");
+        private set;
+    }
 
     private static async Task<DistributedApplication> CreateAppHost()
     {
@@ -20,7 +24,11 @@ public class SetupTestsAi
         return app;
     }
 
-    public static HttpClient ApiClient { get; private set; }
+    public static HttpClient ApiClient
+    {
+        get => field ?? throw new InvalidOperationException("ApiClient has not been set");
+        private set;
+    }
 
     [Before(HookType.Assembly)]
     public static async Task AssemblySetup()
@@ -35,7 +43,7 @@ public class SetupTestsAi
         InitOpenAiKeys();
     }
 
-    private static List<string> OpenAiApiKeys;
+    private static List<string> OpenAiApiKeys = [];
 
     /// <summary>
     /// Please don't judge me for using multiple API keys
@@ -44,7 +52,6 @@ public class SetupTestsAi
     {
         var config = AppHost.Services.GetRequiredService<IConfiguration>();
 
-        OpenAiApiKeys = [];
         int keyNum = 0;
         while (
             config[$"ConnectionStrings:openai{(keyNum == 0 ? "" : keyNum.ToString())}"]
