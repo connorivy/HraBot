@@ -57,7 +57,19 @@ builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
 #endif
 
+#if DEBUG
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+    });
+});
+#endif
+
 var app = builder.Build();
+
+app.UseCors();
 
 // Register SSE Chat Endpoint
 app.MapSseChatEndpoint();

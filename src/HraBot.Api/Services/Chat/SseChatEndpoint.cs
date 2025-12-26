@@ -23,7 +23,7 @@ public static class SseChatEndpoint
             ) => StreamHraBotResponse(chatClient, request, ct)
         );
         app.MapPost(
-            "/api/chat/workflow",
+            "/api/hrabot",
             async (
                 [FromServices] ReturnApprovedResponse workflow,
                 [FromBody] ChatRequestDto request,
