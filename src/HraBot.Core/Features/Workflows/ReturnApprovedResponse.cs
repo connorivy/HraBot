@@ -1,6 +1,8 @@
 using HraBot.Api.Features.Agents;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Workflows;
 
