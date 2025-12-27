@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Security.Cryptography.X509Certificates;
 using HraBot.Api.Features.Workflows;
 using HraBot.Core.Common;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +34,7 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             )),
             ct
         );
+        conversation.AddMessage(Role.Ai, approvedResponse.Response);
     }
 
     private async ValueTask<Result<Conversation>> GetOrCreateConversation(long? conversationId)

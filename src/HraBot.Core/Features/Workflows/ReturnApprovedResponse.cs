@@ -92,7 +92,7 @@ public class ReturnApprovedResponse(
 
 public record ApprovedResponse(
     ResponseType ResponseType,
-    string? Response,
+    string Response,
     List<Citation> Citations
 );
 
