@@ -1,4 +1,5 @@
 using HraBot.Api.Services.Ingestion;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.VectorData;
 
 namespace HraBot.Api.Services;

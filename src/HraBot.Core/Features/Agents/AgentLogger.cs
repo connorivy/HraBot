@@ -2,6 +2,7 @@ using System.Text.Json;
 using HraBot.Api.Features.Json;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Agents;
 

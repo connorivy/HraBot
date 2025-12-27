@@ -4,6 +4,8 @@ using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Agents;
 

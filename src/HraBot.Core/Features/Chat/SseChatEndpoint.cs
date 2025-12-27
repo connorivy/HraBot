@@ -3,6 +3,8 @@ using System.Net.ServerSentEvents;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using HraBot.Api.Features.Workflows;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.AI;

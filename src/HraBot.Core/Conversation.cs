@@ -18,7 +18,7 @@ public class Conversation
         this.Messages.Add(
             new()
             {
-                Id = ++NumMessages,
+                Sequence = ++NumMessages,
                 ConversationId = Id,
                 Role = role,
                 Content = content,

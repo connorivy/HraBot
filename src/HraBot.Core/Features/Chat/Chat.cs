@@ -7,9 +7,9 @@ using Microsoft.Extensions.AI;
 namespace HraBot.Core.Features.Chat;
 
 public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse returnApprovedResponse)
-    : BaseEndpoint<ChatRequest, ReturnApprovedResponse>
+    : BaseEndpoint<ChatRequest, ApprovedResponse>
 {
-    public override async Task<Result<ReturnApprovedResponse>> ExecuteRequestAsync(
+    public override async Task<Result<ApprovedResponse>> ExecuteRequestAsync(
         ChatRequest req,
         CancellationToken ct = default
     )
@@ -20,12 +20,12 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             return conversationResult.Error;
         }
         var conversation = conversationResult.Value;
-
-        conversation.AddMessage(Role.User, req.Content);
         if (conversation.Messages is null)
         {
             throw new UnreachableException("This can't happen after the proper query");
         }
+
+        conversation.AddMessage(Role.User, req.Content);
 
         var approvedResponse = await returnApprovedResponse.GetApprovedResponse(
             conversation.Messages.Select(m => new ChatMessage(
@@ -35,6 +35,8 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             ct
         );
         conversation.AddMessage(Role.Ai, approvedResponse.Response);
+        await hraBotDbContext.SaveChangesAsync(ct);
+        return approvedResponse;
     }
 
     private async ValueTask<Result<Conversation>> GetOrCreateConversation(long? conversationId)

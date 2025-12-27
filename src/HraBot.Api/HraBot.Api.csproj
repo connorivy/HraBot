@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../HraBot.Core/HraBot.Core.csproj" />
     <ProjectReference Include="../HraBot.Shared/HraBot.Shared.csproj" />
     <ProjectReference Include="..\HraBot.ServiceDefaults\HraBot.ServiceDefaults.csproj" />
   </ItemGroup>

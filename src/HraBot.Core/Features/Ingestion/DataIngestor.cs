@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DataIngestion;
 using Microsoft.Extensions.DataIngestion.Chunkers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.VectorData;
 using Microsoft.ML.Tokenizers;
 
