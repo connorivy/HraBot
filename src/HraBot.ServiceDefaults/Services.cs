@@ -15,5 +15,6 @@ public static class HraServices
 
     // public const string vectorDb = "qdrantLocal";
     public const string vectorDb = "qdrantCloud";
+    public const string postgres = "postgres";
     public const string geminiKey = "gemini";
 }

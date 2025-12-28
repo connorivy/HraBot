@@ -49,6 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
     <ProjectReference Include="../HraBot.Shared/HraBot.Shared.csproj" />
   </ItemGroup>
 

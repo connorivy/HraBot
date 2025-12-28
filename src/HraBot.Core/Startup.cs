@@ -1,6 +1,5 @@
-using System;
 using Amazon.Lambda.Annotations;
-using HraBot.Core.Features.Chat;
+using HraBot.ServiceDefaults;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HraBot.Core;
@@ -10,6 +9,14 @@ public class Startup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.RegisterAiServices().AddInfrastructure("");
+        services
+            .RegisterAiServices(
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.vectorDb}")
+                    ?? throw new InvalidOperationException("Could not find connection for vectorDb")
+            )
+            .AddInfrastructure(
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}")
+                    ?? throw new InvalidOperationException("Could not find connection for postgres")
+            );
     }
 }

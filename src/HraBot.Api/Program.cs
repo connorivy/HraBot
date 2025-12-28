@@ -1,11 +1,14 @@
 using HraBot.Api;
+using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Json;
+using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.Core;
 using HraBot.ServiceDefaults;
 using HraBot.Shared;
 using Microsoft.Agents.AI.DevUI;
+using Microsoft.Agents.AI.Hosting;
 using Microsoft.Extensions.AI;
 using Scalar.AspNetCore;
 
@@ -24,7 +27,20 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 
 builder.AddQdrantClient(HraServices.vectorDb);
-builder.Services.RegisterAllServices("");
+builder.Services.RegisterAllServices(
+    // #if !GENERATING_OPENAPI
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.vectorDb}")
+        ?? "Endpoint=dummy;Key=dummy",
+    //     Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}")
+    //         ?? throw new InvalidOperationException("Could not find connection for postgres")
+    // #else
+
+    ""
+// #endif
+);
+// builder
+//     .AddWorkflow(WorkflowNames.Review, (sp, _) => ReturnApprovedResponse.CreateWorkflow(sp))
+//     .AddAsAIAgent();
 
 #if !GENERATING_OPENAPI
 builder.Services.AddOpenAIResponses();

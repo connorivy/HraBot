@@ -3,7 +3,6 @@ using GenerativeAI;
 using GenerativeAI.Microsoft;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
-using OpenAI.Models;
 
 namespace HraBot.Shared;
 

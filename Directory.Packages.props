@@ -15,7 +15,8 @@
     <PackageVersion Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
     <PackageVersion Include="Google_GenerativeAI.Microsoft" Version="3.4.1" />
     <PackageVersion Include="Microsoft.Agents.AI" Version="$(AgentFrameworkVersion)" />
-    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="$(AgentFrameworkVersion)" />
+    <!-- <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="$(AgentFrameworkVersion)" /> -->
+    <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="1.0.0-preview.251204.1" />
     <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="$(AgentFrameworkVersion)" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageVersion Include="Aspire.Azure.AI.OpenAI" Version="13.1.0-preview.1.25616.3" />
