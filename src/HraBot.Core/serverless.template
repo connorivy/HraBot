@@ -18,7 +18,7 @@
         }
       },
       "Properties": {
-        "Runtime": "dotnet10",
+        "Runtime": "provided.al2023",
         "CodeUri": ".",
         "MemorySize": 512,
         "Timeout": 30,
@@ -26,7 +26,7 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Chat.Chat_Lambda_Generated::Lambda",
+        "Handler": "HraBot.Core",
         "Events": {
           "RootPost": {
             "Type": "HttpApi",
@@ -34,6 +34,11 @@
               "Path": "/chat",
               "Method": "POST"
             }
+          }
+        },
+        "Environment": {
+          "Variables": {
+            "ANNOTATIONS_HANDLER": "Lambda"
           }
         }
       }

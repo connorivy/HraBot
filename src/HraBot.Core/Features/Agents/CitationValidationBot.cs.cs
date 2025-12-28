@@ -1,7 +1,7 @@
 using System.Text.Json;
 using HraBot.Api.Features.Json;
+using HraBot.Core;
 using Microsoft.Agents.AI;
-using Microsoft.Agents.AI.Hosting;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;

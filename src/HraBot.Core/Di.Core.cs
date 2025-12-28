@@ -4,10 +4,14 @@ using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.Shared;
+using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.VectorData;
+using Microsoft.SemanticKernel.Connectors.Qdrant;
+using Qdrant.Client;
 using ServiceScan.SourceGenerator;
 
 namespace HraBot.Core;
@@ -108,5 +112,35 @@ public static partial class Di_Core
         where TEntity : class
     {
         _ = builder.ApplyConfiguration(new TConfig());
+    }
+
+    public static void AddAIAgent(
+        this IServiceCollection services,
+        string name,
+        Func<IServiceProvider, string, AIAgent> createAgentDelegate
+    )
+    {
+        services.AddKeyedSingleton(
+            name,
+            (sp, key) =>
+            {
+                var keyString =
+                    key as string
+                    ?? throw new InvalidOperationException("Ai Agent key cannot be null");
+                var agent =
+                    createAgentDelegate(sp, keyString)
+                    ?? throw new InvalidOperationException(
+                        $"The agent factory did not return a valid {nameof(AIAgent)} instance for key '{keyString}'."
+                    );
+                if (!string.Equals(agent.Name, keyString, StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        $"The agent factory returned an agent with name '{agent.Name}', but the expected name is '{keyString}'."
+                    );
+                }
+
+                return agent;
+            }
+        );
     }
 }

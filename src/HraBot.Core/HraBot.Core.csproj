@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <PublishAot>true</PublishAot>
+    <OutputType>Exe</OutputType>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.EntityFrameworkCore.GeneratedInterceptors</InterceptorsNamespaces>
   </PropertyGroup>
 
@@ -9,6 +10,7 @@
     <PackageReference Include="Amazon.Lambda.Annotations" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" />
     <PackageReference Include="Amazon.Lambda.Core" />
+    <PackageReference Include="Amazon.Lambda.RuntimeSupport" />
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -27,10 +29,11 @@
     </PackageReference>
     <PackageReference Include="Google_GenerativeAI.Microsoft" />
     <PackageReference Include="Microsoft.Agents.AI" />
-    <PackageReference Include="Microsoft.Agents.AI.DevUI" />
+    <!-- <PackageReference Include="Microsoft.Agents.AI.DevUI" /> -->
     <PackageReference Include="Microsoft.Agents.AI.Workflows" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Aspire.Azure.AI.OpenAI" />
+    <PackageReference Include="OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI" />
     <PackageReference Include="Microsoft.Extensions.DataIngestion" />

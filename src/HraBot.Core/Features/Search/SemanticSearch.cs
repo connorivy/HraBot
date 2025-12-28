@@ -5,6 +5,7 @@ using Microsoft.Extensions.VectorData;
 namespace HraBot.Api.Services;
 
 public class SemanticSearch(
+    // VectorStoreCollection<Guid, IngestedChunk> vectorCollection,
     VectorStoreCollection<Guid, IngestedChunk> vectorCollection,
     [FromKeyedServices("ingestion_directory")] DirectoryInfo ingestionDirectory,
     DataIngestor dataIngestor
