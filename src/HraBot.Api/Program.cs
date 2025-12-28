@@ -2,6 +2,7 @@ using HraBot.Api;
 using HraBot.Api.Features.Json;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
+using HraBot.Core;
 using HraBot.ServiceDefaults;
 using HraBot.Shared;
 using Microsoft.Agents.AI.DevUI;
@@ -22,33 +23,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, HraBotJsonSerializerContext.Default);
 });
 
-builder
-    .Services.AddChatClient(sp =>
-    {
-        ;
-        return sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient();
-    })
-    .UseFunctionInvocation()
-    .UseOpenTelemetry(configure: c => c.EnableSensitiveData = builder.Environment.IsDevelopment());
-
-builder.Services.AddEmbeddingGenerator(sp =>
-    sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()
-);
-
 builder.AddQdrantClient(HraServices.vectorDb);
-#pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-#pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-builder.Services.AddQdrantVectorStore();
-builder.Services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
-#pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-#pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-builder.Services.AddSingleton<DataIngestor>();
-builder.Services.AddSingleton<SemanticSearch>();
-builder.Services.AddKeyedSingleton(
-    "ingestion_directory",
-    new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "Data"))
-);
-builder.RegisterAiServices();
+builder.Services.RegisterAllServices("");
 
 #if !GENERATING_OPENAPI
 builder.Services.AddOpenAIResponses();
