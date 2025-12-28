@@ -1,4 +1,7 @@
 using System.Diagnostics;
+using Amazon.Lambda.Annotations;
+using Amazon.Lambda.Annotations.APIGateway;
+using Amazon.Lambda.Core;
 using HraBot.Api.Features.Workflows;
 using HraBot.Core.Common;
 using Microsoft.EntityFrameworkCore;
@@ -48,9 +51,15 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             return newConversation;
         }
 
-        var existingConversation = await hraBotDbContext
+        // var existingConversation = await hraBotDbContext
+        //     .Conversations.Include(c => c.Messages)
+        //     .FirstOrDefaultAsync(c => c.Id == conversationId);
+        var localId = conversationId;
+        var localContext = hraBotDbContext;
+        var existingConversation = await localContext
             .Conversations.Include(c => c.Messages)
-            .FirstOrDefaultAsync(c => c.Id == conversationId);
+            .Where(c => c.Id == conversationId)
+            .FirstOrDefaultAsync();
         if (existingConversation is null)
         {
             return HraBotError.NotFound(
@@ -58,6 +67,13 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             );
         }
         return existingConversation;
+    }
+
+    [LambdaFunction()]
+    [HttpApi(LambdaHttpMethod.Post, "/chat")]
+    public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext _)
+    {
+        return (await this.ExecuteAsync(request)).ToWebResult();
     }
 }
 

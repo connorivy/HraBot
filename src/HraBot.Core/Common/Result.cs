@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
+using Amazon.Lambda.Annotations.APIGateway;
 
 namespace HraBot.Core;
 
@@ -98,12 +99,32 @@ public sealed class Result<TValue> : Result
 
     // public static Result<TValue> Success() => new(default(TValue), null, false);
 
-    // public ApiResponse<TValue> ToApiResponse()
-    // {
-    //     if (this.IsSuccess)
-    //     {
-    //         return ApiResponse.FromValue(this.Value!);
-    //     }
-    //     return this.Error!.ToProblemDetails();
-    // }
+    public IHttpResult ToWebResult()
+    {
+        if (IsSuccess)
+        {
+            return HttpResults.Ok(Value);
+        }
+        return MapErrorToResult(Error);
+    }
+
+    internal static IHttpResult MapErrorToResult(HraBotError error) =>
+        error.Type switch
+        {
+            ErrorType.None => throw new NotImplementedException(),
+            ErrorType.Failure => HttpResults.InternalServerError(error.Description),
+            ErrorType.Validation => HttpResults.BadRequest(error.Description),
+            ErrorType.Conflict => HttpResults.Conflict(error.Description),
+            ErrorType.NotFound => HttpResults.NotFound(error.Description),
+            ErrorType.Unauthorized => HttpResults.Unauthorized(),
+            ErrorType.Forbidden => HttpResults.Forbid(error.Description),
+            // ErrorType.InvalidOperation => HttpResults.(
+            //     title: "Invalid Operation Error",
+            //     detail: error.Description,
+            //     statusCode: StatusCodes.Status422UnprocessableEntity,
+            //     type: "https://tools.ietf.org/html/rfc4918#section-11.2",
+            //     extensions: error.Metadata
+            // ),
+            _ => throw new NotImplementedException(),
+        };
 }

@@ -40,7 +40,8 @@ You must reply in JSON format as follows:
   }
 ]
 ",
-                tools: [
+                tools:
+                [
                     AIFunctionFactory.Create(
                         semanticSearch.SearchAsync,
                         "SearchAsync",
@@ -50,11 +51,11 @@ You must reply in JSON format as follows:
                 ]
             )
             .AsBuilder()
-            .UseOpenTelemetry(AgentNames.SearchBot, 
-#if DEBUG 
-           c => c.EnableSensitiveData = true
+            .UseOpenTelemetry(AgentNames.SearchBot
+#if DEBUG
+                , c => c.EnableSensitiveData = true
 #endif
-             )
+            )
             .Build();
     }
 
@@ -85,14 +86,8 @@ public sealed class SearchBotExecutor(
     )
     {
         logger.LogInformation("Retreiving response from SearchBot");
-        var state = new HraBotState()
-        {
-            Messages = messages
-        };
-        var response = await agent.RunAsync(
-            messages,
-            cancellationToken: ct
-        );
+        var state = new HraBotState() { Messages = messages };
+        var response = await agent.RunAsync(messages, cancellationToken: ct);
         state.Messages.AddRange(response.Messages);
         var threadId = Guid.NewGuid().ToString();
         await context.QueueStateUpdateAsync(threadId, messages, cancellationToken: ct);
