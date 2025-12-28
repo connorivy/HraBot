@@ -51,15 +51,13 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
             return newConversation;
         }
 
-        // var existingConversation = await hraBotDbContext
-        //     .Conversations.Include(c => c.Messages)
-        //     .FirstOrDefaultAsync(c => c.Id == conversationId);
+        // need to make local declarations for variables
+        // https://github.com/dotnet/efcore/issues/35887
         var localId = conversationId;
         var localContext = hraBotDbContext;
         var existingConversation = await localContext
             .Conversations.Include(c => c.Messages)
-            .Where(c => c.Id == conversationId)
-            .FirstOrDefaultAsync();
+            .FirstOrDefaultAsync(c => c.Id == localId);
         if (existingConversation is null)
         {
             return HraBotError.NotFound(

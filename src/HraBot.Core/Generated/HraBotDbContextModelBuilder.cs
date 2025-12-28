@@ -17,7 +17,7 @@ namespace HraBot.Core.Generated
     public partial class HraBotDbContextModel
     {
         private HraBotDbContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("92d5f2b5-1c44-4fcc-9912-1feef7498576"), entityTypeCount: 2)
+            : base(skipDetectChanges: false, modelId: new Guid("333a3034-4fe6-484f-805a-b9ff87b3a037"), entityTypeCount: 2)
         {
         }
 
