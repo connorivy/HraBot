@@ -67,7 +67,9 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+#if DEBUG
 app.UseCors();
+#endif
 
 // Register SSE Chat Endpoint
 app.MapSseChatEndpoint();
