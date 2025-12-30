@@ -3,7 +3,7 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.8.0.0).",
   "Resources": {
-    "HraBotCoreFeaturesChatChatLambdaGenerated": {
+    "HraBotCoreFeaturesFeedbackAddFeedbackAddFeedbackLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -27,18 +27,18 @@
         ],
         "PackageType": "Zip",
         "Handler": "HraBot.Core",
+        "Environment": {
+          "Variables": {
+            "ANNOTATIONS_HANDLER": "AddFeedbackLambda"
+          }
+        },
         "Events": {
           "RootPost": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/chat",
+              "Path": "/feedback",
               "Method": "POST"
             }
-          }
-        },
-        "Environment": {
-          "Variables": {
-            "ANNOTATIONS_HANDLER": "Lambda"
           }
         }
       }
@@ -83,15 +83,15 @@
         }
       }
     },
-    "HraBotCoreFeaturesFeedbackAddFeedbackAddFeedbackLambdaGenerated": {
+    "HraBotCoreFeaturesChatChatChatLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
-          "RootGet"
+          "RootPost"
         ],
         "SyncedEventProperties": {
-          "RootGet": [
+          "RootPost": [
             "Path",
             "Method"
           ]
@@ -109,15 +109,15 @@
         "Handler": "HraBot.Core",
         "Environment": {
           "Variables": {
-            "ANNOTATIONS_HANDLER": "AddFeedbackLambda"
+            "ANNOTATIONS_HANDLER": "ChatLambda"
           }
         },
         "Events": {
-          "RootGet": {
+          "RootPost": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/feedback",
-              "Method": "GET"
+              "Path": "/chat",
+              "Method": "POST"
             }
           }
         }

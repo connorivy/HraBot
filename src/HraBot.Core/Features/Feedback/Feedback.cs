@@ -3,6 +3,8 @@ using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.Core;
 using HraBot.Core.Common;
 using HraBot.Core.Features.Chat;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,16 +31,6 @@ public partial class AddFeedback : BaseEndpoint<FeedbackContract, int>
     {
         throw new NotImplementedException();
     }
-
-    // [LambdaFunction()]
-    // [HttpApi(LambdaHttpMethod.Post, "/feedback")]
-    // public async Task<IHttpResult> FeedbackLambda(
-    //     [FromBody] FeedbackContract request,
-    //     ILambdaContext hello
-    // )
-    // {
-    //     return (await this.ExecuteAsync(request)).ToWebResult();
-    // }
 }
 
 [HraBotEndpoint(Http.Get, "/feedback/{id:int}")]
@@ -46,7 +38,7 @@ public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<int, Fe
 {
     public override void Configure(IEndpointRouteBuilder builder)
     {
-        throw new NotImplementedException();
+        builder.MapGet("/feedback/{id:int}", (int id) => TypedResults.Ok(id));
     }
 
     public override async Task<Result<FeedbackContract>> ExecuteRequestAsync(

@@ -11,8 +11,11 @@ using Microsoft.Extensions.AI;
 
 namespace HraBot.Core.Features.Chat;
 
-public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse returnApprovedResponse)
-    : BaseEndpoint<ChatRequest, ApprovedResponse>
+[HraBotEndpoint(Http.Post, "/chat")]
+public partial class Chat(
+    HraBotDbContext hraBotDbContext,
+    ReturnApprovedResponse returnApprovedResponse
+) : BaseEndpoint<ChatRequest, ApprovedResponse>
 {
     public override async Task<Result<ApprovedResponse>> ExecuteRequestAsync(
         ChatRequest req,
@@ -69,12 +72,12 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
         return existingConversation;
     }
 
-    [LambdaFunction()]
-    [HttpApi(LambdaHttpMethod.Post, "/chat")]
-    public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext hello)
-    {
-        return (await this.ExecuteAsync(request)).ToWebResult();
-    }
+    // [LambdaFunction()]
+    // [HttpApi(LambdaHttpMethod.Post, "/chat")]
+    // public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext hello)
+    // {
+    //     return (await this.ExecuteAsync(request)).ToWebResult();
+    // }
 
     public override void Configure(IEndpointRouteBuilder builder)
     {
