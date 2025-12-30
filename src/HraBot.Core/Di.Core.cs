@@ -49,13 +49,6 @@ public static partial class Di_Core
             sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()
         );
 
-        // builder.AddQdrantClient(HraServices.vectorDb);
-        // #pragma warning disable IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-        // #pragma warning disable IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
-        //         services.AddQdrantVectorStore();
-        //         services.AddQdrantCollection<Guid, IngestedChunk>(IngestedChunk.CollectionName);
-        // #pragma warning restore IL2026 // Members annotated with 'RequiresUnreferencedCodeAttribute' require dynamic access otherwise can break functionality when trimming application code
-        // #pragma warning restore IL3050 // Calling members annotated with 'RequiresDynamicCodeAttribute' may break functionality when AOT compiling.
         var (endpoint, key) = ExtractEndpointAndKey(qdrantConnectionString);
         services.AddSingleton(sp => new QdrantClient(
             new Uri(endpoint),

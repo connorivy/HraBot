@@ -1,6 +1,8 @@
 using Amazon.Lambda.Annotations.APIGateway;
+using Amazon.Lambda.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Routing;
 
 namespace HraBot.Core.Common;
 
@@ -35,4 +37,6 @@ public abstract class BaseEndpoint<TRequest, TResponse>
             );
         }
     }
+
+    public abstract void Configure(IEndpointRouteBuilder builder);
 }

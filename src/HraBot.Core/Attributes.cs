@@ -7,4 +7,4 @@ using HraBot.Api.Features.Json;
 [assembly: LambdaSerializer(
     typeof(SourceGeneratorLambdaJsonSerializer<HraBotJsonSerializerContext>)
 )]
-[assembly: LambdaGlobalProperties(GenerateMain = true, Runtime = "provided.al2023")]
+[assembly: LambdaGlobalProperties(GenerateMain = true, Runtime = "dotnet10")]

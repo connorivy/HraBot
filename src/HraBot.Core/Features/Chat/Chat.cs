@@ -4,6 +4,8 @@ using Amazon.Lambda.Annotations.APIGateway;
 using Amazon.Lambda.Core;
 using HraBot.Api.Features.Workflows;
 using HraBot.Core.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 
@@ -69,9 +71,20 @@ public class Chat(HraBotDbContext hraBotDbContext, ReturnApprovedResponse return
 
     [LambdaFunction()]
     [HttpApi(LambdaHttpMethod.Post, "/chat")]
-    public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext _)
+    public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext hello)
     {
         return (await this.ExecuteAsync(request)).ToWebResult();
+    }
+
+    public override void Configure(IEndpointRouteBuilder builder)
+    {
+        builder.MapPost(
+            "/chat",
+            (
+                [Microsoft.AspNetCore.Mvc.FromServices] Chat endpoint,
+                [Microsoft.AspNetCore.Mvc.FromBody] ChatRequest request
+            ) => endpoint.ExecuteAsync(request)
+        );
     }
 }
 

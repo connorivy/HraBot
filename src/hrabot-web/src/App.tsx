@@ -58,28 +58,28 @@ function CitationList({ citations }: { citations: Citation[] }) {
       {citations
         .filter((citation) => citation.filename && citation.quote)
         .map((citation, index) => {
-        const filename = citation.filename as string
-        const quote = citation.quote as string
-        const href = `https://intercom.help/take-command-health/en/articles/${encodeURIComponent(filename)}`
-        return (
-          <Box
-            key={`${filename}-${index}`}
-            component="a"
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="rounded-md border border-dashed px-3 py-2 text-left text-xs font-medium hover:border-solid"
-            sx={{ color: 'primary.main', textDecoration: 'none' }}
-          >
-            <Box component="span" className="block text-[0.65rem] uppercase tracking-[0.24em]">
-              Source
+          const filename = citation.filename as string
+          const quote = citation.quote as string
+          const href = `https://intercom.help/take-command-health/en/articles/${encodeURIComponent(filename)}`
+          return (
+            <Box
+              key={`${filename}-${index}`}
+              component="a"
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md border border-dashed px-3 py-2 text-left text-xs font-medium hover:border-solid"
+              sx={{ color: 'primary.main', textDecoration: 'none' }}
+            >
+              <Box component="span" className="block text-[0.65rem] uppercase tracking-[0.24em]">
+                Source
+              </Box>
+              <Typography variant="body2" className="mt-1 text-sm text-current">
+                {quote}
+              </Typography>
             </Box>
-            <Typography variant="body2" className="mt-1 text-sm text-current">
-              {quote}
-            </Typography>
-          </Box>
-        )
-      })}
+          )
+        })}
     </Box>
   )
 }

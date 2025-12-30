@@ -1,5 +1,4 @@
 using HraBot.ServiceDefaults;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -19,6 +18,13 @@ var vectorDb = builder.AddConnectionString(HraServices.vectorDb);
 //     .WithDataVolume()
 //     .WithLifetime(ContainerLifetime.Persistent);
 
+var postgres = builder
+    .AddPostgres(HraServices.postgres)
+    .WithPgAdmin()
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var db = postgres.AddDatabase("hrabotDb");
+
 var markitdown = builder
     .AddContainer("markitdown", "mcp/markitdown")
     .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
@@ -28,6 +34,8 @@ var webApi = builder.AddProject<Projects.HraBot_Api>("api");
 webApi
     // .WithReference(openai)
     // .WaitFor(openai)
+    .WithReference(db)
+    .WaitFor(db)
     .WithReference(vectorDb)
     .WaitFor(vectorDb)
     .WithUrls(context =>

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using HraBot.Core.Features.Feedback;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 
 namespace HraBot.Core;
@@ -16,6 +17,8 @@ public class HraBotDbContext : DbContext
 
     public DbSet<Conversation> Conversations { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
+    public DbSet<MessageFeedback> MessageFeedbacks { get; set; } = null!;
+    public DbSet<MessageFeedbackItem> MessageFeedbackItems { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

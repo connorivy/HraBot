@@ -4,6 +4,9 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
+  <Folder Name="/codeGen/">
+    <Project Path="codeGen/HraBot.CodeGen.Serverless/HraBot.CodeGen.Serverless.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/HraBot.Api/HraBot.Api.csproj" />
     <Project Path="src/HraBot.AppHost/HraBot.AppHost.csproj" />
@@ -13,5 +16,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/HraBot.Tests.Ai/HraBot.Tests.Ai.csproj" />
+    <Project Path="tests/HraBot.Tests.Integration/HraBot.Tests.Integration.csproj" />
   </Folder>
 </Solution>

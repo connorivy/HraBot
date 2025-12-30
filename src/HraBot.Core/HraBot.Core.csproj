@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PublishAot>true</PublishAot>
     <OutputType>Exe</OutputType>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.EntityFrameworkCore.GeneratedInterceptors</InterceptorsNamespaces>
   </PropertyGroup>
@@ -51,6 +50,10 @@
   <ItemGroup>
     <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
     <ProjectReference Include="../HraBot.Shared/HraBot.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Generated/" />
   </ItemGroup>
 
 </Project>

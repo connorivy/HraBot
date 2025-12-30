@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <UserSecretsId>ac2ea74c-42fc-401d-a878-ea274e0b6d06</UserSecretsId>
-    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +18,10 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ServiceScan.SourceGenerator">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

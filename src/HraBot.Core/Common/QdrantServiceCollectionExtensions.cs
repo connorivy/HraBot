@@ -1,11 +1,7 @@
-using System.Data.Common;
-using Aspire.Qdrant.Client;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
-using Npgsql.Replication;
 using Qdrant.Client;
 
 namespace HraBot.Core.Common;
