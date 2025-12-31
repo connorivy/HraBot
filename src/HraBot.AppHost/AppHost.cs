@@ -23,7 +23,7 @@ var postgres = builder
     .WithPgAdmin()
     .WithLifetime(ContainerLifetime.Persistent);
 
-var db = postgres.AddDatabase("hrabotDb");
+var db = postgres.AddDatabase(HraServices.db_hraBot);
 
 var markitdown = builder
     .AddContainer("markitdown", "mcp/markitdown")
@@ -66,7 +66,7 @@ webApi
     .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
 
 var frontend = builder
-    .AddViteApp("frontend", "../hrabot-web")
+    .AddViteApp(HraServices.WEB, "../hrabot-web")
     .WithEnvironment("VITE_API_ENDPOINT", webApi.GetEndpoint("https"))
     .WithReference(webApi)
     .WaitFor(webApi);

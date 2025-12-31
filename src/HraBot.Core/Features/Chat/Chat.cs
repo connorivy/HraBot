@@ -72,13 +72,6 @@ public partial class Chat(
         return existingConversation;
     }
 
-    // [LambdaFunction()]
-    // [HttpApi(LambdaHttpMethod.Post, "/chat")]
-    // public async Task<IHttpResult> Lambda([FromBody] ChatRequest request, ILambdaContext hello)
-    // {
-    //     return (await this.ExecuteAsync(request)).ToWebResult();
-    // }
-
     public override void Configure(IEndpointRouteBuilder builder)
     {
         builder.MapPost(

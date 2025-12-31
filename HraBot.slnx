@@ -16,6 +16,6 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/HraBot.Tests.Ai/HraBot.Tests.Ai.csproj" />
-    <Project Path="tests/HraBot.Tests.Integration/HraBot.Tests.Integration.csproj" />
+    <Project Path="tests/HraBot.Tests.E2E/HraBot.Tests.E2E.csproj" />
   </Folder>
 </Solution>

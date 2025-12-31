@@ -1,4 +1,5 @@
 using System;
+using System.Reflection.Metadata;
 
 namespace HraBot.ServiceDefaults;
 
@@ -12,9 +13,18 @@ public static class HraServices
     public const string openai3 = "openai3";
 
     public const string API = "api";
+    public const string WEB = "web";
 
     // public const string vectorDb = "qdrantLocal";
     public const string vectorDb = "qdrantCloud";
     public const string postgres = "postgres";
+    public const string db_hraBot = "hraBotDb";
     public const string geminiKey = "gemini";
 }
+
+// public static class AppOptions
+// {
+//     public const string MockChatClient = nameof(MockChatClient);
+
+//     public static T
+// }

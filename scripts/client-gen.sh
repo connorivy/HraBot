@@ -5,6 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 api_project="$repo_root/src/HraBot.Api/HraBot.Api.csproj"
 api_openapi_json="$repo_root/src/HraBot.Api/obj/HraBot.Api.json"
 web_output_dir="$repo_root/src/hrabot-web/src/hraBotApiClient"
+back_output_dir="$repo_root/src/HraBot.Api/HraBotApiClient"
 
 dotnet build "$api_project" /p:GENERATING_OPENAPI=true
 
@@ -19,7 +20,6 @@ if [[ ! -d "$web_output_dir" ]]; then
 fi
 
 find "$web_output_dir" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +
-
 dnx Microsoft.OpenApi.Kiota@1.29.0 \
   --allow-roll-forward \
   --yes \
@@ -29,3 +29,14 @@ dnx Microsoft.OpenApi.Kiota@1.29.0 \
   -n HraBot.ApiClient \
   -d "$api_openapi_json" \
   -o "$web_output_dir"
+
+find "$back_output_dir" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +
+dnx Microsoft.OpenApi.Kiota@1.29.0 \
+  --allow-roll-forward \
+  --yes \
+  -- generate \
+  -l csharp \
+  -c HraBotApiClient \
+  -n HraBot.ApiClient \
+  -d "$api_openapi_json" \
+  -o "$back_output_dir"

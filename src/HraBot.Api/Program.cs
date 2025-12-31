@@ -31,11 +31,7 @@ builder.Services.RegisterAllServices(
     // #if !GENERATING_OPENAPI
     Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.vectorDb}")
         ?? "Endpoint=dummy;Key=dummy",
-    //     Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}")
-    //         ?? throw new InvalidOperationException("Could not find connection for postgres")
-    // #else
-
-    ""
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}") ?? ""
 // #endif
 );
 // builder
