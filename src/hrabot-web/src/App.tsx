@@ -262,6 +262,7 @@ function ChatPane() {
                     HR
                   </Avatar>
                   <Box
+                    data-testid="assistant-typing"
                     className="flex max-w-[70%] flex-col gap-1.5 px-4 py-3"
                     sx={{
                       borderRadius: 3,

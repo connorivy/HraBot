@@ -100,15 +100,6 @@ public sealed class PageContext
         return contextInstance;
     }
 
-#if DEBUG
-    const string configuration = "Debug";
-#else
-    const string configuration = "Release";
-#endif
-#if NET10_0
-    const string frameworkVersion = "net10";
-#endif
-
     public async ValueTask DisposeAsync(TestContext testContext)
     {
         bool testFailed =
@@ -119,8 +110,7 @@ public sealed class PageContext
             path = $"trace-{this.testName}.zip";
             Console.WriteLine(
                 $"Test {this.testName} failed. View trace info with this command:\n"
-                    + $"    npx playwright show-trace ./bin/{configuration}/{frameworkVersion}/{path} --host 0.0.0.0"
-            // + $"    pwsh ./bin/Debug/net9.0/playwright.ps1 show-trace ./bin/Debug/net9.0/{path}"
+                    + $"    npx playwright show-trace {Path.Combine(AppContext.BaseDirectory, path)} --host 0.0.0.0"
             );
         }
         else

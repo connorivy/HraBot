@@ -3,9 +3,6 @@ using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using HraBot.ApiClient;
 using HraBot.ServiceDefaults;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
@@ -41,14 +38,6 @@ public class SetupTestsE2E
                 (options, settings) => { }
             );
 
-        FrontendAddress = hostBuilder
-            .Resources.OfType<IResourceWithEndpoints>()
-            .First(r => r.Name == AppServices.WEB)
-            .GetEndpoints()
-            .First()
-            .Url;
-        Console.WriteLine($"Frontend address {FrontendAddress}");
-
         var app = await hostBuilder.BuildAsync().WaitAsync(CancellationToken.None);
         await app.StartAsync(CancellationToken.None);
         return app;
@@ -71,47 +60,15 @@ public class SetupTestsE2E
             AppServices.WEB,
             CancellationToken.None
         );
-
-        InitOpenAiKeys();
-    }
-
-    private static List<string> OpenAiApiKeys = [];
-
-    /// <summary>
-    /// Please don't judge me for using multiple API keys
-    /// </summary>
-    private static void InitOpenAiKeys()
-    {
-        var config = AppHost.Services.GetRequiredService<IConfiguration>();
-
-        int keyNum = 0;
-        while (
-            config[$"ConnectionStrings:openai{(keyNum == 0 ? "" : keyNum.ToString())}"]
-                is string apiKey
-        )
-        {
-            // will get api key in this format "Endpoint=<endpoint>;Key=<key>"
-            // extract just the key part without the "Key=" prefix
-            OpenAiApiKeys.Add(apiKey.Split(';').First(part => part.StartsWith("Key="))[4..]);
-            keyNum++;
-        }
-    }
-
-    public static string GetOpenAiApiKey()
-    {
-        var rand = new Random();
-        int index = rand.Next(OpenAiApiKeys.Count);
-        return OpenAiApiKeys[index];
+        FrontendAddress = AppHost.GetEndpoint(AppServices.WEB).AbsoluteUri;
+        Console.WriteLine($"Frontend address {FrontendAddress}");
     }
 
     [After(HookType.Assembly)]
     public static async Task AssemblyTeardown()
     {
-        if (AppHost != null)
-        {
-            await AppHost.StopAsync(CancellationToken.None);
-            AppHost.Dispose();
-        }
+        await AppHost.StopAsync(CancellationToken.None);
+        AppHost.Dispose();
         BackendHttpClient?.Dispose();
     }
 }
