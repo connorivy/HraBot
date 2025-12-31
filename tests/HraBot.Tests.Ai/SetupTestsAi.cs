@@ -34,9 +34,9 @@ public class SetupTestsAi
     public static async Task AssemblySetup()
     {
         AppHost = await CreateAppHost();
-        ApiClient = AppHost.CreateHttpClient(HraServices.API);
+        ApiClient = AppHost.CreateHttpClient(AppServices.API);
         await AppHost.ResourceNotifications.WaitForResourceHealthyAsync(
-            HraServices.API,
+            AppServices.API,
             CancellationToken.None
         );
 

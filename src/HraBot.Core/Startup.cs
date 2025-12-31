@@ -11,11 +11,11 @@ public class Startup
     {
         services
             .RegisterAiServices(
-                Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.vectorDb}")
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
                     ?? throw new InvalidOperationException("Could not find connection for vectorDb")
             )
             .AddInfrastructure(
-                Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}")
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.postgres}")
                     ?? throw new InvalidOperationException("Could not find connection for postgres")
             );
     }

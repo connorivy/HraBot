@@ -10,6 +10,7 @@ using TUnit.Core.Interfaces;
 namespace HraBot.Tests.Ai;
 
 [ParallelLimiter<AiParallelLimiter>]
+[Explicit]
 public class EvalTests
 {
     [Test]

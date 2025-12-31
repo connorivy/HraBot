@@ -6,10 +6,8 @@
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Quality" />
-    <PackageReference Include="Microsoft.Extensions.AI.Evaluation.Reporting" />
     <PackageReference Include="TUnit" />
+    <PackageReference Include="TUnit.Playwright" />
   </ItemGroup>
 
   <ItemGroup>

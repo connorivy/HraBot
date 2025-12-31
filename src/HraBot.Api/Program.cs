@@ -26,12 +26,12 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, HraBotJsonSerializerContext.Default);
 });
 
-builder.AddQdrantClient(HraServices.vectorDb);
+builder.AddQdrantClient(AppServices.vectorDb);
 builder.Services.RegisterAllServices(
     // #if !GENERATING_OPENAPI
-    Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.vectorDb}")
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
         ?? "Endpoint=dummy;Key=dummy",
-    Environment.GetEnvironmentVariable($"ConnectionStrings__{HraServices.postgres}") ?? ""
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.postgres}") ?? ""
 // #endif
 );
 // builder

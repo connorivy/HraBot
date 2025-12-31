@@ -5,6 +5,8 @@ using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.Core.Common;
+using HraBot.Core.Features.Chat;
+using HraBot.ServiceDefaults;
 using HraBot.Shared;
 using Microsoft.Agents.AI;
 using Microsoft.EntityFrameworkCore;
@@ -36,14 +38,28 @@ public static partial class Di_Core
         string qdrantConnectionString
     )
     {
-        services
-            .AddChatClient(sp => sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient())
-            .UseFunctionInvocation()
-            .UseOpenTelemetry(
+        if (
+            Environment.GetEnvironmentVariable(AppOptions.MockChatClient_bool)
+                is string mockChatClientString
+            && bool.TryParse(mockChatClientString, out var mockChatClient)
+            && mockChatClient
+        )
+        {
+            services.AddSingleton<IChatClient, DummyChatClient>();
+        }
+        else
+        {
+            services
+                .AddChatClient(sp =>
+                    sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient()
+                )
+                .UseFunctionInvocation()
+                .UseOpenTelemetry(
 #if DEBUG
-                configure: c => c.EnableSensitiveData = true
+                    configure: c => c.EnableSensitiveData = true
 #endif
-            );
+                );
+        }
 
         services.AddEmbeddingGenerator(sp =>
             sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()

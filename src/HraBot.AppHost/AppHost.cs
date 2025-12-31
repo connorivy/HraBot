@@ -1,3 +1,4 @@
+using HraBot.AppHost;
 using HraBot.ServiceDefaults;
 
 var builder = DistributedApplication.CreateBuilder(args);
@@ -11,7 +12,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 // You will need to set the connection string to your own value
 //   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>:6334;Key=<qdrant-cloud-key>"
 // Make sure to include the port number!!!
-var vectorDb = builder.AddConnectionString(HraServices.vectorDb);
+var vectorDb = builder.AddConnectionString(AppServices.vectorDb);
 
 // var vectorDb = builder
 //     .AddQdrant(HraServices.qdrantLocal)
@@ -19,21 +20,19 @@ var vectorDb = builder.AddConnectionString(HraServices.vectorDb);
 //     .WithLifetime(ContainerLifetime.Persistent);
 
 var postgres = builder
-    .AddPostgres(HraServices.postgres)
+    .AddPostgres(AppServices.postgres)
     .WithPgAdmin()
     .WithLifetime(ContainerLifetime.Persistent);
 
-var db = postgres.AddDatabase(HraServices.db_hraBot);
+var db = postgres.AddDatabase(AppServices.db_hraBot);
 
 var markitdown = builder
     .AddContainer("markitdown", "mcp/markitdown")
     .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
     .WithHttpEndpoint(targetPort: 3001, name: "http");
 
-var webApi = builder.AddProject<Projects.HraBot_Api>("api");
+var webApi = builder.AddProject<Projects.HraBot_Api>(AppServices.API);
 webApi
-    // .WithReference(openai)
-    // .WaitFor(openai)
     .WithReference(db)
     .WaitFor(db)
     .WithReference(vectorDb)
@@ -63,12 +62,14 @@ webApi
             }
         );
     })
-    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"));
+    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"))
+    .ApplyTestEnvironmentOverrides();
 
 var frontend = builder
-    .AddViteApp(HraServices.WEB, "../hrabot-web")
+    .AddViteApp(AppServices.WEB, "../hrabot-web")
     .WithEnvironment("VITE_API_ENDPOINT", webApi.GetEndpoint("https"))
     .WithReference(webApi)
-    .WaitFor(webApi);
+    .WaitFor(webApi)
+    .ApplyTestEnvironmentOverrides();
 
 builder.Build().Run();

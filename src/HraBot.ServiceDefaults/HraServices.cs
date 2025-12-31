@@ -3,7 +3,7 @@ using System.Reflection.Metadata;
 
 namespace HraBot.ServiceDefaults;
 
-public static class HraServices
+public static class AppServices
 {
     // public const string openai = "openai";
     public const string openai = "openai";
@@ -22,9 +22,7 @@ public static class HraServices
     public const string geminiKey = "gemini";
 }
 
-// public static class AppOptions
-// {
-//     public const string MockChatClient = nameof(MockChatClient);
-
-//     public static T
-// }
+public static class AppOptions
+{
+    public const string MockChatClient_bool = nameof(MockChatClient_bool);
+}

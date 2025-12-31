@@ -1,12 +1,17 @@
 ﻿using Aspire.Hosting;
+using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using HraBot.ApiClient;
 using HraBot.ServiceDefaults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Kiota.Abstractions.Authentication;
+using Microsoft.Kiota.Http.HttpClientLibrary;
 
-namespace HraBot.Tests.Integration;
+namespace HraBot.Tests.E2E;
 
-public class SetupTestsIntegration
+public class SetupTestsE2E
 {
     public static DistributedApplication AppHost
     {
@@ -14,29 +19,56 @@ public class SetupTestsIntegration
         private set;
     }
 
+    private static HttpClient BackendHttpClient
+    {
+        get => field ?? throw new InvalidOperationException("ApiClient has not been set");
+        set;
+    }
+
+    public static string FrontendAddress
+    {
+        get => field ?? throw new InvalidOperationException("Frontend endpoint is not set");
+        private set;
+    }
+
     private static async Task<DistributedApplication> CreateAppHost()
     {
         var hostBuilder =
-            await DistributedApplicationTestingBuilder.CreateAsync<Projects.HraBot_AppHost>();
+            await DistributedApplicationTestingBuilder.CreateAsync<Projects.HraBot_AppHost>(
+                [
+                    $"TestOverrides:Resources:{AppServices.API}:Environment:{AppOptions.MockChatClient_bool}=true",
+                ],
+                (options, settings) => { }
+            );
+
+        FrontendAddress = hostBuilder
+            .Resources.OfType<IResourceWithEndpoints>()
+            .First(r => r.Name == AppServices.WEB)
+            .GetEndpoints()
+            .First()
+            .Url;
+        Console.WriteLine($"Frontend address {FrontendAddress}");
 
         var app = await hostBuilder.BuildAsync().WaitAsync(CancellationToken.None);
         await app.StartAsync(CancellationToken.None);
         return app;
     }
 
-    public static HttpClient ApiClient
-    {
-        get => field ?? throw new InvalidOperationException("ApiClient has not been set");
-        private set;
-    }
+    public static HraBotApiClient ApiClient =>
+        new(
+            new HttpClientRequestAdapter(
+                new AnonymousAuthenticationProvider(),
+                httpClient: BackendHttpClient
+            )
+        );
 
     [Before(HookType.Assembly)]
     public static async Task AssemblySetup()
     {
         AppHost = await CreateAppHost();
-        ApiClient = AppHost.CreateHttpClient(HraServices.API);
+        BackendHttpClient = AppHost.CreateHttpClient(AppServices.API);
         await AppHost.ResourceNotifications.WaitForResourceHealthyAsync(
-            HraServices.API,
+            AppServices.WEB,
             CancellationToken.None
         );
 
@@ -80,6 +112,6 @@ public class SetupTestsIntegration
             await AppHost.StopAsync(CancellationToken.None);
             AppHost.Dispose();
         }
-        ApiClient?.Dispose();
+        BackendHttpClient?.Dispose();
     }
 }
