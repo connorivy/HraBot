@@ -125,11 +125,18 @@ public class WebApplicationEndpointBuilder
         builder.AppendLine("    public static void Configure(IEndpointRouteBuilder builder)");
         builder.AppendLine("    {");
 
-        var signature = BuildHandlerSignature(className, requestTypeName, routeParameters);
+        var includeBody = !string.Equals(http, "get", StringComparison.OrdinalIgnoreCase);
+        var signature = BuildHandlerSignature(
+            className,
+            requestTypeName,
+            routeParameters,
+            includeBody
+        );
         var (requestConstruction, executeArgument) = BuildRequestInvocation(
             requestTypeName,
             requestType,
-            routeParameters
+            routeParameters,
+            includeBody
         );
 
         var mapMethod = GetMapMethod(http);
@@ -289,11 +296,17 @@ public class WebApplicationEndpointBuilder
     static string BuildHandlerSignature(
         string className,
         string requestTypeName,
-        IReadOnlyList<RouteParameter> routeParameters
+        IReadOnlyList<RouteParameter> routeParameters,
+        bool includeBody
     )
     {
         if (routeParameters.Count == 0)
         {
+            if (!includeBody)
+            {
+                return $"[FromServices] {className} endpoint";
+            }
+
             return $"[FromServices] {className} endpoint, [FromBody] {requestTypeName} request";
         }
 
@@ -311,11 +324,17 @@ public class WebApplicationEndpointBuilder
     static (string RequestConstruction, string ExecuteArgument) BuildRequestInvocation(
         string requestTypeName,
         Type requestType,
-        IReadOnlyList<RouteParameter> routeParameters
+        IReadOnlyList<RouteParameter> routeParameters,
+        bool includeBody
     )
     {
         if (routeParameters.Count == 0)
         {
+            if (!includeBody)
+            {
+                return (string.Empty, "default!");
+            }
+
             return (string.Empty, "request");
         }
 

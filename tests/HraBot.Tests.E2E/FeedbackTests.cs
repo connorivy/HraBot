@@ -22,6 +22,18 @@ public class FeedbackTests : PageTestBase
         await SendPositiveFeedback();
     }
 
+    [Test]
+    public async Task SendingNegativeFeedback_ShouldCreateCorrectDataInDb()
+    {
+        await this.PageContext.Page.GotoAsync(
+            "/",
+            new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle }
+        );
+
+        await SendMessage("hello!");
+        await SendNegativeFeedback();
+    }
+
     private async Task SendMessage(string message)
     {
         var sendButton = this.Page.GetByRole(AriaRole.Button);
@@ -73,5 +85,63 @@ public class FeedbackTests : PageTestBase
         persistedFeedback.MessageFeedbackItemIds.Should().Contain([1]);
 
         await Expect(chatBox).Not.ToBeDisabledAsync();
+    }
+
+    private async Task SendNegativeFeedback()
+    {
+        var buttons = this.Page.GetByRole(AriaRole.Button);
+        // there should be three buttons. The last one is the send button, currently disabled, and two new feedback buttons (thumbs up and thumbs down)
+        await Expect(buttons).ToHaveCountAsync(3);
+
+        var chatBox = this.Page.GetByRole(AriaRole.Textbox);
+        // chat box should be disabled until feed back is provided. There should be a tooltip that explains this
+        await Expect(chatBox).ToBeDisabledAsync();
+
+        var thumbsDown = buttons.Nth(1);
+
+        await thumbsDown.ClickAsync();
+
+        var dialog = this.Page.GetByRole(AriaRole.Dialog);
+
+        await Expect(dialog).ToBeVisibleAsync();
+        await Expect(dialog).ToContainTextAsync("This is a dummy response");
+        await Expect(dialog).ToContainTextAsync("dummy-quote");
+
+        var contentSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "Content" });
+        var citationsSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "Citations" });
+        var uxSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "UX" });
+
+        await Expect(contentSelect).ToHaveValueAsync("no issues");
+        await Expect(citationsSelect).ToHaveValueAsync("no issues");
+        await Expect(uxSelect).ToHaveValueAsync("no issues");
+
+        var submitButton = dialog.GetByRole(AriaRole.Button, new() { Name = "Submit" });
+        await Expect(submitButton).ToBeDisabledAsync();
+
+        await contentSelect.SelectOptionAsync(new SelectOptionValue { Label = "incorrect" });
+        await Expect(submitButton).Not.ToBeDisabledAsync();
+
+        await citationsSelect.SelectOptionAsync(new SelectOptionValue { Label = "missing" });
+        await uxSelect.SelectOptionAsync(new SelectOptionValue { Label = "too slow" });
+
+        var response = await this.Page.RunAndWaitForResponseAsync(
+            async () => await submitButton.ClickAsync(),
+            resp => resp.Url.Contains("/api/feedback") && resp.Request.Method == "POST" && resp.Ok
+        );
+        var json =
+            await response.JsonAsync()
+            ?? throw new InvalidOperationException("Json response is null");
+        Console.WriteLine($"Received api response: {json}");
+        var typedResponse =
+            json.Deserialize(HraBotJsonSerializerContext.Default.EntityResponseInt64)
+            ?? throw new InvalidOperationException($"Could not deserialize json: {json}");
+
+        var persistedFeedback =
+            await SetupTestsE2E.ApiClient.Api.Feedback[typedResponse.Id].GetAsync()
+            ?? throw new InvalidOperationException($"Could not find persisted feedback");
+
+        Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
+        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(3);
+        persistedFeedback.MessageFeedbackItemIds.Should().Contain([4, 9, 13]);
     }
 }

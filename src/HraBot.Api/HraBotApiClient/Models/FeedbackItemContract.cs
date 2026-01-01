@@ -9,49 +9,53 @@ namespace HraBot.ApiClient.Models
 {
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     #pragma warning disable CS1591
-    public partial class ApprovedResponseContract : IAdditionalDataHolder, IParsable
+    public partial class FeedbackItemContract : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
-        /// <summary>The citations property</summary>
+        /// <summary>The feedbackItem property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public List<global::HraBot.ApiClient.Models.Citation>? Citations { get; set; }
+        public string? FeedbackItem { get; set; }
 #nullable restore
 #else
-        public List<global::HraBot.ApiClient.Models.Citation> Citations { get; set; }
+        public string FeedbackItem { get; set; }
 #endif
-        /// <summary>The conversationId property</summary>
-        public long? ConversationId { get; set; }
-        /// <summary>The messageId property</summary>
-        public long? MessageId { get; set; }
-        /// <summary>The response property</summary>
+        /// <summary>The feedbackType property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
-        public string? Response { get; set; }
+        public string? FeedbackType { get; set; }
 #nullable restore
 #else
-        public string Response { get; set; }
+        public string FeedbackType { get; set; }
 #endif
-        /// <summary>The responseType property</summary>
-        public int? ResponseType { get; set; }
+        /// <summary>The id property</summary>
+        public long? Id { get; set; }
+        /// <summary>The shortDescription property</summary>
+#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
+#nullable enable
+        public string? ShortDescription { get; set; }
+#nullable restore
+#else
+        public string ShortDescription { get; set; }
+#endif
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Models.ApprovedResponseContract"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Models.FeedbackItemContract"/> and sets the default values.
         /// </summary>
-        public ApprovedResponseContract()
+        public FeedbackItemContract()
         {
             AdditionalData = new Dictionary<string, object>();
         }
         /// <summary>
         /// Creates a new instance of the appropriate class based on discriminator value
         /// </summary>
-        /// <returns>A <see cref="global::HraBot.ApiClient.Models.ApprovedResponseContract"/></returns>
+        /// <returns>A <see cref="global::HraBot.ApiClient.Models.FeedbackItemContract"/></returns>
         /// <param name="parseNode">The parse node to use to read the discriminator value and create the object</param>
-        public static global::HraBot.ApiClient.Models.ApprovedResponseContract CreateFromDiscriminatorValue(IParseNode parseNode)
+        public static global::HraBot.ApiClient.Models.FeedbackItemContract CreateFromDiscriminatorValue(IParseNode parseNode)
         {
             if(ReferenceEquals(parseNode, null)) throw new ArgumentNullException(nameof(parseNode));
-            return new global::HraBot.ApiClient.Models.ApprovedResponseContract();
+            return new global::HraBot.ApiClient.Models.FeedbackItemContract();
         }
         /// <summary>
         /// The deserialization information for the current model
@@ -61,11 +65,10 @@ namespace HraBot.ApiClient.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "citations", n => { Citations = n.GetCollectionOfObjectValues<global::HraBot.ApiClient.Models.Citation>(global::HraBot.ApiClient.Models.Citation.CreateFromDiscriminatorValue)?.AsList(); } },
-                { "conversationId", n => { ConversationId = n.GetLongValue(); } },
-                { "messageId", n => { MessageId = n.GetLongValue(); } },
-                { "response", n => { Response = n.GetStringValue(); } },
-                { "responseType", n => { ResponseType = n.GetIntValue(); } },
+                { "feedbackItem", n => { FeedbackItem = n.GetStringValue(); } },
+                { "feedbackType", n => { FeedbackType = n.GetStringValue(); } },
+                { "id", n => { Id = n.GetLongValue(); } },
+                { "shortDescription", n => { ShortDescription = n.GetStringValue(); } },
             };
         }
         /// <summary>
@@ -75,11 +78,10 @@ namespace HraBot.ApiClient.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteCollectionOfObjectValues<global::HraBot.ApiClient.Models.Citation>("citations", Citations);
-            writer.WriteLongValue("conversationId", ConversationId);
-            writer.WriteLongValue("messageId", MessageId);
-            writer.WriteStringValue("response", Response);
-            writer.WriteIntValue("responseType", ResponseType);
+            writer.WriteStringValue("feedbackItem", FeedbackItem);
+            writer.WriteStringValue("feedbackType", FeedbackType);
+            writer.WriteLongValue("id", Id);
+            writer.WriteStringValue("shortDescription", ShortDescription);
             writer.WriteAdditionalData(AdditionalData);
         }
     }

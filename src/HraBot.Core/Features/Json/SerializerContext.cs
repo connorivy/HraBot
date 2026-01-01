@@ -24,6 +24,7 @@ namespace HraBot.Api.Features.Json;
 [JsonSerializable(typeof(IReadOnlyList<IngestedChunkDto>))]
 [JsonSerializable(typeof(EntityResponse<long>))]
 [JsonSerializable(typeof(FeedbackContract))]
+[JsonSerializable(typeof(List<FeedbackItemContract>))]
 public partial class HraBotJsonSerializerContext : JsonSerializerContext
 {
     public static JsonSerializerOptions DefaultOptions { get; }

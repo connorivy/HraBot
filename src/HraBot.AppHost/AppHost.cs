@@ -21,7 +21,7 @@ var vectorDb = builder.AddConnectionString(AppServices.vectorDb);
 
 var postgres = builder
     .AddPostgres(AppServices.postgres)
-    .WithPgAdmin()
+    // .WithPgAdmin()
     .WithLifetime(ContainerLifetime.Persistent);
 
 var db = postgres.AddDatabase(AppServices.db_hraBot);

@@ -2,6 +2,7 @@
 #pragma warning disable CS0618
 using HraBot.ApiClient.Api.Chat;
 using HraBot.ApiClient.Api.Feedback;
+using HraBot.ApiClient.Api.Ping;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using System.Collections.Generic;
@@ -25,6 +26,11 @@ namespace HraBot.ApiClient.Api
         public global::HraBot.ApiClient.Api.Feedback.FeedbackRequestBuilder Feedback
         {
             get => new global::HraBot.ApiClient.Api.Feedback.FeedbackRequestBuilder(PathParameters, RequestAdapter);
+        }
+        /// <summary>The ping property</summary>
+        public global::HraBot.ApiClient.Api.Ping.PingRequestBuilder Ping
+        {
+            get => new global::HraBot.ApiClient.Api.Ping.PingRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::HraBot.ApiClient.Api.ApiRequestBuilder"/> and sets the default values.

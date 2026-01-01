@@ -29,7 +29,7 @@ public partial class Chat(
             throw new UnreachableException("This can't happen after the proper query");
         }
 
-        conversation.AddMessage(Role.User, req.Content);
+        conversation.AddTrackedMessage(Role.User, req.Content);
 
         var approvedResponse = await returnApprovedResponse.GetApprovedResponse(
             conversation.Messages.Select(m => new ChatMessage(
@@ -38,10 +38,11 @@ public partial class Chat(
             )),
             ct
         );
-        conversation.AddMessage(Role.Ai, approvedResponse.Response);
+        var newMessage = conversation.AddTrackedMessage(Role.Ai, approvedResponse.Response);
         await hraBotDbContext.SaveChangesAsync(ct);
         return new ApprovedResponseContract(
             conversation.Id,
+            newMessage.Id,
             approvedResponse.ResponseType,
             approvedResponse.Response,
             approvedResponse.Citations
@@ -89,6 +90,7 @@ public record ChatRequest(long? ConversationId, string Content);
 
 public record ApprovedResponseContract(
     long ConversationId,
+    long MessageId,
     ResponseType ResponseType,
     string Response,
     List<Citation> Citations

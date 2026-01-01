@@ -9,21 +9,21 @@ public class Conversation
 
     public int NumMessages { get; private set; }
 
-    public void AddMessage(Role role, string content)
+    public Message AddTrackedMessage(Role role, string content)
     {
         if (this.Messages is null)
         {
             throw new InvalidOperationException("Messages prop is null on conversation object");
         }
-        this.Messages.Add(
-            new()
-            {
-                Sequence = ++NumMessages,
-                ConversationId = Id,
-                Role = role,
-                Content = content,
-            }
-        );
+        Message message = new()
+        {
+            Sequence = ++NumMessages,
+            ConversationId = Id,
+            Role = role,
+            Content = content,
+        };
+        this.Messages.Add(message);
+        return message;
     }
 
     public List<Message>? Messages { get; set; }

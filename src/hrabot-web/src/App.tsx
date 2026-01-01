@@ -2,9 +2,14 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import {
   Avatar,
   Box,
+  Button,
   Container,
   CssBaseline,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Paper,
   Stack,
@@ -32,6 +37,24 @@ type ChatMessage = {
   timestamp: number
   citations?: Citation[]
 }
+
+const defaultFeedbackItems = [
+  { id: 1, shortDescription: 'no issues', feedbackItem: 'MessageContent', feedbackType: 'Positive' },
+  { id: 4, shortDescription: 'incorrect', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
+  { id: 5, shortDescription: 'missing information', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
+  { id: 6, shortDescription: 'not applicable to question', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
+  { id: 7, shortDescription: 'not informed by citations', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
+  { id: 8, shortDescription: 'other', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
+  { id: 2, shortDescription: 'no issues', feedbackItem: 'Citation', feedbackType: 'Positive' },
+  { id: 9, shortDescription: 'missing', feedbackItem: 'Citation', feedbackType: 'Negative' },
+  { id: 10, shortDescription: 'incorrect', feedbackItem: 'Citation', feedbackType: 'Negative' },
+  { id: 11, shortDescription: 'not applicable to question', feedbackItem: 'Citation', feedbackType: 'Negative' },
+  { id: 12, shortDescription: 'other', feedbackItem: 'Citation', feedbackType: 'Negative' },
+  { id: 3, shortDescription: 'no issues', feedbackItem: 'Citation', feedbackType: 'Positive' },
+  { id: 13, shortDescription: 'too slow', feedbackItem: 'Ux', feedbackType: 'Negative' },
+  { id: 14, shortDescription: 'other', feedbackItem: 'Ux', feedbackType: 'Negative' },
+  { id: 15, shortDescription: 'other', feedbackItem: 'Other', feedbackType: 'Negative' },
+]
 
 const theme = createTheme({
   palette: {
@@ -96,6 +119,15 @@ function ChatPane() {
   const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(null)
   const [feedbackUiMessageId, setFeedbackUiMessageId] = useState<number | null>(null)
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
+  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false)
+  const [feedbackItems, setFeedbackItems] = useState<
+    { id?: number | null; shortDescription?: string | null; feedbackItem?: string | null; feedbackType?: string | null }[]
+  >(defaultFeedbackItems)
+  const [feedbackItemsLoading, setFeedbackItemsLoading] = useState(false)
+  const [feedbackItemsFetched, setFeedbackItemsFetched] = useState(false)
+  const [contentSelection, setContentSelection] = useState('no issues')
+  const [citationsSelection, setCitationsSelection] = useState('no issues')
+  const [uxSelection, setUxSelection] = useState('no issues')
   const streamRef = useRef<HTMLDivElement | null>(null)
   const apiClient = useApiClient()
 
@@ -133,15 +165,15 @@ function ChatPane() {
         response?.response?.trim() ??
         'Sorry, I could not find a response right now.'
       const aiMessage: ChatMessage = {
-        id: Date.now(),
+        id: response?.messageId ?? Date.now(),
         role: 'ai',
         text: responseText,
         timestamp: Date.now(),
         citations: response?.citations ?? undefined,
       }
       setMessages((prev) => [...prev, aiMessage])
-      if (response?.conversationId != null) {
-        setFeedbackMessageId(response.conversationId)
+      if (response?.messageId) {
+        setFeedbackMessageId(response.messageId)
         setFeedbackUiMessageId(aiMessage.id)
         setPendingFeedback(true)
       }
@@ -159,13 +191,13 @@ function ChatPane() {
     }
   }
 
-  const handleFeedback = async (isPositive: boolean) => {
+  const handlePositiveFeedback = async () => {
     if (feedbackSubmitting || feedbackMessageId == null) return
     setFeedbackSubmitting(true)
     try {
       await apiClient.api.feedback.post({
         messageId: feedbackMessageId,
-        messageFeedbackItemIds: [isPositive ? 1 : 2],
+        messageFeedbackItemIds: [1],
         additionalComments: null,
       })
       setPendingFeedback(false)
@@ -177,10 +209,74 @@ function ChatPane() {
     }
   }
 
+  const handleOpenNegativeFeedback = async () => {
+    if (feedbackSubmitting || feedbackMessageId == null) return
+    setFeedbackDialogOpen(true)
+    setContentSelection('no issues')
+    setCitationsSelection('no issues')
+    setUxSelection('no issues')
+    if (feedbackItemsLoading || feedbackItemsFetched) return
+    setFeedbackItemsLoading(true)
+    try {
+      const response = await apiClient.api.feedback.items.get()
+      if (response?.length) {
+        setFeedbackItems(response)
+        setFeedbackItemsFetched(true)
+      }
+    } catch (error) {
+      console.error('Failed to load feedback options.', error)
+    } finally {
+      setFeedbackItemsLoading(false)
+    }
+  }
+
+  const handleSubmitNegativeFeedback = async () => {
+    if (feedbackSubmitting || feedbackMessageId == null) return
+    const selectedIds = [contentSelection, citationsSelection, uxSelection]
+      .filter((value) => value !== 'no issues')
+      .map((value) => Number.parseInt(value, 10))
+      .filter((value) => Number.isFinite(value))
+
+    if (selectedIds.length === 0) return
+
+    setFeedbackSubmitting(true)
+    try {
+      await apiClient.api.feedback.post({
+        messageId: feedbackMessageId,
+        messageFeedbackItemIds: selectedIds,
+        additionalComments: null,
+      })
+      setPendingFeedback(false)
+      setFeedbackUiMessageId(null)
+      setFeedbackDialogOpen(false)
+    } catch (error) {
+      console.error('Failed to submit feedback.', error)
+    } finally {
+      setFeedbackSubmitting(false)
+    }
+  }
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     void handleSend()
   }
+
+  const feedbackMessage = messages.find((message) => message.id === feedbackUiMessageId)
+  const negativeFeedbackOptions = feedbackItems.filter(
+    (item) => item.feedbackType?.toLowerCase() === 'negative',
+  )
+  const contentOptions = negativeFeedbackOptions.filter(
+    (item) => item.feedbackItem?.toLowerCase() === 'messagecontent',
+  )
+  const citationOptions = negativeFeedbackOptions.filter(
+    (item) => item.feedbackItem?.toLowerCase() === 'citation',
+  )
+  const uxOptions = negativeFeedbackOptions.filter(
+    (item) => item.feedbackItem?.toLowerCase() === 'ux',
+  )
+  const canSubmitNegativeFeedback =
+    !feedbackSubmitting &&
+    [contentSelection, citationsSelection, uxSelection].some((value) => value !== 'no issues')
 
   return (
     <>
@@ -283,7 +379,7 @@ function ChatPane() {
                             color="primary"
                             aria-label="Thumbs up"
                             disabled={feedbackSubmitting}
-                            onClick={() => void handleFeedback(true)}
+                            onClick={() => void handlePositiveFeedback()}
                           >
                             <ThumbUpAltOutlinedIcon />
                           </IconButton>
@@ -291,7 +387,7 @@ function ChatPane() {
                             color="secondary"
                             aria-label="Thumbs down"
                             disabled={feedbackSubmitting}
-                            onClick={() => void handleFeedback(false)}
+                            onClick={() => void handleOpenNegativeFeedback()}
                           >
                             <ThumbDownAltOutlinedIcon />
                           </IconButton>
@@ -335,6 +431,87 @@ function ChatPane() {
               )}
             </Box>
             <Divider />
+            <Dialog
+              open={feedbackDialogOpen}
+              onClose={() => {
+                if (feedbackSubmitting) return
+                setFeedbackDialogOpen(false)
+              }}
+              fullWidth
+              maxWidth="sm"
+            >
+              <DialogTitle>Tell us what went wrong</DialogTitle>
+              <DialogContent className="flex flex-col gap-3">
+                <Box className="rounded-xl border px-3 py-2" sx={{ borderColor: 'divider' }}>
+                  <Typography variant="subtitle2" color="text.secondary">
+                    AI response
+                  </Typography>
+                  <Typography variant="body2" className="mt-1">
+                    {feedbackMessage?.text ?? 'Response unavailable.'}
+                  </Typography>
+                  {feedbackMessage?.citations?.length ? (
+                    <CitationList citations={feedbackMessage.citations} />
+                  ) : null}
+                </Box>
+                <Box className="grid gap-3 sm:grid-cols-3">
+                  <TextField
+                    select
+                    label="Content"
+                    value={contentSelection}
+                    onChange={(event) => setContentSelection(event.target.value)}
+                    SelectProps={{ native: true }}
+                    fullWidth
+                  >
+                    <option value="no issues">no issues</option>
+                    {contentOptions.map((item) => (
+                      <option key={item.id} value={item.id ?? ''}>
+                        {item.shortDescription}
+                      </option>
+                    ))}
+                  </TextField>
+                  <TextField
+                    select
+                    label="Citations"
+                    value={citationsSelection}
+                    onChange={(event) => setCitationsSelection(event.target.value)}
+                    SelectProps={{ native: true }}
+                    fullWidth
+                  >
+                    <option value="no issues">no issues</option>
+                    {citationOptions.map((item) => (
+                      <option key={item.id} value={item.id ?? ''}>
+                        {item.shortDescription}
+                      </option>
+                    ))}
+                  </TextField>
+                  <TextField
+                    select
+                    label="UX"
+                    value={uxSelection}
+                    onChange={(event) => setUxSelection(event.target.value)}
+                    SelectProps={{ native: true }}
+                    fullWidth
+                  >
+                    <option value="no issues">no issues</option>
+                    {uxOptions.map((item) => (
+                      <option key={item.id} value={item.id ?? ''}>
+                        {item.shortDescription}
+                      </option>
+                    ))}
+                  </TextField>
+                </Box>
+              </DialogContent>
+              <DialogActions className="px-6 pb-4">
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => void handleSubmitNegativeFeedback()}
+                  disabled={!canSubmitNegativeFeedback}
+                >
+                  Submit
+                </Button>
+              </DialogActions>
+            </Dialog>
             <Box
               component="form"
               onSubmit={handleSubmit}

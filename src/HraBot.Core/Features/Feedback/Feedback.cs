@@ -12,6 +12,13 @@ public record FeedbackContract(
     string? AdditionalComments
 );
 
+public record FeedbackItemContract(
+    long Id,
+    string ShortDescription,
+    string FeedbackItem,
+    string FeedbackType
+);
+
 public record EntityResponse<TId>(TId Id);
 
 [HraBotEndpoint(Http.Post, "/feedback")]
@@ -110,6 +117,30 @@ public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<long, F
             [.. feedback.MessageFeedbackItems.Select(i => i.Id)],
             feedback.AdditionalComments
         );
+    }
+}
+
+[HraBotEndpoint(Http.Get, "/feedback/items")]
+public partial class GetFeedbackItems(HraBotDbContext context)
+    : BaseEndpoint<object, IReadOnlyList<FeedbackItemContract>>
+{
+    public override async Task<Result<IReadOnlyList<FeedbackItemContract>>> ExecuteRequestAsync(
+        object req,
+        CancellationToken ct = default
+    )
+    {
+        var items = await context
+            .MessageFeedbackItems.AsNoTracking()
+            .OrderBy(item => item.Id)
+            .Select(item => new FeedbackItemContract(
+                item.Id,
+                item.ShortDescription,
+                item.FeedbackItem.ToString(),
+                item.FeedbackType.ToString()
+            ))
+            .ToListAsync(ct);
+
+        return items;
     }
 }
 

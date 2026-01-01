@@ -22,6 +22,7 @@ public class UiTests : PageTestBase
                 // var x = await SetupTestsE2E.ApiClient.Api.Chat.PostAsync(new());
                 ApprovedResponseContract approvedResponse = new(
                     1,
+                    1,
                     ResponseType.Success,
                     "This is a dummy response",
                     [new("filename", "this is a dummy citation")]
