@@ -10,10 +10,13 @@ import {
   Stack,
   TextField,
   ThemeProvider,
+  Tooltip,
   Typography,
   createTheme,
 } from '@mui/material'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
+import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined'
+import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
 import { ApiClientProvider, useApiClient } from './features/ApiClientProvider'
 type ChatRole = 'user' | 'ai'
 
@@ -89,6 +92,10 @@ function ChatPane() {
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [conversationId, setConversationId] = useState<number | null>(null)
+  const [pendingFeedback, setPendingFeedback] = useState(false)
+  const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(null)
+  const [feedbackUiMessageId, setFeedbackUiMessageId] = useState<number | null>(null)
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
   const streamRef = useRef<HTMLDivElement | null>(null)
   const apiClient = useApiClient()
 
@@ -99,7 +106,7 @@ function ChatPane() {
 
   const handleSend = async () => {
     const trimmed = inputValue.trim()
-    if (!trimmed) return
+    if (!trimmed || pendingFeedback) return
 
     const timestamp = Date.now()
     const userMessage: ChatMessage = {
@@ -133,6 +140,11 @@ function ChatPane() {
         citations: response?.citations ?? undefined,
       }
       setMessages((prev) => [...prev, aiMessage])
+      if (response?.conversationId != null) {
+        setFeedbackMessageId(response.conversationId)
+        setFeedbackUiMessageId(aiMessage.id)
+        setPendingFeedback(true)
+      }
     } catch (error) {
       console.error('Failed to fetch response from HraBot.', error)
       const aiMessage: ChatMessage = {
@@ -144,6 +156,24 @@ function ChatPane() {
       setMessages((prev) => [...prev, aiMessage])
     } finally {
       setIsTyping(false)
+    }
+  }
+
+  const handleFeedback = async (isPositive: boolean) => {
+    if (feedbackSubmitting || feedbackMessageId == null) return
+    setFeedbackSubmitting(true)
+    try {
+      await apiClient.api.feedback.post({
+        messageId: feedbackMessageId,
+        messageFeedbackItemIds: [isPositive ? 1 : 2],
+        additionalComments: null,
+      })
+      setPendingFeedback(false)
+      setFeedbackUiMessageId(null)
+    } catch (error) {
+      console.error('Failed to submit feedback.', error)
+    } finally {
+      setFeedbackSubmitting(false)
     }
   }
 
@@ -245,6 +275,28 @@ function ChatPane() {
                       {message.role === 'ai' && message.citations?.length ? (
                         <CitationList citations={message.citations} />
                       ) : null}
+                      {pendingFeedback &&
+                        message.role === 'ai' &&
+                        feedbackUiMessageId === message.id ? (
+                        <Box className="mt-2 flex gap-1.5">
+                          <IconButton
+                            color="primary"
+                            aria-label="Thumbs up"
+                            disabled={feedbackSubmitting}
+                            onClick={() => void handleFeedback(true)}
+                          >
+                            <ThumbUpAltOutlinedIcon />
+                          </IconButton>
+                          <IconButton
+                            color="secondary"
+                            aria-label="Thumbs down"
+                            disabled={feedbackSubmitting}
+                            onClick={() => void handleFeedback(false)}
+                          >
+                            <ThumbDownAltOutlinedIcon />
+                          </IconButton>
+                        </Box>
+                      ) : null}
                       <Typography variant="caption" className="opacity-60">
                         {new Date(message.timestamp).toLocaleTimeString([], {
                           hour: '2-digit',
@@ -289,22 +341,30 @@ function ChatPane() {
               className="flex items-center gap-2.5"
               sx={{ px: { xs: 2, sm: 3 }, pb: 2.5, pt: 2 }}
             >
-              <TextField
-                value={inputValue}
-                onChange={(event) => setInputValue(event.target.value)}
-                placeholder="Ask about time off, benefits, or policies..."
-                fullWidth
-                size="small"
-                variant="outlined"
-                color="primary"
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault()
-                    void handleSend()
-                  }
-                }}
-                inputProps={{ 'aria-label': 'Chat message' }}
-              />
+              <Tooltip
+                title="Rate the last response to continue."
+                disableHoverListener={!pendingFeedback}
+              >
+                <span className="flex-1">
+                  <TextField
+                    value={inputValue}
+                    onChange={(event) => setInputValue(event.target.value)}
+                    placeholder="Ask about time off, benefits, or policies..."
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    color="primary"
+                    disabled={pendingFeedback}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter' && !event.shiftKey) {
+                        event.preventDefault()
+                        void handleSend()
+                      }
+                    }}
+                    inputProps={{ 'aria-label': 'Chat message' }}
+                  />
+                </span>
+              </Tooltip>
               <IconButton
                 type="submit"
                 color="primary"
@@ -320,7 +380,7 @@ function ChatPane() {
                     boxShadow: 'none',
                   },
                 })}
-                disabled={!inputValue.trim()}
+                disabled={pendingFeedback || !inputValue.trim()}
               >
                 <SendRoundedIcon />
               </IconButton>

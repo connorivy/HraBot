@@ -39,13 +39,13 @@ public class SetupTestsE2E
                 (options, settings) => { }
             );
 
-        if (!System.Diagnostics.Debugger.IsAttached)
-        {
-            var pgadminResource = hostBuilder.Resources.First(r => r.Name == AppServices.PG_ADMIN);
-            hostBuilder.Resources.Remove(pgadminResource);
-            var markitdown = hostBuilder.Resources.First(r => r.Name == AppServices.MARK_IT_DOWN);
-            hostBuilder.Resources.Remove(markitdown);
-        }
+        // if (!System.Diagnostics.Debugger.IsAttached)
+        // {
+        //     var pgadminResource = hostBuilder.Resources.First(r => r.Name == AppServices.PG_ADMIN);
+        //     hostBuilder.Resources.Remove(pgadminResource);
+        //     var markitdown = hostBuilder.Resources.First(r => r.Name == AppServices.MARK_IT_DOWN);
+        //     hostBuilder.Resources.Remove(markitdown);
+        // }
         // make postgres container ephemeral
         var postgres = hostBuilder.Resources.First(r => r.Name == AppServices.postgres);
         var lifetime = postgres.Annotations.OfType<ContainerLifetimeAnnotation>().FirstOrDefault();
