@@ -10,6 +10,7 @@ public class MessageFeedback
     public Message? Message { get; set; }
     public List<MessageFeedbackItem>? MessageFeedbackItems { get; set; }
     public string? AdditionalComments { get; set; }
+    public byte? ImportanceToTakeCommand { get; set; }
 }
 
 public class MessageFeedbackConfiguration : IEntityTypeConfiguration<MessageFeedback>

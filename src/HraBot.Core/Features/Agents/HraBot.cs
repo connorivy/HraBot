@@ -42,7 +42,7 @@ IF the user asked you about something unrelated these topics
     RETURN
 
 // orchestrate searching a vector database for the answer to the question
-TRANSFORM the user's question into a string that will produce a similar embedding as the answer to the user's question
+TRANSFORM the user's question into a statement that will produce a similar embedding as the answer to the user's question
 THEN use the SearchAsync tool to find relevant citations. 
 THEN generate an answer and include up to 3 relevant citation summaries that are the basis of your answer.
 

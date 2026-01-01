@@ -109,20 +109,25 @@ public class FeedbackTests : PageTestBase
 
         var contentSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "Content" });
         var citationsSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "Citations" });
-        var uxSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "UX" });
+        var importanceSelect = dialog.GetByRole(AriaRole.Combobox, new() { Name = "Importance" });
+        var otherComments = dialog.GetByRole(AriaRole.Textbox, new() { Name = "Other comments" });
 
         await Expect(contentSelect).ToHaveValueAsync("no issues");
         await Expect(citationsSelect).ToHaveValueAsync("no issues");
-        await Expect(uxSelect).ToHaveValueAsync("no issues");
+        await Expect(importanceSelect).ToHaveValueAsync("");
 
         var submitButton = dialog.GetByRole(AriaRole.Button, new() { Name = "Submit" });
         await Expect(submitButton).ToBeDisabledAsync();
 
         await contentSelect.SelectOptionAsync(new SelectOptionValue { Label = "incorrect" });
-        await Expect(submitButton).Not.ToBeDisabledAsync();
+        await Expect(submitButton).ToBeDisabledAsync();
 
         await citationsSelect.SelectOptionAsync(new SelectOptionValue { Label = "missing" });
-        await uxSelect.SelectOptionAsync(new SelectOptionValue { Label = "too slow" });
+        await Expect(submitButton).ToBeDisabledAsync();
+
+        await importanceSelect.SelectOptionAsync(new SelectOptionValue { Value = "4" });
+        await otherComments.FillAsync("Needs clearer citation details.");
+        await Expect(submitButton).Not.ToBeDisabledAsync();
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () => await submitButton.ClickAsync(),
@@ -141,7 +146,9 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
-        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(3);
-        persistedFeedback.MessageFeedbackItemIds.Should().Contain([4, 9, 13]);
+        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(2);
+        persistedFeedback.MessageFeedbackItemIds.Should().Contain([4, 9]);
+        persistedFeedback.ImportanceToTakeCommand.Should().Be(4);
+        persistedFeedback.AdditionalComments.Should().Be("Needs clearer citation details.");
     }
 }

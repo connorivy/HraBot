@@ -9,7 +9,8 @@ namespace HraBot.Core.Features.Feedback;
 public record FeedbackContract(
     long MessageId,
     List<long> MessageFeedbackItemIds,
-    string? AdditionalComments
+    string? AdditionalComments,
+    byte? ImportanceToTakeCommand
 );
 
 public record FeedbackItemContract(
@@ -36,21 +37,18 @@ public partial class AddFeedback(HraBotDbContext context)
                 description: "At least one feedback item id is required."
             );
         }
+        if (
+            req.ImportanceToTakeCommand is not null
+            && (req.ImportanceToTakeCommand < 1 || req.ImportanceToTakeCommand > 5)
+        )
+        {
+            return HraBotError.Validation(description: "Importance must be between 1 and 5.");
+        }
 
         var aiMessage = await context.Messages.FirstOrDefaultAsync(
             message => message.Id == req.MessageId && message.Role == Role.Ai,
             ct
         );
-        if (aiMessage is null)
-        {
-            var conversation = await context
-                .Conversations.Include(c => c.Messages)
-                .FirstOrDefaultAsync(c => c.Id == req.MessageId, ct);
-            aiMessage = conversation
-                ?.Messages?.Where(message => message.Role == Role.Ai)
-                .OrderByDescending(message => message.Sequence)
-                .FirstOrDefault();
-        }
 
         if (aiMessage is null)
         {
@@ -84,6 +82,7 @@ public partial class AddFeedback(HraBotDbContext context)
         {
             MessageId = aiMessage.Id,
             AdditionalComments = req.AdditionalComments,
+            ImportanceToTakeCommand = req.ImportanceToTakeCommand,
             MessageFeedbackItems = feedbackItems,
         };
         context.MessageFeedbacks.Add(feedback);
@@ -115,7 +114,8 @@ public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<long, F
         return new FeedbackContract(
             feedback.MessageId,
             [.. feedback.MessageFeedbackItems.Select(i => i.Id)],
-            feedback.AdditionalComments
+            feedback.AdditionalComments,
+            feedback.ImportanceToTakeCommand
         );
     }
 }

@@ -22,6 +22,8 @@ namespace HraBot.ApiClient.Models
 #endif
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
+        /// <summary>The importanceToTakeCommand property</summary>
+        public byte? ImportanceToTakeCommand { get; set; }
         /// <summary>The messageFeedbackItemIds property</summary>
 #if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
 #nullable enable
@@ -58,6 +60,7 @@ namespace HraBot.ApiClient.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "additionalComments", n => { AdditionalComments = n.GetStringValue(); } },
+                { "importanceToTakeCommand", n => { ImportanceToTakeCommand = n.GetByteValue(); } },
                 { "messageFeedbackItemIds", n => { MessageFeedbackItemIds = n.GetCollectionOfPrimitiveValues<long?>()?.AsList(); } },
                 { "messageId", n => { MessageId = n.GetLongValue(); } },
             };
@@ -70,6 +73,7 @@ namespace HraBot.ApiClient.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteStringValue("additionalComments", AdditionalComments);
+            writer.WriteByteValue("importanceToTakeCommand", ImportanceToTakeCommand);
             writer.WriteCollectionOfPrimitiveValues<long?>("messageFeedbackItemIds", MessageFeedbackItemIds);
             writer.WriteLongValue("messageId", MessageId);
             writer.WriteAdditionalData(AdditionalData);

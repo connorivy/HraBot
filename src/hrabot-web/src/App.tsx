@@ -51,8 +51,6 @@ const defaultFeedbackItems = [
   { id: 11, shortDescription: 'not applicable to question', feedbackItem: 'Citation', feedbackType: 'Negative' },
   { id: 12, shortDescription: 'other', feedbackItem: 'Citation', feedbackType: 'Negative' },
   { id: 3, shortDescription: 'no issues', feedbackItem: 'Citation', feedbackType: 'Positive' },
-  { id: 13, shortDescription: 'too slow', feedbackItem: 'Ux', feedbackType: 'Negative' },
-  { id: 14, shortDescription: 'other', feedbackItem: 'Ux', feedbackType: 'Negative' },
   { id: 15, shortDescription: 'other', feedbackItem: 'Other', feedbackType: 'Negative' },
 ]
 
@@ -127,7 +125,8 @@ function ChatPane() {
   const [feedbackItemsFetched, setFeedbackItemsFetched] = useState(false)
   const [contentSelection, setContentSelection] = useState('no issues')
   const [citationsSelection, setCitationsSelection] = useState('no issues')
-  const [uxSelection, setUxSelection] = useState('no issues')
+  const [importanceSelection, setImportanceSelection] = useState('')
+  const [additionalComments, setAdditionalComments] = useState('')
   const streamRef = useRef<HTMLDivElement | null>(null)
   const apiClient = useApiClient()
 
@@ -199,6 +198,7 @@ function ChatPane() {
         messageId: feedbackMessageId,
         messageFeedbackItemIds: [1, 2, 3],
         additionalComments: null,
+        importanceToTakeCommand: null,
       })
       setPendingFeedback(false)
       setFeedbackUiMessageId(null)
@@ -214,7 +214,8 @@ function ChatPane() {
     setFeedbackDialogOpen(true)
     setContentSelection('no issues')
     setCitationsSelection('no issues')
-    setUxSelection('no issues')
+    setImportanceSelection('')
+    setAdditionalComments('')
     if (feedbackItemsLoading || feedbackItemsFetched) return
     setFeedbackItemsLoading(true)
     try {
@@ -232,19 +233,21 @@ function ChatPane() {
 
   const handleSubmitNegativeFeedback = async () => {
     if (feedbackSubmitting || feedbackMessageId == null) return
-    const selectedIds = [contentSelection, citationsSelection, uxSelection]
+    const selectedIds = [contentSelection, citationsSelection]
       .filter((value) => value !== 'no issues')
       .map((value) => Number.parseInt(value, 10))
       .filter((value) => Number.isFinite(value))
 
-    if (selectedIds.length === 0) return
+    const importanceValue = Number.parseInt(importanceSelection, 10)
+    if (selectedIds.length === 0 || !Number.isFinite(importanceValue)) return
 
     setFeedbackSubmitting(true)
     try {
       await apiClient.api.feedback.post({
         messageId: feedbackMessageId,
         messageFeedbackItemIds: selectedIds,
-        additionalComments: null,
+        additionalComments: additionalComments.trim() || null,
+        importanceToTakeCommand: importanceValue,
       })
       setPendingFeedback(false)
       setFeedbackUiMessageId(null)
@@ -271,12 +274,10 @@ function ChatPane() {
   const citationOptions = negativeFeedbackOptions.filter(
     (item) => item.feedbackItem?.toLowerCase() === 'citation',
   )
-  const uxOptions = negativeFeedbackOptions.filter(
-    (item) => item.feedbackItem?.toLowerCase() === 'ux',
-  )
   const canSubmitNegativeFeedback =
     !feedbackSubmitting &&
-    [contentSelection, citationsSelection, uxSelection].some((value) => value !== 'no issues')
+    [contentSelection, citationsSelection].some((value) => value !== 'no issues') &&
+    importanceSelection !== ''
 
   return (
     <>
@@ -453,7 +454,10 @@ function ChatPane() {
                     <CitationList citations={feedbackMessage.citations} />
                   ) : null}
                 </Box>
-                <Box className="grid gap-3 sm:grid-cols-3">
+                <p></p>
+                <p></p>
+                <p></p>
+                <Box className="grid gap-3 sm:grid-cols-2">
                   <TextField
                     select
                     label="Content"
@@ -486,20 +490,33 @@ function ChatPane() {
                   </TextField>
                   <TextField
                     select
-                    label="UX"
-                    value={uxSelection}
-                    onChange={(event) => setUxSelection(event.target.value)}
-                    SelectProps={{ native: true }}
+                    label="Importance"
+                    value={importanceSelection}
+                    onChange={(event) => setImportanceSelection(event.target.value)}
+                    SelectProps={{ native: true, displayEmpty: true }}
+                    InputLabelProps={{ shrink: true }}
                     fullWidth
+                    helperText="How important is providing a correct answer to this question"
                   >
-                    <option value="no issues">no issues</option>
-                    {uxOptions.map((item) => (
-                      <option key={item.id} value={item.id ?? ''}>
-                        {item.shortDescription}
+                    <option value="" disabled>
+                      Select importance
+                    </option>
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <option key={value} value={value}>
+                        {value} - {value === 1 ? 'Least' : value === 5 ? 'Most' : 'Moderate'} importance
                       </option>
                     ))}
                   </TextField>
                 </Box>
+                <TextField
+                  label="Other comments (optional)"
+                  value={additionalComments}
+                  onChange={(event) => setAdditionalComments(event.target.value)}
+                  placeholder="Share anything else about the response"
+                  fullWidth
+                  multiline
+                  minRows={3}
+                />
               </DialogContent>
               <DialogActions className="px-6 pb-4">
                 <Button
