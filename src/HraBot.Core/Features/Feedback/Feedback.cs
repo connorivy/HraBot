@@ -1,30 +1,22 @@
-using Amazon.Lambda.Annotations;
-using Amazon.Lambda.Annotations.APIGateway;
-using Amazon.Lambda.Core;
+using System.Diagnostics;
 using HraBot.Core.Common;
 using HraBot.Core.Features.Chat;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 
 namespace HraBot.Core.Features.Feedback;
 
 public record FeedbackContract(
     long MessageId,
-    long MessageFeedbackItemId,
+    List<long> MessageFeedbackItemIds,
     string? AdditionalComments
 );
 
-[HraBotEndpoint(Http.Post, "/feedback")]
-public partial class AddFeedback : BaseEndpoint<FeedbackContract, int>
-{
-    public override void Configure(IEndpointRouteBuilder builder)
-    {
-        throw new NotImplementedException();
-    }
+public record EntityResponse<TId>(TId Id);
 
-    public override Task<Result<int>> ExecuteRequestAsync(
+[HraBotEndpoint(Http.Post, "/feedback")]
+public partial class AddFeedback : BaseEndpoint<FeedbackContract, EntityResponse<long>>
+{
+    public override Task<Result<EntityResponse<long>>> ExecuteRequestAsync(
         FeedbackContract req,
         CancellationToken ct = default
     )
@@ -33,27 +25,29 @@ public partial class AddFeedback : BaseEndpoint<FeedbackContract, int>
     }
 }
 
-[HraBotEndpoint(Http.Get, "/feedback/{id:int}")]
-public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<int, FeedbackContract>
+[HraBotEndpoint(Http.Get, "/feedback/{id:long}")]
+public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<long, FeedbackContract>
 {
-    public override void Configure(IEndpointRouteBuilder builder)
-    {
-        builder.MapGet("/feedback/{id:int}", (int id) => TypedResults.Ok(id));
-    }
-
     public override async Task<Result<FeedbackContract>> ExecuteRequestAsync(
-        int req,
+        long req,
         CancellationToken ct = default
     )
     {
-        var feedback = await context.MessageFeedbacks.FirstOrDefaultAsync(m => m.Id == req);
+        var feedback = await context
+            .MessageFeedbacks.AsNoTracking()
+            .Include(m => m.MessageFeedbackItems)
+            .FirstOrDefaultAsync(m => m.Id == req);
         if (feedback is null)
         {
             return HraBotError.NotFound();
         }
+        if (feedback.MessageFeedbackItems is null)
+        {
+            throw new UnreachableException("Cannot happen after proper query");
+        }
         return new FeedbackContract(
             feedback.MessageId,
-            feedback.MessageFeedbackItemId,
+            [.. feedback.MessageFeedbackItems.Select(i => i.Id)],
             feedback.AdditionalComments
         );
     }

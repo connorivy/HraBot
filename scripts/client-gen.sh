@@ -39,4 +39,6 @@ dnx Microsoft.OpenApi.Kiota@1.29.0 \
   -c HraBotApiClient \
   -n HraBot.ApiClient \
   -d "$api_openapi_json" \
-  -o "$back_output_dir"
+  -o "$back_output_dir" \
+  --exclude-backward-compatible \
+  --clean-output

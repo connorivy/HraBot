@@ -72,16 +72,16 @@ public partial class Chat(
         return existingConversation;
     }
 
-    public override void Configure(IEndpointRouteBuilder builder)
-    {
-        builder.MapPost(
-            "/chat",
-            (
-                [Microsoft.AspNetCore.Mvc.FromServices] Chat endpoint,
-                [Microsoft.AspNetCore.Mvc.FromBody] ChatRequest request
-            ) => endpoint.ExecuteAsync(request)
-        );
-    }
+    // public override void Configure(IEndpointRouteBuilder builder)
+    // {
+    //     builder.MapPost(
+    //         "/chat",
+    //         (
+    //             [Microsoft.AspNetCore.Mvc.FromServices] Chat endpoint,
+    //             [Microsoft.AspNetCore.Mvc.FromBody] ChatRequest request
+    //         ) => endpoint.ExecuteAsync(request)
+    //     );
+    // }
 }
 
 public record ChatRequest(long? ConversationId, string Content);

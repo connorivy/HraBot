@@ -8,8 +8,7 @@ public class MessageFeedback
     public long Id { get; private set; }
     public long MessageId { get; set; }
     public Message? Message { get; set; }
-    public long MessageFeedbackItemId { get; set; }
-    public MessageFeedbackItem? MessageFeedbackItem { get; set; }
+    public List<MessageFeedbackItem>? MessageFeedbackItems { get; set; }
     public string? AdditionalComments { get; set; }
 }
 
@@ -24,12 +23,7 @@ public class MessageFeedbackConfiguration : IEntityTypeConfiguration<MessageFeed
             .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder
-            .HasOne(b => b.MessageFeedbackItem)
-            .WithOne()
-            .HasForeignKey<MessageFeedback>(e => e.MessageFeedbackItem)
-            .IsRequired()
-            .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(b => b.MessageFeedbackItems).WithMany(b => b.MessageFeedbacks);
     }
 }
 
@@ -38,6 +32,8 @@ public class MessageFeedbackItem
     public long Id { get; set; }
     public required string ShortDescription { get; set; }
     public required FeedbackItem FeedbackItem { get; set; }
+    public required FeedbackType FeedbackType { get; set; }
+    public List<MessageFeedback>? MessageFeedbacks { get; set; }
 }
 
 public enum FeedbackItem : byte
@@ -47,6 +43,13 @@ public enum FeedbackItem : byte
     Citation,
     Ux,
     Other = 255,
+}
+
+public enum FeedbackType : byte
+{
+    Undefined = 0,
+    Positive,
+    Negative,
 }
 
 public class MessageFeedbackItemConfiguration : IEntityTypeConfiguration<MessageFeedbackItem>
@@ -59,59 +62,75 @@ public class MessageFeedbackItemConfiguration : IEntityTypeConfiguration<Message
             new MessageFeedbackItem()
             {
                 Id = 1,
-                ShortDescription = "incorrect",
+                ShortDescription = "no issues",
                 FeedbackItem = FeedbackItem.MessageContent,
+                FeedbackType = FeedbackType.Positive,
             },
             new MessageFeedbackItem()
             {
                 Id = 2,
-                ShortDescription = "missing information",
+                ShortDescription = "incorrect",
                 FeedbackItem = FeedbackItem.MessageContent,
+                FeedbackType = FeedbackType.Negative,
             },
             new MessageFeedbackItem()
             {
                 Id = 3,
-                ShortDescription = "not applicable to question",
+                ShortDescription = "missing information",
                 FeedbackItem = FeedbackItem.MessageContent,
+                FeedbackType = FeedbackType.Negative,
             },
             new MessageFeedbackItem()
             {
                 Id = 4,
+                ShortDescription = "not applicable to question",
+                FeedbackItem = FeedbackItem.MessageContent,
+                FeedbackType = FeedbackType.Negative,
+            },
+            new MessageFeedbackItem()
+            {
+                Id = 5,
                 ShortDescription = "not informed by citations",
                 FeedbackItem = FeedbackItem.MessageContent,
+                FeedbackType = FeedbackType.Negative,
             },
             // citation
             new MessageFeedbackItem()
             {
-                Id = 5,
+                Id = 6,
                 ShortDescription = "missing",
                 FeedbackItem = FeedbackItem.Citation,
-            },
-            new MessageFeedbackItem()
-            {
-                Id = 6,
-                ShortDescription = "incorrect",
-                FeedbackItem = FeedbackItem.Citation,
+                FeedbackType = FeedbackType.Negative,
             },
             new MessageFeedbackItem()
             {
                 Id = 7,
+                ShortDescription = "incorrect",
+                FeedbackItem = FeedbackItem.Citation,
+                FeedbackType = FeedbackType.Negative,
+            },
+            new MessageFeedbackItem()
+            {
+                Id = 8,
                 ShortDescription = "not applicable to question",
                 FeedbackItem = FeedbackItem.Citation,
+                FeedbackType = FeedbackType.Negative,
             },
             // ux
             new MessageFeedbackItem()
             {
-                Id = 8,
+                Id = 9,
                 ShortDescription = "too slow",
                 FeedbackItem = FeedbackItem.Ux,
+                FeedbackType = FeedbackType.Negative,
             },
             // other
             new MessageFeedbackItem()
             {
-                Id = 9,
+                Id = 10,
                 ShortDescription = "other",
                 FeedbackItem = FeedbackItem.Other,
+                FeedbackType = FeedbackType.Negative,
             }
         );
     }

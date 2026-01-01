@@ -1,7 +1,10 @@
 using System.Text.Json;
+using AwesomeAssertions;
 using HraBot.Api.Features.Json;
 using HraBot.Api.Features.Workflows;
+using HraBot.Core.Features.Feedback;
 using Microsoft.Playwright;
+using UglyToad.PdfPig.Graphics.Colors;
 
 namespace HraBot.Tests.E2E;
 
@@ -81,9 +84,28 @@ public class ResponseTests : PageTestBase
         // there should be three buttons. The last one is the send button, currently disabled, and two new feedback buttons (thumbs up and thumbs down)
         await Expect(buttons).ToHaveCountAsync(3);
 
-        var thumbsUp = buttons.Nth(1);
-        await thumbsUp.ClickAsync();
+        var chatBox = this.Page.GetByRole(AriaRole.Textbox);
+        // chat box should be disabled until feed back is provided. There should be a tooltip that explains this
+        await Expect(chatBox).ToBeDisabledAsync();
 
-        // await SetupTestsE2E.ApiClient.Api.
+        var thumbsUp = buttons.Nth(1);
+        var response = await this.Page.RunAndWaitForResponseAsync(
+            async () => await thumbsUp.ClickAsync(),
+            resp => resp.Ok
+        );
+        var json =
+            await response.JsonAsync()
+            ?? throw new InvalidOperationException("Json response is null");
+        // var x = await SetupTestsE2E.ApiClient.Api.Feedback.PostAsync(null!);
+        var typedResponse =
+            json.Deserialize(HraBotJsonSerializerContext.Default.EntityResponseInt64)
+            ?? throw new InvalidOperationException($"Could not deserialize json: {json}");
+
+        var persistedFeedback =
+            await SetupTestsE2E.ApiClient.Api.Feedback[typedResponse.Id].GetAsync()
+            ?? throw new InvalidOperationException($"Could not find persisted feedback");
+
+        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(1);
+        persistedFeedback.MessageFeedbackItemIds.Should().Contain([1]);
     }
 }

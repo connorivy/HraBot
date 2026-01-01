@@ -13,6 +13,7 @@
     <PackageVersion Include="Amazon.Lambda.Core" Version="2.8.0" />
     <PackageVersion Include="Amazon.Lambda.RuntimeSupport" Version="1.14.1" />
     <PackageVersion Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.4.4" />
+    <PackageVersion Include="AwesomeAssertions" Version="9.3.0" />
     <PackageVersion Include="Google_GenerativeAI.Microsoft" Version="3.4.1" />
     <PackageVersion Include="Microsoft.Agents.AI" Version="$(AgentFrameworkVersion)" />
     <!-- <PackageVersion Include="Microsoft.Agents.AI.DevUI" Version="$(AgentFrameworkVersion)" /> -->

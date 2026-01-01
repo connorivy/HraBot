@@ -8,7 +8,7 @@ public partial class GetFeedback
 {
     [Amazon.Lambda.Annotations.LambdaFunction()]
     [Amazon.Lambda.Annotations.APIGateway.HttpApi(Amazon.Lambda.Annotations.APIGateway.LambdaHttpMethod.Get, "/feedback/{id}")]
-    public async System.Threading.Tasks.Task<Amazon.Lambda.Annotations.APIGateway.IHttpResult> GetFeedbackLambda(int id, Amazon.Lambda.Core.ILambdaContext _)
+    public async System.Threading.Tasks.Task<Amazon.Lambda.Annotations.APIGateway.IHttpResult> GetFeedbackLambda(long id, Amazon.Lambda.Core.ILambdaContext _)
     {
         return (await this.ExecuteAsync(id)).ToWebResult();
     }

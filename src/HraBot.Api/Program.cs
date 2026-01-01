@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using HraBot.Api;
 using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Json;
@@ -16,7 +17,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(o =>
+    o.OpenApiVersion = Microsoft.OpenApi.OpenApiSpecVersion.OpenApi3_1
+);
 
 builder.AddServiceDefaults();
 
@@ -24,6 +27,8 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.PropertyNameCaseInsensitive = true;
     options.SerializerOptions.TypeInfoResolverChain.Insert(0, HraBotJsonSerializerContext.Default);
+    options.SerializerOptions.NumberHandling = JsonNumberHandling.Strict;
+    options.SerializerOptions.RespectNullableAnnotations = true;
 });
 
 builder.AddQdrantClient(AppServices.vectorDb);
@@ -60,7 +65,9 @@ app.UseCors();
 #endif
 
 // Register SSE Chat Endpoint
-app.MapSseChatEndpoint();
+// app.MapSseChatEndpoint();
+app.MapGroup("api").MapEndpoints();
+app.MapGet("/hello/{id:int}", (int id) => id * 2);
 
 #if !GENERATING_OPENAPI
 app.MapOpenAIResponses();

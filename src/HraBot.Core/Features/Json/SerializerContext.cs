@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
+using HraBot.Core.Features.Feedback;
 
 namespace HraBot.Api.Features.Json;
 
@@ -19,6 +20,7 @@ namespace HraBot.Api.Features.Json;
 [JsonSerializable(typeof(System.Net.ServerSentEvents.SseItem<string>))]
 [JsonSerializable(typeof(string[]))]
 [JsonSerializable(typeof(IReadOnlyList<IngestedChunkDto>))]
+[JsonSerializable(typeof(EntityResponse<long>))]
 public partial class HraBotJsonSerializerContext : JsonSerializerContext
 {
     public static JsonSerializerOptions DefaultOptions { get; }

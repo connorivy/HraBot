@@ -3,6 +3,7 @@ using Amazon.Lambda.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.StaticAssets;
 
 namespace HraBot.Core.Common;
 
@@ -12,6 +13,10 @@ public abstract class BaseEndpoint<TRequest, TResponse>
         TRequest req,
         CancellationToken ct = default
     );
+
+#if GENERATING_OPENAPI
+    public TResponse ReturnResponse() => default(TResponse)!;
+#endif
 
     public async Task<Result<TResponse>> ExecuteAsync(
         TRequest request,
@@ -38,5 +43,10 @@ public abstract class BaseEndpoint<TRequest, TResponse>
         }
     }
 
-    public abstract void Configure(IEndpointRouteBuilder builder);
+    // public virtual void Configure(IEndpointRouteBuilder builder) { }
+}
+
+public interface IBaseEndpoint
+{
+    public static abstract void Configure(IEndpointRouteBuilder builder);
 }
