@@ -1,4 +1,5 @@
 using System.Text.Json;
+using GenerativeAI;
 using HraBot.Api.Features.Json;
 using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
@@ -34,14 +35,18 @@ public static partial class HraBot
             .CreateAIAgent(
                 name: AgentNames.HraBot,
                 instructions: @"
-You are an assistant who answers questions about health insurance.
-Do not answer questions about anything else.
-Use only simple markdown to format your responses.
+You are an assistant who answers questions about health insurance, health reimbursement accounts, ICHRA, QSEHRA, and Take Command Health.
 
-Use the SearchAsync tool to find relevant information. 
+IF the user asked you about something unrelated these topics
+    THEN response = {""Question"": {{originalMessage}}, ""Answer"": ""I can only answer questions about health insurance"", ""Citations"": [] }
+    RETURN
+
+// orchestrate searching a vector database for the answer to the question
+TRANSFORM the user's question into a string that will produce a similar embedding as the answer to the user's question
+THEN use the SearchAsync tool to find relevant citations. 
+THEN generate an answer and include up to 3 relevant citation summaries that are the basis of your answer.
 
 You must reply in JSON format as follows:
-
 {
   ""Question"": ""string"",
   ""Answer"": ""string"",
@@ -53,8 +58,7 @@ You must reply in JSON format as follows:
   ]
 }
 
-The quote must be max 10 words, taken word-for-word from the search result, and is the basis for why the citation is relevant.
-Don't refer to the presence of citations; just emit the citations in the JSON response.
+For each citation that you include in the response, the quote must be max 10 words, taken word-for-word from the search result, and should be the basis for why the citation is relevant to the generated answer.
 ",
                 tools:
                 [
@@ -89,20 +93,6 @@ Don't refer to the presence of citations; just emit the citations in the JSON re
             }
         );
         return services;
-    }
-
-    public static IServiceCollection AddDumbHraBot(this IServiceCollection services)
-    {
-        return services.AddKeyedSingleton<AIAgent>(
-            AgentNames.HraBot,
-            new DumbAiAgent<HraBotResponse>(
-                new(
-                    "Dummy original question",
-                    "This is a dummy hra bot anwser",
-                    [new("dummy-filename", "dummy-quote")]
-                )
-            )
-        );
     }
 }
 

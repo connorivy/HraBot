@@ -103,24 +103,6 @@ Don't refer to the presence of citations; just emit these tags right at the end,
         return TypedResults.ServerSentEvents(StreamChat(ct));
     }
 
-    public static IChatClient CreateGithubModelsChatClient(string apiKey)
-    {
-        var credential = new ApiKeyCredential(
-            apiKey
-                ?? throw new InvalidOperationException(
-                    "Missing configuration: GitHubModels:Token. See the README for details."
-                )
-        );
-        var openAIOptions = new OpenAIClientOptions()
-        {
-            Endpoint = new Uri("https://models.inference.ai.azure.com"),
-        };
-
-        var ghModelsClient = new OpenAIClient(credential, openAIOptions);
-        var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
-        return chatClient;
-    }
-
 #pragma warning disable CS8321 // Local function is declared but never used
     private static async IAsyncEnumerable<SseItem<string>> StreamChatDummy(
         [EnumeratorCancellation] CancellationToken cancellationToken

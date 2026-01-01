@@ -67,11 +67,18 @@ public class GetApprovedResponseWorkflow(
         {
             return new(ResponseType.Success, finalResponse.Answer, finalResponse.Citations);
         }
-        return new(
-            ResponseType.Failure,
-            "Unable to find an answer in the company documents",
-            citations ?? []
-        );
+        string response;
+        if (citations?.Count > 0)
+        {
+            response =
+                "I was unable to confidently determine the answer. Here are some documents that may be relevent to your question.";
+        }
+        else
+        {
+            response =
+                "I was unable to find an answer to your question in the Take Command documents";
+        }
+        return new(ResponseType.Failure, response, citations ?? []);
     }
 
     public static Workflow CreateWorkflow(IServiceProvider sp)
