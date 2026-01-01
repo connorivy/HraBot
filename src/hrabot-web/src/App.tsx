@@ -197,7 +197,7 @@ function ChatPane() {
     try {
       await apiClient.api.feedback.post({
         messageId: feedbackMessageId,
-        messageFeedbackItemIds: [1],
+        messageFeedbackItemIds: [1, 2, 3],
         additionalComments: null,
       })
       setPendingFeedback(false)

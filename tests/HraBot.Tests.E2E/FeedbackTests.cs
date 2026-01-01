@@ -81,8 +81,8 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
-        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(1);
-        persistedFeedback.MessageFeedbackItemIds.Should().Contain([1]);
+        persistedFeedback.MessageFeedbackItemIds.Should().HaveCount(3);
+        persistedFeedback.MessageFeedbackItemIds.Should().Contain([1, 2, 3]);
 
         await Expect(chatBox).Not.ToBeDisabledAsync();
     }
