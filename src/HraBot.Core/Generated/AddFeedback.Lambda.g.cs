@@ -10,6 +10,6 @@ public partial class AddFeedback
     [Amazon.Lambda.Annotations.APIGateway.HttpApi(Amazon.Lambda.Annotations.APIGateway.LambdaHttpMethod.Post, "/feedback")]
     public async System.Threading.Tasks.Task<Amazon.Lambda.Annotations.APIGateway.IHttpResult> AddFeedbackLambda([FromBody] HraBot.Core.Features.Feedback.FeedbackContract request, Amazon.Lambda.Core.ILambdaContext _)
     {
-        return (await this.ExecuteAsync(request)).ToWebResult();
+        return (await this.ExecuteAsync(request)).ToLambdaResult();
     }
 }

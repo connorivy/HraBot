@@ -11,6 +11,7 @@
     <Project Path="src/HraBot.Api/HraBot.Api.csproj" />
     <Project Path="src/HraBot.AppHost/HraBot.AppHost.csproj" />
     <Project Path="src/HraBot.Core/HraBot.Core.csproj" />
+    <Project Path="src/HraBot.MigrationService/HraBot.MigrationService.csproj" />
     <Project Path="src/HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
     <Project Path="src/HraBot.Shared/HraBot.Shared.csproj" />
   </Folder>

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <UserSecretsId>dotnet-HraBot.MigrationService-e21c5345-0abb-40a3-90df-d7bc4287ea1f</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HraBot.Core/HraBot.Core.csproj" />
+    <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+  </ItemGroup>
+</Project>

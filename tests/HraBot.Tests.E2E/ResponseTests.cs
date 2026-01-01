@@ -1,10 +1,7 @@
 using System.Text.Json;
 using AwesomeAssertions;
 using HraBot.Api.Features.Json;
-using HraBot.Api.Features.Workflows;
-using HraBot.Core.Features.Feedback;
 using Microsoft.Playwright;
-using UglyToad.PdfPig.Graphics.Colors;
 
 namespace HraBot.Tests.E2E;
 
@@ -13,36 +10,36 @@ public class ResponseTests : PageTestBase
     [Test]
     public async Task WhenUserAsksQuestion_AgentResponseShouldShow()
     {
-        await this.Page.RouteAsync(
-            "**/api/hrabot",
-            async route =>
-            {
-                Console.WriteLine("hrabot api call intercepted");
-                // Force latency so the typing indicator has time to render
-                await Task.Delay(1000);
+        // await this.Page.RouteAsync(
+        //     "**/api/chat",
+        //     async route =>
+        //     {
+        //         Console.WriteLine("hrabot api call intercepted");
+        //         // Force latency so the typing indicator has time to render
+        //         await Task.Delay(1000);
 
-                // var x = await SetupTestsE2E.ApiClient.Api.Hrabot.PostAsync(new());
-                ApprovedResponse approvedResponse = new(
-                    ResponseType.Success,
-                    "This is a dummy response",
-                    [new("filename", "this is a dummy citation")]
-                );
+        //         var x = await SetupTestsE2E.ApiClient.Api.Chat.PostAsync(new());
+        //         ApprovedResponseContract approvedResponse = new(
+        //             ResponseType.Success,
+        //             "This is a dummy response",
+        //             [new("filename", "this is a dummy citation")]
+        //         );
 
-                var bodyJson = JsonSerializer.Serialize(
-                    approvedResponse,
-                    HraBotJsonSerializerContext.Default.ApprovedResponse
-                );
+        //         var bodyJson = JsonSerializer.Serialize(
+        //             approvedResponse,
+        //             HraBotJsonSerializerContext.Default.ApprovedResponse
+        //         );
 
-                await route.FulfillAsync(
-                    new RouteFulfillOptions
-                    {
-                        Status = 200,
-                        ContentType = "application/json",
-                        Body = bodyJson,
-                    }
-                );
-            }
-        );
+        //         await route.FulfillAsync(
+        //             new RouteFulfillOptions
+        //             {
+        //                 Status = 200,
+        //                 ContentType = "application/json",
+        //                 Body = bodyJson,
+        //             }
+        //         );
+        //     }
+        // );
 
         await this.PageContext.Page.GotoAsync(
             "/",
@@ -53,6 +50,7 @@ public class ResponseTests : PageTestBase
             .ToHaveTitleAsync("JackBot", new() { Timeout = 500 });
 
         await SendMessage("hello!");
+        await SendPositiveFeedback();
     }
 
     private async Task SendMessage(string message)

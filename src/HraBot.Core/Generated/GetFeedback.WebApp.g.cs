@@ -9,6 +9,15 @@ public class GetFeedback_ConfigureWebApi : HraBot.Core.Common.IBaseEndpoint
 {
     public static void Configure(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/feedback/{id:long}", async ([FromServices] GetFeedback endpoint, long id) => (await endpoint.ExecuteAsync(id)).Value!);
+        builder.MapGet("/feedback/{id:long}", async ([FromServices] GetFeedback endpoint, long id) =>
+        {
+
+#if GENERATING_OPENAPI
+            return await endpoint.ReturnResponse();
+#else
+            return (await endpoint.ExecuteAsync(id)).ToWebResult();
+#endif
+            
+        });
     }
 }

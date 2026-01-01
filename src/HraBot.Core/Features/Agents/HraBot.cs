@@ -1,7 +1,9 @@
 using System.Text.Json;
 using HraBot.Api.Features.Json;
+using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
 using HraBot.Core;
+using HraBot.Core.Features.Agents;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
@@ -10,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Agents;
 
-public static class HraBot
+public static partial class HraBot
 {
     public static AIAgent Create(
         IChatClient chatClient,
@@ -84,10 +86,23 @@ Don't refer to the presence of citations; just emit the citations in the JSON re
                 var agentLogger = sp.GetRequiredService<AgentLogger>();
                 var semanticSearch = sp.GetRequiredService<SemanticSearch>();
                 return Create(chatClient, semanticSearch, agentLogger);
-                // return Create(chatClient);
             }
         );
         return services;
+    }
+
+    public static IServiceCollection AddDumbHraBot(this IServiceCollection services)
+    {
+        return services.AddKeyedSingleton<AIAgent>(
+            AgentNames.HraBot,
+            new DumbAiAgent<HraBotResponse>(
+                new(
+                    "Dummy original question",
+                    "This is a dummy hra bot anwser",
+                    [new("dummy-filename", "dummy-quote")]
+                )
+            )
+        );
     }
 }
 

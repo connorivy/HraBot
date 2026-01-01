@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../HraBot.MigrationService/HraBot.MigrationService.csproj" />
     <ProjectReference Include="../HraBot.ServiceDefaults/HraBot.ServiceDefaults.csproj" IsAspireProjectResource="false" />
     <ProjectReference Include="..\HraBot.Api\HraBot.Api.csproj" />
   </ItemGroup>

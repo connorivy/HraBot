@@ -1,9 +1,4 @@
-using Amazon.Lambda.Annotations.APIGateway;
-using Amazon.Lambda.Core;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.StaticAssets;
 
 namespace HraBot.Core.Common;
 
@@ -15,7 +10,7 @@ public abstract class BaseEndpoint<TRequest, TResponse>
     );
 
 #if GENERATING_OPENAPI
-    public TResponse ReturnResponse() => default(TResponse)!;
+    public Task<TResponse> ReturnResponse() => Task.FromResult(default(TResponse)!);
 #endif
 
     public async Task<Result<TResponse>> ExecuteAsync(

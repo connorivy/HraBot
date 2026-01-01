@@ -1,16 +1,9 @@
 using System.Text.Json.Serialization;
 using HraBot.Api;
-using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Json;
-using HraBot.Api.Features.Workflows;
-using HraBot.Api.Services;
-using HraBot.Api.Services.Ingestion;
 using HraBot.Core;
 using HraBot.ServiceDefaults;
-using HraBot.Shared;
 using Microsoft.Agents.AI.DevUI;
-using Microsoft.Agents.AI.Hosting;
-using Microsoft.Extensions.AI;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,15 +26,10 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 builder.AddQdrantClient(AppServices.vectorDb);
 builder.Services.RegisterAllServices(
-    // #if !GENERATING_OPENAPI
     Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
         ?? "Endpoint=dummy;Key=dummy",
-    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.postgres}") ?? ""
-// #endif
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.db_hraBot}") ?? ""
 );
-// builder
-//     .AddWorkflow(WorkflowNames.Review, (sp, _) => ReturnApprovedResponse.CreateWorkflow(sp))
-//     .AddAsAIAgent();
 
 #if !GENERATING_OPENAPI
 builder.Services.AddOpenAIResponses();
@@ -64,10 +52,7 @@ var app = builder.Build();
 app.UseCors();
 #endif
 
-// Register SSE Chat Endpoint
-// app.MapSseChatEndpoint();
 app.MapGroup("api").MapEndpoints();
-app.MapGet("/hello/{id:int}", (int id) => id * 2);
 
 #if !GENERATING_OPENAPI
 app.MapOpenAIResponses();
@@ -91,5 +76,14 @@ app.MapDefaultEndpoints();
 // var sp = app.Services.CreateScope().ServiceProvider;
 // var semanticSearch = sp.GetRequiredService<SemanticSearch>();
 // await semanticSearch.LoadDocumentsAsync();
+// if (
+//     Environment.GetEnvironmentVariable(AppOptions.MockChatClient_bool)
+//         is string mockChatClientString
+//     && bool.TryParse(mockChatClientString, out var mockChatClient)
+//     && mockChatClient
+// )
+// {
+//     return services.AddDumbAiServices();
+// }
 
 app.Run();

@@ -138,7 +138,7 @@ public class AwsServerlessEndpointBuilder
             builder.AppendLine($"        {requestConstruction}");
         }
         builder.AppendLine(
-            $"        return (await this.ExecuteAsync({executeArgument})).ToWebResult();"
+            $"        return (await this.ExecuteAsync({executeArgument})).ToLambdaResult();"
         );
         builder.AppendLine("    }");
         builder.AppendLine("}");

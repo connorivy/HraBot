@@ -26,9 +26,9 @@ public class Conversation
         );
     }
 
-    public List<Message>? Messages { get; }
+    public List<Message>? Messages { get; set; }
 
-    public byte[] RowVersion { get; set; } = null!;
+    public DateTimeOffset UpdatedAt { get; private set; }
 }
 
 public class ConversationConfig : IEntityTypeConfiguration<Conversation>
@@ -37,6 +37,10 @@ public class ConversationConfig : IEntityTypeConfiguration<Conversation>
     {
         builder.HasKey(n => n.Id);
         builder.Property(n => n.Id).ValueGeneratedOnAdd();
-        builder.Property(e => e.RowVersion).IsRowVersion();
+        builder
+            .Property(e => e.UpdatedAt)
+            .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+            .IsConcurrencyToken()
+            .ValueGeneratedOnAddOrUpdate();
     }
 }

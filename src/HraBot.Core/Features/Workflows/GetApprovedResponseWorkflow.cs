@@ -6,12 +6,12 @@ using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Workflows;
 
-public class ReturnApprovedResponse(
+public class GetApprovedResponseWorkflow(
     [FromKeyedServices(WorkflowNames.Review)] Workflow reviewWorkflow,
-    ILogger<ReturnApprovedResponse> logger
+    ILogger<GetApprovedResponseWorkflow> logger
 )
 {
-    public async Task<ApprovedResponse> GetApprovedResponse(
+    public virtual async Task<ApprovedResponse> GetApprovedResponse(
         IEnumerable<ChatMessage> messages,
         CancellationToken ct
     )
@@ -101,4 +101,21 @@ public enum ResponseType
     Undefined = 0,
     Success,
     Failure,
+}
+
+internal class GetDummyApprovedResponseWorkflow() : GetApprovedResponseWorkflow(null!, null!)
+{
+    public override Task<ApprovedResponse> GetApprovedResponse(
+        IEnumerable<ChatMessage> messages,
+        CancellationToken ct
+    )
+    {
+        return Task.FromResult(
+            new ApprovedResponse(
+                ResponseType.Success,
+                "This is a dummy response",
+                [new("dummy-filename", "dummy-quote")]
+            )
+        );
+    }
 }

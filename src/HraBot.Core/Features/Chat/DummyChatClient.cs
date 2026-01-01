@@ -2,7 +2,7 @@ using Microsoft.Extensions.AI;
 
 namespace HraBot.Core.Features.Chat;
 
-public class DummyChatClient() : IChatClient
+public class DummyChatClient(IServiceProvider serviceProvider) : IChatClient
 {
     public void Dispose() { }
 
@@ -19,7 +19,7 @@ public class DummyChatClient() : IChatClient
 
     public object? GetService(Type serviceType, object? serviceKey = null)
     {
-        throw new NotImplementedException();
+        return serviceProvider.GetService(serviceType);
     }
 
     public IAsyncEnumerable<ChatResponseUpdate> GetStreamingResponseAsync(

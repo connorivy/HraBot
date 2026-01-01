@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Amazon.Lambda.Annotations.APIGateway;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace HraBot.Core;
 
@@ -99,16 +101,25 @@ public sealed class Result<TValue> : Result
 
     // public static Result<TValue> Success() => new(default(TValue), null, false);
 
-    public IHttpResult ToWebResult()
+    public IResult ToWebResult(CancellationToken _ = default)
+    {
+        if (this.IsSuccess)
+        {
+            return TypedResults.Ok(this.Value);
+        }
+        return MapErrorToResult(this.Error);
+    }
+
+    public IHttpResult ToLambdaResult()
     {
         if (IsSuccess)
         {
             return HttpResults.Ok(Value);
         }
-        return MapErrorToResult(Error);
+        return MapLambdaErrorToResult(Error);
     }
 
-    internal static IHttpResult MapErrorToResult(HraBotError error) =>
+    internal static IHttpResult MapLambdaErrorToResult(HraBotError error) =>
         error.Type switch
         {
             ErrorType.None => throw new NotImplementedException(),
@@ -125,6 +136,62 @@ public sealed class Result<TValue> : Result
             //     type: "https://tools.ietf.org/html/rfc4918#section-11.2",
             //     extensions: error.Metadata
             // ),
+            _ => throw new NotImplementedException(),
+        };
+
+    internal static ProblemHttpResult MapErrorToResult(HraBotError error) =>
+        error.Type switch
+        {
+            ErrorType.None => throw new NotImplementedException(),
+            ErrorType.Failure => TypedResults.Problem(
+                title: "Internal Server Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status500InternalServerError,
+                type: "https://datatracker.ietf.org/doc/html/rfc7231#section-6.6.1",
+                extensions: error.Metadata
+            ),
+            ErrorType.Validation => TypedResults.Problem(
+                title: "Validation Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status400BadRequest,
+                type: "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+                extensions: error.Metadata
+            ),
+            ErrorType.Conflict => TypedResults.Problem(
+                title: "Conflict Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status409Conflict,
+                type: "https://tools.ietf.org/html/rfc7231#section-6.5.8",
+                extensions: error.Metadata
+            ),
+            ErrorType.NotFound => TypedResults.Problem(
+                title: "Not Found Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status404NotFound,
+                type: "https://tools.ietf.org/html/rfc7231#section-6.5.4",
+                extensions: error.Metadata
+            ),
+            ErrorType.Unauthorized => TypedResults.Problem(
+                title: "Unauthorized Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status401Unauthorized,
+                type: "https://tools.ietf.org/html/rfc7231#section-6.5.2",
+                extensions: error.Metadata
+            ),
+            ErrorType.Forbidden => TypedResults.Problem(
+                title: "Forbidden Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status403Forbidden,
+                type: "https://tools.ietf.org/html/rfc7231#section-6.5.3",
+                extensions: error.Metadata
+            ),
+            ErrorType.InvalidOperation => TypedResults.Problem(
+                title: "Invalid Operation Error",
+                detail: error.Description,
+                statusCode: StatusCodes.Status422UnprocessableEntity,
+                type: "https://tools.ietf.org/html/rfc4918#section-11.2",
+                extensions: error.Metadata
+            ),
             _ => throw new NotImplementedException(),
         };
 }

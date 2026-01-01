@@ -27,7 +27,7 @@ public static class SseChatEndpoint
         app.MapPost(
             "/api/hrabot",
             async (
-                [FromServices] ReturnApprovedResponse workflow,
+                [FromServices] GetApprovedResponseWorkflow workflow,
                 [FromBody] ChatRequestDto request,
                 CancellationToken ct
             ) =>

@@ -1,3 +1,4 @@
+using HraBot.ServiceDefaults;
 using Microsoft.Extensions.Configuration;
 
 namespace HraBot.AppHost;
@@ -9,8 +10,19 @@ public static class IResouceBuilderExtensions
     )
         where TResouce : IResourceWithEnvironment
     {
+        ApplyOverridesForService(resource, AppServices.ALL_SERVICES);
+        ApplyOverridesForService(resource, resource.Resource.Name);
+        return resource;
+    }
+
+    private static void ApplyOverridesForService<TResouce>(
+        IResourceBuilder<TResouce> resource,
+        string serviceName
+    )
+        where TResouce : IResourceWithEnvironment
+    {
         var overrides = resource.ApplicationBuilder.Configuration.GetSection(
-            $"TestOverrides:Resources:{resource.Resource.Name}:Environment"
+            $"TestOverrides:Resources:{serviceName}:Environment"
         );
         foreach (var entry in overrides.GetChildren())
         {
@@ -19,6 +31,5 @@ public static class IResouceBuilderExtensions
                 resource.WithEnvironment(entry.Key, entry.Value);
             }
         }
-        return resource;
     }
 }

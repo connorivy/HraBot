@@ -1,11 +1,7 @@
 using System.Diagnostics;
-using Amazon.Lambda.Annotations;
-using Amazon.Lambda.Annotations.APIGateway;
-using Amazon.Lambda.Core;
+using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Workflows;
 using HraBot.Core.Common;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 
@@ -14,10 +10,10 @@ namespace HraBot.Core.Features.Chat;
 [HraBotEndpoint(Http.Post, "/chat")]
 public partial class Chat(
     HraBotDbContext hraBotDbContext,
-    ReturnApprovedResponse returnApprovedResponse
-) : BaseEndpoint<ChatRequest, ApprovedResponse>
+    GetApprovedResponseWorkflow returnApprovedResponse
+) : BaseEndpoint<ChatRequest, ApprovedResponseContract>
 {
-    public override async Task<Result<ApprovedResponse>> ExecuteRequestAsync(
+    public override async Task<Result<ApprovedResponseContract>> ExecuteRequestAsync(
         ChatRequest req,
         CancellationToken ct = default
     )
@@ -44,14 +40,19 @@ public partial class Chat(
         );
         conversation.AddMessage(Role.Ai, approvedResponse.Response);
         await hraBotDbContext.SaveChangesAsync(ct);
-        return approvedResponse;
+        return new ApprovedResponseContract(
+            conversation.Id,
+            approvedResponse.ResponseType,
+            approvedResponse.Response,
+            approvedResponse.Citations
+        );
     }
 
     private async ValueTask<Result<Conversation>> GetOrCreateConversation(long? conversationId)
     {
         if (conversationId is null)
         {
-            var newConversation = new Conversation();
+            var newConversation = new Conversation() { Messages = [] };
             hraBotDbContext.Add(newConversation);
             return newConversation;
         }
@@ -85,6 +86,13 @@ public partial class Chat(
 }
 
 public record ChatRequest(long? ConversationId, string Content);
+
+public record ApprovedResponseContract(
+    long ConversationId,
+    ResponseType ResponseType,
+    string Response,
+    List<Citation> Citations
+);
 
 public static class ChatRoleMapper
 {

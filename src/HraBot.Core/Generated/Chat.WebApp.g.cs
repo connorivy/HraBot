@@ -9,6 +9,15 @@ public class Chat_ConfigureWebApi : HraBot.Core.Common.IBaseEndpoint
 {
     public static void Configure(IEndpointRouteBuilder builder)
     {
-        builder.MapPost("/chat", async ([FromServices] Chat endpoint, [FromBody] HraBot.Core.Features.Chat.ChatRequest request) => (await endpoint.ExecuteAsync(request)).Value!);
+        builder.MapPost("/chat", async ([FromServices] Chat endpoint, [FromBody] HraBot.Core.Features.Chat.ChatRequest request) =>
+        {
+
+#if GENERATING_OPENAPI
+            return await endpoint.ReturnResponse();
+#else
+            return (await endpoint.ExecuteAsync(request)).ToWebResult();
+#endif
+            
+        });
     }
 }

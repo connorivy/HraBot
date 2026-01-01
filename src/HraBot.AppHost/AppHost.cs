@@ -26,8 +26,14 @@ var postgres = builder
 
 var db = postgres.AddDatabase(AppServices.db_hraBot);
 
+var migrationService = builder
+    .AddProject<Projects.HraBot_MigrationService>(AppServices.MIGRATION_SERVICE)
+    .WithReference(db)
+    .WaitFor(db)
+    .ApplyTestEnvironmentOverrides();
+
 var markitdown = builder
-    .AddContainer("markitdown", "mcp/markitdown")
+    .AddContainer(AppServices.MARK_IT_DOWN, "mcp/markitdown")
     .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
     .WithHttpEndpoint(targetPort: 3001, name: "http");
 
@@ -37,6 +43,8 @@ webApi
     .WaitFor(db)
     .WithReference(vectorDb)
     .WaitFor(vectorDb)
+    .WithReference(migrationService)
+    .WaitForCompletion(migrationService)
     .WithUrls(context =>
     {
         foreach (var u in context.Urls)

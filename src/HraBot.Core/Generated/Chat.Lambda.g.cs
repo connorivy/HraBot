@@ -10,6 +10,6 @@ public partial class Chat
     [Amazon.Lambda.Annotations.APIGateway.HttpApi(Amazon.Lambda.Annotations.APIGateway.LambdaHttpMethod.Post, "/chat")]
     public async System.Threading.Tasks.Task<Amazon.Lambda.Annotations.APIGateway.IHttpResult> ChatLambda([FromBody] HraBot.Core.Features.Chat.ChatRequest request, Amazon.Lambda.Core.ILambdaContext _)
     {
-        return (await this.ExecuteAsync(request)).ToWebResult();
+        return (await this.ExecuteAsync(request)).ToLambdaResult();
     }
 }

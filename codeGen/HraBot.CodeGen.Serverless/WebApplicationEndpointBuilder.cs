@@ -137,20 +137,22 @@ public class WebApplicationEndpointBuilder
             ? $"MapMethods(\"{route}\", new[] {{ \"{mapMethod.Verb}\" }}, "
             : $"{mapMethod.MethodName}(\"{route}\", ";
 
-        if (string.IsNullOrWhiteSpace(requestConstruction))
+        builder.AppendLine($"        builder.{mapTarget}async ({signature}) =>");
+        builder.AppendLine("        {");
+        if (!string.IsNullOrWhiteSpace(requestConstruction))
         {
-            builder.AppendLine(
-                $"        builder.{mapTarget}async ({signature}) => (await endpoint.ExecuteAsync({executeArgument})).Value!);"
-            );
-        }
-        else
-        {
-            builder.AppendLine($"        builder.{mapTarget}async ({signature}) =>");
-            builder.AppendLine("        {");
             builder.AppendLine($"            {requestConstruction}");
-            builder.AppendLine($"            return (await endpoint.ExecuteAsync({executeArgument})).Value!;");
-            builder.AppendLine("        });");
         }
+        builder.AppendLine(
+            @$"
+#if GENERATING_OPENAPI
+            return await endpoint.ReturnResponse();
+#else
+            return (await endpoint.ExecuteAsync({executeArgument})).ToWebResult();
+#endif
+            "
+        );
+        builder.AppendLine("        });");
 
         builder.AppendLine("    }");
         builder.AppendLine("}");

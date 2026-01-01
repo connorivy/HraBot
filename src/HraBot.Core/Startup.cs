@@ -10,7 +10,7 @@ public class Startup
     public void ConfigureServices(IServiceCollection services)
     {
         services
-            .RegisterAiServices(
+            .AddAiServices(
                 Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
                     ?? throw new InvalidOperationException("Could not find connection for vectorDb")
             )

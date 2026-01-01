@@ -34,9 +34,25 @@ public class SetupTestsE2E
             await DistributedApplicationTestingBuilder.CreateAsync<Projects.HraBot_AppHost>(
                 [
                     $"TestOverrides:Resources:{AppServices.API}:Environment:{AppOptions.MockChatClient_bool}=true",
+                    $"TestOverrides:Resources:{AppServices.MIGRATION_SERVICE}:Environment:{AppOptions.ENV_NAME_IsEphemeralDb}=true",
                 ],
                 (options, settings) => { }
             );
+
+        if (!System.Diagnostics.Debugger.IsAttached)
+        {
+            var pgadminResource = hostBuilder.Resources.First(r => r.Name == AppServices.PG_ADMIN);
+            hostBuilder.Resources.Remove(pgadminResource);
+            var markitdown = hostBuilder.Resources.First(r => r.Name == AppServices.MARK_IT_DOWN);
+            hostBuilder.Resources.Remove(markitdown);
+        }
+        // make postgres container ephemeral
+        var postgres = hostBuilder.Resources.First(r => r.Name == AppServices.postgres);
+        var lifetime = postgres.Annotations.OfType<ContainerLifetimeAnnotation>().FirstOrDefault();
+        if (lifetime is not null)
+        {
+            postgres.Annotations.Remove(lifetime);
+        }
 
         var app = await hostBuilder.BuildAsync().WaitAsync(CancellationToken.None);
         await app.StartAsync(CancellationToken.None);

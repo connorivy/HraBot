@@ -88,6 +88,7 @@ function ChatPane() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [conversationId, setConversationId] = useState<number | null>(null)
   const streamRef = useRef<HTMLDivElement | null>(null)
   const apiClient = useApiClient()
 
@@ -114,12 +115,13 @@ function ChatPane() {
     setIsTyping(true)
 
     try {
-      const response = await apiClient.api.hrabot.post({
-        messages: nextMessages.map((message) => ({
-          role: message.role === 'user' ? 2 : 1,
-          text: message.text,
-        })),
+      const response = await apiClient.api.chat.post({
+        content: trimmed,
+        conversationId: conversationId ?? undefined,
       })
+      if (response?.conversationId != null) {
+        setConversationId(response.conversationId)
+      }
       const responseText =
         response?.response?.trim() ??
         'Sorry, I could not find a response right now.'

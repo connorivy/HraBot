@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HraBot.Api.Features.Json;
 using HraBot.Core;
+using HraBot.Core.Features.Agents;
 using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
@@ -61,6 +62,14 @@ Where:
             }
         );
         return services;
+    }
+
+    public static IServiceCollection AddDumbCitationValidationBot(this IServiceCollection services)
+    {
+        return services.AddKeyedSingleton<AIAgent>(
+            AgentNames.CitationValidator,
+            new DumbAiAgent<CitationValidationResponse>(new(true, []))
+        );
     }
 }
 

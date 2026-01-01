@@ -5,7 +5,6 @@ using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
 using HraBot.Api.Services.Ingestion;
 using HraBot.Core.Common;
-using HraBot.Core.Features.Chat;
 using HraBot.ServiceDefaults;
 using HraBot.Shared;
 using Microsoft.Agents.AI;
@@ -29,11 +28,19 @@ public static partial class Di_Core
     )
     {
         return services
-            .RegisterAiServices(qdrantConnectionString)
+            .AddEndpoints()
+            .AddAiServices(qdrantConnectionString)
             .AddInfrastructure(postgresConnectionString);
     }
 
-    public static IServiceCollection RegisterAiServices(
+    [GenerateServiceRegistrations(
+        AssignableTo = typeof(BaseEndpoint<,>),
+        Lifetime = ServiceLifetime.Scoped,
+        AsSelf = true
+    )]
+    public static partial IServiceCollection AddEndpoints(this IServiceCollection services);
+
+    public static IServiceCollection AddAiServices(
         this IServiceCollection services,
         string qdrantConnectionString
     )
@@ -45,21 +52,24 @@ public static partial class Di_Core
             && mockChatClient
         )
         {
-            services.AddSingleton<IChatClient, DummyChatClient>();
+            return services.AddDumbAiServices();
         }
-        else
-        {
-            services
-                .AddChatClient(sp =>
-                    sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient()
-                )
-                .UseFunctionInvocation()
-                .UseOpenTelemetry(
+        return services.AddRealAiServices(qdrantConnectionString);
+    }
+
+    public static IServiceCollection AddRealAiServices(
+        this IServiceCollection services,
+        string qdrantConnectionString
+    )
+    {
+        services
+            .AddChatClient(sp => sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient())
+            .UseFunctionInvocation()
+            .UseOpenTelemetry(
 #if DEBUG
-                    configure: c => c.EnableSensitiveData = true
+                configure: c => c.EnableSensitiveData = true
 #endif
-                );
-        }
+            );
 
         services.AddEmbeddingGenerator(sp =>
             sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()
@@ -105,19 +115,27 @@ public static partial class Di_Core
         );
         services.AddHraBotAgent();
         services.AddCitationValidationBot();
-        services.AddSearchAgent();
-        services.AddWorkflowAsAgent(
-            WorkflowNames.Review,
-            (sp, _) => ReturnApprovedResponse.CreateWorkflow(sp)
-        );
-        services.AddTransient<ReturnApprovedResponse>();
-        services.AddTransient<SearchBotExecutor>();
-        services.AddSingleton<HraBotExecutor>();
-        services.AddSingleton<CitationValidatorExecutor>();
+        // services.AddSearchAgent();
         services.AddSingleton<AiServiceProvider>();
         services.AddSingleton<AiConfigInfoProvider>();
+        services.AddWorkflowAsAgent(
+            WorkflowNames.Review,
+            (sp, _) => GetApprovedResponseWorkflow.CreateWorkflow(sp)
+        );
+        services.AddTransient<GetApprovedResponseWorkflow>();
+        services.AddSingleton<HraBotExecutor>();
+        services.AddSingleton<CitationValidatorExecutor>();
+        // services.AddTransient<SearchBotExecutor>();
         services.AddSingleton<AgentLogger>();
         return services;
+    }
+
+    public static IServiceCollection AddDumbAiServices(this IServiceCollection services)
+    {
+        return services.AddSingleton<
+            GetApprovedResponseWorkflow,
+            GetDummyApprovedResponseWorkflow
+        >();
     }
 
     static string GetProjectRoot()
