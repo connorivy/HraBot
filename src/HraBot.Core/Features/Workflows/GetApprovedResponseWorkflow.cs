@@ -84,13 +84,14 @@ public class GetApprovedResponseWorkflow(
     public static Workflow CreateWorkflow(IServiceProvider sp)
     {
         var startExecutor = new StartExecutor();
-        // var searchBotExecutor = sp.GetRequiredService<SearchBotExecutor>();
+        var queryRewriteExecutor = sp.GetRequiredService<QueryRewriteExecutor>();
+        var multiQuerySearchExecutor = sp.GetRequiredService<MultiQuerySearchExecutor>();
         var hraBotExecutor = sp.GetRequiredService<HraBotExecutor>();
         var citationValidatorExecutor = sp.GetRequiredService<CitationValidatorExecutor>();
         var workflowBuilder = new WorkflowBuilder(startExecutor)
-            // .AddEdge(startExecutor, searchBotExecutor)
-            // .AddEdge(searchBotExecutor, hraBotExecutor)
-            .AddEdge(startExecutor, hraBotExecutor)
+            .AddEdge(startExecutor, queryRewriteExecutor)
+            .AddEdge(queryRewriteExecutor, multiQuerySearchExecutor)
+            .AddEdge(multiQuerySearchExecutor, hraBotExecutor)
             .AddEdge(hraBotExecutor, citationValidatorExecutor);
         workflowBuilder.WithName(WorkflowNames.Review);
         return workflowBuilder.Build();

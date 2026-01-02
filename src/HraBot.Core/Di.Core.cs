@@ -113,6 +113,7 @@ public static partial class Di_Core
             "ingestion_directory",
             new DirectoryInfo(Path.Combine(GetProjectRoot(), "Data"))
         );
+        services.AddQueryRewriteAgent();
         services.AddHraBotAgent();
         services.AddCitationValidationBot();
         // services.AddSearchAgent();
@@ -123,8 +124,10 @@ public static partial class Di_Core
             (sp, _) => GetApprovedResponseWorkflow.CreateWorkflow(sp)
         );
         services.AddTransient<GetApprovedResponseWorkflow>();
+        services.AddSingleton<QueryRewriteExecutor>();
         services.AddSingleton<HraBotExecutor>();
         services.AddSingleton<CitationValidatorExecutor>();
+        services.AddSingleton<MultiQuerySearchExecutor>();
         // services.AddTransient<SearchBotExecutor>();
         services.AddSingleton<AgentLogger>();
         return services;

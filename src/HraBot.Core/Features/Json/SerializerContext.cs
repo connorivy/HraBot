@@ -16,6 +16,7 @@ namespace HraBot.Api.Features.Json;
 [JsonSerializable(typeof(HraBotResponse))]
 [JsonSerializable(typeof(List<Citation>))]
 [JsonSerializable(typeof(CitationValidationResponse))]
+[JsonSerializable(typeof(QueryRewriteResponse))]
 [JsonSerializable(typeof(ChatRequestDto))]
 [JsonSerializable(typeof(ApprovedResponse))]
 [JsonSerializable(typeof(ApprovedResponseContract))]
