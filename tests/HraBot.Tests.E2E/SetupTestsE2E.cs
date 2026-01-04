@@ -10,6 +10,7 @@ namespace HraBot.Tests.E2E;
 
 public class SetupTestsE2E
 {
+    private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
     public static DistributedApplication AppHost
     {
         get => field ?? throw new InvalidOperationException("Apphost has not been set");
@@ -54,8 +55,8 @@ public class SetupTestsE2E
             postgres.Annotations.Remove(lifetime);
         }
 
-        var app = await hostBuilder.BuildAsync().WaitAsync(CancellationToken.None);
-        await app.StartAsync(CancellationToken.None);
+        var app = await hostBuilder.BuildAsync().WaitAsync(DefaultTimeout, CancellationToken.None);
+        await app.StartAsync(CancellationToken.None).WaitAsync(DefaultTimeout);
         return app;
     }
 

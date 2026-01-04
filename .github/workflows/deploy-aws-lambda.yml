@@ -31,8 +31,16 @@ jobs:
       - name: Install Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
 
+      - name: Generate api clients
+        run: |
+          chmod +x scripts/client-gen.sh
+          ./scripts/client-gen.sh
+
       - name: Restore and Build
         run: dotnet build -c Release
+
+      - name: Install playwright deps
+        run: npx playwright install --with-deps --only-shell chromium
 
       - name: Test
         run: dotnet test -c Release --no-build
