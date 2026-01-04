@@ -32,10 +32,10 @@ var migrationService = builder
     .WaitFor(db)
     .ApplyTestEnvironmentOverrides();
 
-var markitdown = builder
-    .AddContainer(AppServices.MARK_IT_DOWN, "mcp/markitdown")
-    .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
-    .WithHttpEndpoint(targetPort: 3001, name: "http");
+// var markitdown = builder
+//     .AddContainer(AppServices.MARK_IT_DOWN, "mcp/markitdown")
+//     .WithArgs("--http", "--host", "0.0.0.0", "--port", "3001")
+//     .WithHttpEndpoint(targetPort: 3001, name: "http");
 
 var webApi = builder.AddProject<Projects.HraBot_Api>(AppServices.API);
 webApi
@@ -70,7 +70,7 @@ webApi
             }
         );
     })
-    .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"))
+    // .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"))
     .ApplyTestEnvironmentOverrides();
 
 var frontend = builder
