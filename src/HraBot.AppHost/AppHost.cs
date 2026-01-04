@@ -42,7 +42,7 @@ webApi
     .WithReference(db)
     .WaitFor(db)
     .WithReference(vectorDb)
-    .WaitFor(vectorDb)
+    // .WaitFor(vectorDb)
     .WithReference(migrationService)
     .WaitForCompletion(migrationService)
     .WithUrls(context =>

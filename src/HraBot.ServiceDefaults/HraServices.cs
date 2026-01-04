@@ -41,3 +41,14 @@ public static class AppOptions
         && bool.TryParse(mockChatClientString, out var mockChatClient)
         && mockChatClient;
 }
+
+public static class AppEnv
+{
+    public static bool IsCiEnv()
+    {
+        return bool.TryParse(
+                Environment.GetEnvironmentVariable("ContinuousIntegrationEnv"),
+                out bool isCiEnv
+            ) && isCiEnv;
+    }
+}

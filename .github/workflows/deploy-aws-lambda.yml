@@ -12,6 +12,8 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      ContinuousIntegrationEnv: true
 
     steps:
       - name: Checkout
