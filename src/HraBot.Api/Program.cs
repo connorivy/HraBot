@@ -24,7 +24,6 @@ builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.RespectNullableAnnotations = true;
 });
 
-builder.AddQdrantClient(AppServices.vectorDb);
 builder.Services.RegisterAllServices(
     Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
         ?? "Endpoint=dummy;Key=dummy",
