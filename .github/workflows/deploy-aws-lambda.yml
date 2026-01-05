@@ -19,6 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ContinuousIntegrationEnv: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy_pages.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -66,6 +69,8 @@ jobs:
 
       - name: Build frontend
         working-directory: src/hrabot-web
+        env:
+          VITE_API_ENDPOINT: https://glxyrc58i4.execute-api.us-east-2.amazonaws.com/
         run: npm run build
 
       - name: Upload Pages artifact

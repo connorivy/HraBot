@@ -5,10 +5,18 @@ import { createHraBotApiClient, type HraBotApiClient } from "../hraBotApiClient/
 
 export const ApiClientContext = createContext<HraBotApiClient | undefined>(undefined);
 
+function getApiBaseUrl() {
+    const apiBaseUrl = (import.meta.env.VITE_API_ENDPOINT as string | undefined)?.trim();
+    if (!apiBaseUrl) {
+        throw new Error("VITE_API_ENDPOINT is not configured");
+    }
+    return apiBaseUrl;
+}
+
 export function ApiClientProvider({ children }: { children: ReactNode }) {
     const authProvider = new AnonymousAuthenticationProvider();
     const adapter = new FetchRequestAdapter(authProvider);
-    adapter.baseUrl = import.meta.env.VITE_API_ENDPOINT as string;
+    adapter.baseUrl = getApiBaseUrl();
     const apiClient = createHraBotApiClient(adapter);
     return (
         <ApiClientContext.Provider value={apiClient}>

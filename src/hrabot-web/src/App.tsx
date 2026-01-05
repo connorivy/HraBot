@@ -5,6 +5,7 @@ import {
   Container,
   CssBaseline,
   Divider,
+  Button,
   IconButton,
   Paper,
   Stack,
@@ -18,6 +19,7 @@ import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded'
 import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded'
+import EditRoundedIcon from '@mui/icons-material/EditRounded'
 import { ApiClientProvider, useApiClient } from './features/ApiClientProvider'
 type ChatRole = 'user' | 'ai'
 
@@ -51,6 +53,7 @@ const importanceOptions = [
 ]
 
 const FEEDBACK_BUTTON_SIZE = 42
+const USER_MESSAGE_LIMIT = 5
 
 const theme = createTheme({
   palette: {
@@ -130,6 +133,8 @@ function ChatPane() {
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
   const [ratingSelection, setRatingSelection] = useState<number | null>(null)
   const [importanceSelection, setImportanceSelection] = useState('')
+  const [userMessageCount, setUserMessageCount] = useState(0)
+  const [limitReached, setLimitReached] = useState(false)
   const streamRef = useRef<HTMLDivElement | null>(null)
   const feedbackQueueRef = useRef<{ rating: number; importance: number } | null>(null)
   const apiClient = useApiClient()
@@ -152,7 +157,10 @@ function ChatPane() {
 
   const handleSend = async () => {
     const trimmed = inputValue.trim()
-    if (!trimmed || pendingFeedback) return
+    if (!trimmed || pendingFeedback || limitReached) return
+
+    const nextUserMessageCount = userMessageCount + 1
+    setUserMessageCount(nextUserMessageCount)
 
     const timestamp = Date.now()
     const userMessage: ChatMessage = {
@@ -185,7 +193,21 @@ function ChatPane() {
         timestamp: Date.now(),
         citations: response?.citations ?? undefined,
       }
-      setMessages((prev) => [...prev, aiMessage])
+      setMessages((prev) => {
+        const updated = [...prev, aiMessage]
+        if (nextUserMessageCount >= USER_MESSAGE_LIMIT) {
+          updated.push({
+            id: Date.now() + 1,
+            role: 'ai',
+            text: 'You have reached the message limit for this chat. Please start a new conversation.',
+            timestamp: Date.now(),
+          })
+        }
+        return updated
+      })
+      if (nextUserMessageCount >= USER_MESSAGE_LIMIT) {
+        setLimitReached(true)
+      }
       if (response?.messageId) {
         setFeedbackMessageId(response.messageId)
         setFeedbackUiMessageId(aiMessage.id)
@@ -202,7 +224,21 @@ function ChatPane() {
         text: 'Sorry, I ran into an issue contacting the HraBot service.',
         timestamp: Date.now(),
       }
-      setMessages((prev) => [...prev, aiMessage])
+      setMessages((prev) => {
+        const updated = [...prev, aiMessage]
+        if (nextUserMessageCount >= USER_MESSAGE_LIMIT) {
+          updated.push({
+            id: Date.now() + 1,
+            role: 'ai',
+            text: 'You have reached the message limit for this chat. Please start a new conversation.',
+            timestamp: Date.now(),
+          })
+        }
+        return updated
+      })
+      if (nextUserMessageCount >= USER_MESSAGE_LIMIT) {
+        setLimitReached(true)
+      }
     } finally {
       setIsTyping(false)
     }
@@ -250,6 +286,22 @@ function ChatPane() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     void handleSend()
+  }
+
+  const handleNewChat = () => {
+    setMessages([])
+    setInputValue('')
+    setConversationId(null)
+    setPendingFeedback(false)
+    setFeedbackMessageId(null)
+    setFeedbackUiMessageId(null)
+    setFeedbackSubmitting(false)
+    setRatingSelection(null)
+    setImportanceSelection('')
+    setIsTyping(false)
+    setUserMessageCount(0)
+    setLimitReached(false)
+    feedbackQueueRef.current = null
   }
 
   return (
@@ -322,7 +374,7 @@ function ChatPane() {
                           }
                       }
                     >
-                      {message.role === 'user' ? 'You' : 'HR'}
+                      {message.role === 'user' ? 'You' : 'HB'}
                     </Avatar>
                     <Box
                       className="flex max-w-[70%] flex-col gap-1.5 px-4 py-3"
@@ -518,12 +570,33 @@ function ChatPane() {
                 </Stack>
               )}
             </Box>
+            <Box
+              className="flex items-center justify-center"
+              sx={{ px: { xs: 2, sm: 3 }, pb: 1.5 }}
+            >
+              <Tooltip
+                title="Rate the last response to continue."
+                disableHoverListener={!pendingFeedback}
+              >
+                <span>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    startIcon={<EditRoundedIcon />}
+                    onClick={handleNewChat}
+                    disabled={pendingFeedback && !limitReached}
+                  >
+                    New chat
+                  </Button>
+                </span>
+              </Tooltip>
+            </Box>
             <Divider />
             <Box
               component="form"
               onSubmit={handleSubmit}
               className="flex items-center gap-2.5"
-              sx={{ px: { xs: 2, sm: 3 }, pb: 2.5, pt: 2 }}
+              sx={{ px: { xs: 2, sm: 3 }, pb: 2.5, pt: 1 }}
             >
               <Tooltip
                 title="Rate the last response to continue."
@@ -538,7 +611,7 @@ function ChatPane() {
                     size="small"
                     variant="outlined"
                     color="primary"
-                    disabled={pendingFeedback}
+                    disabled={pendingFeedback || limitReached}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter' && !event.shiftKey) {
                         event.preventDefault()
@@ -551,6 +624,7 @@ function ChatPane() {
               </Tooltip>
               <IconButton
                 type="submit"
+                aria-label="Send message"
                 color="primary"
                 sx={(muiTheme) => ({
                   bgcolor: muiTheme.palette.primary.main,
@@ -564,7 +638,7 @@ function ChatPane() {
                     boxShadow: 'none',
                   },
                 })}
-                disabled={pendingFeedback || !inputValue.trim()}
+                disabled={pendingFeedback || limitReached || !inputValue.trim()}
               >
                 <SendRoundedIcon />
               </IconButton>

@@ -49,7 +49,7 @@ public class UiTests : PageTestBase
             new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle }
         );
 
-        var sendButton = this.Page.GetByRole(AriaRole.Button);
+        var sendButton = this.Page.GetByRole(AriaRole.Button, new() { Name = "Send message" });
         await Expect(sendButton).ToHaveCountAsync(1);
         await Expect(sendButton).ToBeVisibleAsync();
         // send button should be disabled until the user adds input
@@ -68,5 +68,40 @@ public class UiTests : PageTestBase
         await Expect(typingBubbles).ToBeVisibleAsync();
 
         await Expect(typingBubbles).ToBeHiddenAsync(new() { Timeout = 3000 });
+    }
+
+    [Test]
+    public async Task AfterFiveMessages_ShouldShowLimitNoticeAndDisableInput()
+    {
+        await this.PageContext.Page.GotoAsync(
+            "/",
+            new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle }
+        );
+
+        var sendButton = this.Page.GetByRole(AriaRole.Button, new() { Name = "Send message" });
+        var chatBox = this.Page.GetByRole(AriaRole.Textbox);
+
+        for (var i = 0; i < 5; i++)
+        {
+            await FeedbackTests.SendMessage(this.Page, $"hello {i + 1}");
+
+            // Provide feedback to re-enable the input for the next message (except the final send)
+            if (i < 4)
+            {
+                await FeedbackTests.SendFeedback(this.Page, 5, 5);
+                await Expect(chatBox).Not.ToBeDisabledAsync(new() { Timeout = 2000 });
+            }
+        }
+
+        var limitNotice = this.Page.GetByText(
+            "You have reached the message limit for this chat. Please start a new conversation."
+        );
+
+        await Expect(limitNotice).ToBeVisibleAsync();
+        await Expect(chatBox).ToBeDisabledAsync();
+        await Expect(sendButton).ToBeDisabledAsync();
+
+        var newChatButton = this.Page.GetByRole(AriaRole.Button, new() { Name = "New chat" });
+        await Expect(newChatButton).Not.ToBeDisabledAsync();
     }
 }
