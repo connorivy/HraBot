@@ -15,8 +15,8 @@ import {
   createTheme,
 } from '@mui/material'
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
-import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined'
-import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
+import StarBorderRoundedIcon from '@mui/icons-material/StarBorderRounded'
+import StarRoundedIcon from '@mui/icons-material/StarRounded'
 import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded'
 import { ApiClientProvider, useApiClient } from './features/ApiClientProvider'
 type ChatRole = 'user' | 'ai'
@@ -33,6 +33,24 @@ type ChatMessage = {
   timestamp: number
   citations?: Citation[]
 }
+
+const ratingOptions = [
+  { value: 1, label: 'Very poor' },
+  { value: 2, label: 'Poor' },
+  { value: 3, label: 'Okay' },
+  { value: 4, label: 'Good' },
+  { value: 5, label: 'Excellent' },
+]
+
+const importanceOptions = [
+  { value: 1, label: '1' },
+  { value: 2, label: '2' },
+  { value: 3, label: '3' },
+  { value: 4, label: '4' },
+  { value: 5, label: '5' },
+]
+
+const FEEDBACK_BUTTON_SIZE = 42
 
 const theme = createTheme({
   palette: {
@@ -110,10 +128,10 @@ function ChatPane() {
   const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(null)
   const [feedbackUiMessageId, setFeedbackUiMessageId] = useState<number | null>(null)
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
-  const [thumbSelection, setThumbSelection] = useState<'up' | 'down' | ''>('')
+  const [ratingSelection, setRatingSelection] = useState<number | null>(null)
   const [importanceSelection, setImportanceSelection] = useState('')
   const streamRef = useRef<HTMLDivElement | null>(null)
-  const feedbackQueueRef = useRef<{ thumb: 'up' | 'down'; importance: number } | null>(null)
+  const feedbackQueueRef = useRef<{ rating: number; importance: number } | null>(null)
   const apiClient = useApiClient()
 
   useEffect(() => {
@@ -173,7 +191,7 @@ function ChatPane() {
         setFeedbackUiMessageId(aiMessage.id)
         setPendingFeedback(true)
         feedbackQueueRef.current = null
-        setThumbSelection('')
+        setRatingSelection(null)
         setImportanceSelection('')
       }
     } catch (error) {
@@ -199,16 +217,12 @@ function ChatPane() {
     try {
       await apiClient.feedback.put({
         messageId: feedbackMessageId,
-        isPositive: payload.thumb === 'up',
+        rating: payload.rating,
         importanceToTakeCommand: payload.importance,
       })
       const hasQueuedUpdate = feedbackQueueRef.current !== null
       if (!hasQueuedUpdate) {
         setPendingFeedback(false)
-        setFeedbackUiMessageId(null)
-        setFeedbackMessageId(null)
-        setThumbSelection('')
-        setImportanceSelection('')
       }
     } catch (error) {
       console.error('Failed to submit feedback.', error)
@@ -220,11 +234,14 @@ function ChatPane() {
     }
   }
 
-  const queueFeedbackSubmission = (thumbValue: 'up' | 'down' | '', importanceValue: string) => {
-    if (!pendingFeedback || feedbackMessageId == null) return
+  const queueFeedbackSubmission = (ratingValue: number | null, importanceValue: string) => {
+    if (feedbackMessageId == null) return
     const parsedImportance = Number.parseInt(importanceValue, 10)
-    if (!thumbValue || !Number.isFinite(parsedImportance)) return
-    feedbackQueueRef.current = { thumb: thumbValue, importance: parsedImportance }
+    const isValidRating = ratingValue != null && ratingValue >= 1 && ratingValue <= 5
+    const isValidImportance =
+      Number.isFinite(parsedImportance) && parsedImportance >= 1 && parsedImportance <= 5
+    if (!isValidRating || !isValidImportance || ratingValue == null) return
+    feedbackQueueRef.current = { rating: ratingValue, importance: parsedImportance }
     if (!feedbackSubmitting) {
       void processQueuedFeedback()
     }
@@ -234,9 +251,6 @@ function ChatPane() {
     event.preventDefault()
     void handleSend()
   }
-
-  const feedbackNeedsInput =
-    pendingFeedback && (thumbSelection === '' || importanceSelection === '')
 
   return (
     <>
@@ -331,18 +345,13 @@ function ChatPane() {
                       {message.role === 'ai' && message.citations?.length ? (
                         <CitationList citations={message.citations} />
                       ) : null}
-                      {pendingFeedback &&
-                        message.role === 'ai' &&
-                        feedbackUiMessageId === message.id ? (
+                      {message.role === 'ai' && feedbackUiMessageId === message.id ? (
                         <Box
                           className="mt-3 flex flex-col gap-2.5"
                           sx={{
                             borderRadius: 3,
                             border: 1,
-                            // borderColor: feedbackNeedsInput ? '#e0a200' : 'primary.main',
                             borderColor: 'primary.main',
-                            // bgcolor: feedbackNeedsInput ? '#fff7d6' : 'rgba(24, 138, 104, 0.06)',
-                            // bgcolor: 'rgba(24, 138, 104, 0.06)',
                             px: { xs: 2, sm: 2.5 },
                             py: { xs: 1.75, sm: 2.25 },
                             boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4)',
@@ -353,59 +362,122 @@ function ChatPane() {
                               Rate this response
                             </Typography>
                           </Box>
-                          <Stack
-                            direction={{ xs: 'column', sm: 'row' }}
-                            spacing={2}
-                            alignItems={{ xs: 'stretch', sm: 'center' }}
-                          >
-                            <Box className="flex items-center gap-1.5">
-                              <IconButton
-                                color={thumbSelection === 'up' ? 'primary' : 'default'}
-                                aria-label="Thumbs up"
-                                aria-pressed={thumbSelection === 'up'}
-                                onClick={() => {
-                                  setThumbSelection('up')
-                                  queueFeedbackSubmission('up', importanceSelection)
-                                }}
-                              >
-                                <ThumbUpAltOutlinedIcon />
-                              </IconButton>
-                              <IconButton
-                                color={thumbSelection === 'down' ? 'secondary' : 'default'}
-                                aria-label="Thumbs down"
-                                aria-pressed={thumbSelection === 'down'}
-                                onClick={() => {
-                                  setThumbSelection('down')
-                                  queueFeedbackSubmission('down', importanceSelection)
-                                }}
-                              >
-                                <ThumbDownAltOutlinedIcon />
-                              </IconButton>
+                          <Stack spacing={2.25}>
+                            <Box className="flex flex-col gap-1.5">
+                              <Typography variant="body2" color="text.secondary">
+                                Give an overall rating based on information accuracy and citation quality.
+                              </Typography>
+                              <Box className="flex items-center gap-2">
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ minWidth: 96, textAlign: 'right' }}
+                                >
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: `repeat(5, ${FEEDBACK_BUTTON_SIZE}px)`,
+                                    gap: 1,
+                                    justifyItems: 'center',
+                                  }}
+                                  role="group"
+                                  aria-label="Response rating"
+                                >
+                                  {ratingOptions.map(({ value, label }) => {
+                                    const isFilled = ratingSelection != null && value <= ratingSelection
+                                    const isSelected = ratingSelection === value
+                                    return (
+                                      <IconButton
+                                        key={value}
+                                        color={isFilled ? 'warning' : 'default'}
+                                        aria-label={label}
+                                        aria-pressed={isSelected}
+                                        onClick={() => {
+                                          setRatingSelection(value)
+                                          queueFeedbackSubmission(value, importanceSelection)
+                                        }}
+                                        size="small"
+                                        sx={{
+                                          bgcolor: isSelected ? 'rgba(255, 213, 79, 0.2)' : undefined,
+                                          borderRadius: 2,
+                                          width: FEEDBACK_BUTTON_SIZE,
+                                          height: FEEDBACK_BUTTON_SIZE,
+                                        }}
+                                      >
+                                        {isFilled ? <StarRoundedIcon /> : <StarBorderRoundedIcon />}
+                                      </IconButton>
+                                    )
+                                  })}
+                                </Box>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ minWidth: 96 }}
+                                >
+                                  {/* Excellent */}
+                                </Typography>
+                              </Box>
                             </Box>
-                            <TextField
-                              select
-                              label="Importance"
-                              value={importanceSelection}
-                              onChange={(event) => {
-                                setImportanceSelection(event.target.value)
-                                queueFeedbackSubmission(thumbSelection, event.target.value)
-                              }}
-                              SelectProps={{ native: true, displayEmpty: true }}
-                              InputLabelProps={{ shrink: true }}
-                              fullWidth
-                              helperText="How critical is it to get this answer right?"
-                              size="small"
-                              aria-label="Importance"
-                            >
-                              <option value="" disabled>
-                                Select importance
-                              </option>
-                              {[1, 2, 3, 4, 5].map((value) => (
-                                <option key={value} value={value}>
-                                  {value} - {value === 1 ? 'Least' : value === 5 ? 'Most' : 'Moderate'} importance
-                                </option>
-                              ))}
-                            </TextField>
+                            <Box className="flex flex-col gap-1.5">
+                              <Typography variant="body2" color="text.secondary">
+                                How important is providing an accurate answer to this question?
+                              </Typography>
+                              <Box className="flex flex-wrap items-center gap-2">
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ minWidth: 96, textAlign: 'right' }}
+                                >
+                                  Not important
+                                </Typography>
+                                <Box
+                                  className="flex items-center"
+                                  role="group"
+                                  aria-label="Response importance"
+                                  sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: `repeat(5, ${FEEDBACK_BUTTON_SIZE}px)`,
+                                    gap: 1,
+                                    justifyItems: 'center',
+                                  }}
+                                >
+                                  {importanceOptions.map(({ value, label }) => {
+                                    const isSelected = Number(importanceSelection) === value
+                                    return (
+                                      <IconButton
+                                        key={value}
+                                        aria-label={`Importance ${value}`}
+                                        aria-pressed={isSelected}
+                                        color={isSelected ? 'primary' : 'default'}
+                                        onClick={() => {
+                                          setImportanceSelection(String(value))
+                                          queueFeedbackSubmission(ratingSelection, String(value))
+                                        }}
+                                        size="small"
+                                        sx={{
+                                          borderRadius: 2,
+                                          border: 1,
+                                          borderColor: isSelected ? 'primary.main' : 'divider',
+                                          bgcolor: isSelected ? 'rgba(24,138,104,0.12)' : undefined,
+                                          width: FEEDBACK_BUTTON_SIZE,
+                                          height: FEEDBACK_BUTTON_SIZE,
+                                        }}
+                                      >
+                                        {label}
+                                      </IconButton>
+                                    )
+                                  })}
+                                </Box>
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{ minWidth: 96 }}
+                                >
+                                  Extremely important
+                                </Typography>
+                              </Box>
+                            </Box>
                           </Stack>
                         </Box>
                       ) : null}

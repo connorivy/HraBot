@@ -22,7 +22,7 @@ public class GetApprovedResponseWorkflow(
             cancellationToken: ct
         );
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
-        HraBotResponse? finalResponse = null;
+        HraBotResponseWithRawJson? finalResponse = null;
         List<CitationValidationResponse> citationValidations = [];
         List<Citation>? citations = null;
 
@@ -40,7 +40,7 @@ public class GetApprovedResponseWorkflow(
                     $"Executor {failedEvt.ExecutorId} failed with error {failedEvt.Data}"
                 );
             }
-            if (evt.Data is HraBotResponse hraBotResponse)
+            if (evt.Data is HraBotResponseWithRawJson hraBotResponse)
             {
                 finalResponse = hraBotResponse;
             }
@@ -65,7 +65,12 @@ public class GetApprovedResponseWorkflow(
 
         if (citationValidations.All(cv => cv.IsValid))
         {
-            return new(ResponseType.Success, finalResponse.Answer, finalResponse.Citations);
+            return new(
+                ResponseType.Success,
+                finalResponse.Answer,
+                finalResponse.Citations,
+                finalResponse.RawJson
+            );
         }
         string response;
         if (citations?.Count > 0)
@@ -78,7 +83,7 @@ public class GetApprovedResponseWorkflow(
             response =
                 "I was unable to find an answer to your question in the Take Command documents";
         }
-        return new(ResponseType.Failure, response, citations ?? []);
+        return new(ResponseType.Failure, response, citations ?? [], finalResponse.RawJson);
     }
 
     public static Workflow CreateWorkflow(IServiceProvider sp)
@@ -101,7 +106,8 @@ public class GetApprovedResponseWorkflow(
 public record ApprovedResponse(
     ResponseType ResponseType,
     string Response,
-    List<Citation> Citations
+    List<Citation> Citations,
+    string RawJsonResponse
 );
 
 public enum ResponseType
@@ -122,7 +128,16 @@ internal class GetDummyApprovedResponseWorkflow() : GetApprovedResponseWorkflow(
             new ApprovedResponse(
                 ResponseType.Success,
                 "This is a dummy response",
-                [new("dummy-filename", "dummy-quote")]
+                [new("dummy-filename", "dummy-quote")],
+                @"
+                {
+                    ""Answer"": ""This is a dummy response"",
+                    ""Citations"": [{
+                        ""Filename"" : ""dummy-filename"",
+                        ""Quote"" :  ""dummy-quote""
+                    }]
+                }
+                "
             )
         );
     }

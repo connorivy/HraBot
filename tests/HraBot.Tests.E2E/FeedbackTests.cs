@@ -8,7 +8,7 @@ namespace HraBot.Tests.E2E;
 public class FeedbackTests : PageTestBase
 {
     [Test]
-    public async Task SendingPositiveFeedback_ShouldCreateCorrectDataInDb()
+    public async Task SendingFiveStarFeedback_ShouldCreateCorrectDataInDb()
     {
         await this.PageContext.Page.GotoAsync(
             "/",
@@ -19,11 +19,11 @@ public class FeedbackTests : PageTestBase
             .ToHaveTitleAsync("JackBot", new() { Timeout = 500 });
 
         await SendMessage("hello!");
-        await SendPositiveFeedback();
+        await SendFiveStarFeedback();
     }
 
     [Test]
-    public async Task SendingNegativeFeedback_ShouldCreateCorrectDataInDb()
+    public async Task SendingTwoStarFeedback_ShouldCreateCorrectDataInDb()
     {
         await this.PageContext.Page.GotoAsync(
             "/",
@@ -31,7 +31,7 @@ public class FeedbackTests : PageTestBase
         );
 
         await SendMessage("hello!");
-        await SendNegativeFeedback();
+        await SendTwoStarFeedback();
     }
 
     private async Task SendMessage(string message)
@@ -62,26 +62,28 @@ public class FeedbackTests : PageTestBase
         }
     }
 
-    private async Task SendPositiveFeedback()
+    private async Task SendFiveStarFeedback()
     {
-        var buttons = this.Page.GetByRole(AriaRole.Button);
-        // there should be three buttons. Two thumbs and the send button (disabled)
-        await Expect(buttons).ToHaveCountAsync(3);
-
         var chatBox = this.Page.GetByRole(AriaRole.Textbox);
         // chat box should be disabled until feed back is provided. There should be a tooltip that explains this
         await Expect(chatBox).ToBeDisabledAsync();
 
-        var thumbsUp = this.Page.GetByRole(AriaRole.Button, new() { Name = "Thumbs up" });
-        var importanceSelect = this.Page.GetByRole(
-            AriaRole.Combobox,
-            new() { Name = "Importance" }
-        );
+        var ratingGroup = this.Page.GetByRole(AriaRole.Group, new() { Name = "Response rating" });
+        await Expect(ratingGroup).ToBeVisibleAsync();
 
-        await importanceSelect.SelectOptionAsync(new SelectOptionValue { Value = "5" });
+        var fiveStarButton = ratingGroup.GetByRole(AriaRole.Button, new() { Name = "Excellent" });
+        var importanceGroup = this.Page.GetByRole(
+            AriaRole.Group,
+            new() { Name = "Response importance" }
+        );
+        var importanceFive = importanceGroup.GetByRole(AriaRole.Button, new() { Name = "Importance 5" });
 
         var response = await this.Page.RunAndWaitForResponseAsync(
-            async () => await thumbsUp.ClickAsync(),
+            async () =>
+            {
+                await fiveStarButton.ClickAsync();
+                await importanceFive.ClickAsync();
+            },
             resp => resp.Url.Contains("/feedback") && resp.Request.Method == "PUT" && resp.Ok
         );
         var json =
@@ -97,33 +99,33 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
-        persistedFeedback.IsPositive.Should().BeTrue();
+        persistedFeedback.Rating.Should().Be(5);
         persistedFeedback.ImportanceToTakeCommand.Should().Be(5);
 
         await Expect(chatBox).Not.ToBeDisabledAsync();
     }
 
-    private async Task SendNegativeFeedback()
+    private async Task SendTwoStarFeedback()
     {
-        var buttons = this.Page.GetByRole(AriaRole.Button);
-        // there should be three buttons. Two thumbs and the send button (disabled)
-        await Expect(buttons).ToHaveCountAsync(3);
-
         var chatBox = this.Page.GetByRole(AriaRole.Textbox);
         // chat box should be disabled until feed back is provided. There should be a tooltip that explains this
         await Expect(chatBox).ToBeDisabledAsync();
 
-        var thumbsDown = this.Page.GetByRole(AriaRole.Button, new() { Name = "Thumbs down" });
-        var importanceSelect = this.Page.GetByRole(
-            AriaRole.Combobox,
-            new() { Name = "Importance" }
+        var ratingGroup = this.Page.GetByRole(AriaRole.Group, new() { Name = "Response rating" });
+        await Expect(ratingGroup).ToBeVisibleAsync();
+
+        var twoStarButton = ratingGroup.GetByRole(AriaRole.Button, new() { Name = "Poor" });
+        var importanceGroup = this.Page.GetByRole(
+            AriaRole.Group,
+            new() { Name = "Response importance" }
         );
+        var importanceTwo = importanceGroup.GetByRole(AriaRole.Button, new() { Name = "Importance 2" });
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () =>
             {
-                await thumbsDown.ClickAsync();
-                await importanceSelect.SelectOptionAsync(new SelectOptionValue { Value = "2" });
+                await twoStarButton.ClickAsync();
+                await importanceTwo.ClickAsync();
             },
             resp => resp.Url.Contains("/feedback") && resp.Request.Method == "PUT" && resp.Ok
         );
@@ -140,7 +142,7 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
-        persistedFeedback.IsPositive.Should().BeFalse();
+        persistedFeedback.Rating.Should().Be(2);
         persistedFeedback.ImportanceToTakeCommand.Should().Be(2);
     }
 }

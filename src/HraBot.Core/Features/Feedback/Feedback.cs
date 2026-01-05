@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HraBot.Core.Features.Feedback;
 
-public record FeedbackContract(long MessageId, bool IsPositive, byte ImportanceToTakeCommand);
+public record FeedbackContract(long MessageId, byte Rating, byte ImportanceToTakeCommand);
 
 public record FeedbackItemContract(
     long Id,
@@ -24,6 +24,11 @@ public partial class AddFeedback(HraBotDbContext context)
         CancellationToken ct = default
     )
     {
+        if (req.Rating is < 1 or > 5)
+        {
+            return HraBotError.Validation(description: "Rating must be between 1 and 5.");
+        }
+
         if (req.ImportanceToTakeCommand is < 1 or > 5)
         {
             return HraBotError.Validation(description: "Importance must be between 1 and 5.");
@@ -53,7 +58,7 @@ public partial class AddFeedback(HraBotDbContext context)
         }
 
         feedback.ImportanceToTakeCommand = req.ImportanceToTakeCommand;
-        feedback.IsPositive = req.IsPositive;
+        feedback.Rating = req.Rating;
 
         await context.SaveChangesAsync(ct);
         return new EntityResponse<long>(feedback.Id);
@@ -77,7 +82,7 @@ public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<long, F
         }
         return new FeedbackContract(
             feedback.MessageId,
-            feedback.IsPositive,
+            feedback.Rating,
             feedback.ImportanceToTakeCommand
         );
     }

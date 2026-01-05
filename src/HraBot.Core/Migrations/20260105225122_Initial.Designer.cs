@@ -58,8 +58,8 @@ namespace HraBot.Core.Migrations
                     b.Property<byte>("ImportanceToTakeCommand")
                         .HasColumnType("smallint");
 
-                    b.Property<bool>("IsPositive")
-                        .HasColumnType("boolean");
+                    b.Property<byte>("Rating")
+                        .HasColumnType("smallint");
 
                     b.Property<long>("MessageId")
                         .HasColumnType("bigint");

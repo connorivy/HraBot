@@ -68,15 +68,22 @@ Return JSON with this shape:
 
 public record HraBotResponse(string Question, string Answer, List<Citation> Citations);
 
+public record HraBotResponseWithRawJson(
+    string Question,
+    string Answer,
+    List<Citation> Citations,
+    string RawJson
+);
+
 public record Citation(string Filename, string Quote);
 
 public sealed class HraBotExecutor(
     [FromKeyedServices(AgentNames.HraBot)] AIAgent hraBot,
     ILogger<HraBotExecutor> logger,
     AgentLogger agentLogger
-) : Executor<RetrievedSearchContext, HraBotResponse>(AgentNames.HraBot + "Executor")
+) : Executor<RetrievedSearchContext, HraBotResponseWithRawJson>(AgentNames.HraBot + "Executor")
 {
-    public override async ValueTask<HraBotResponse> HandleAsync(
+    public override async ValueTask<HraBotResponseWithRawJson> HandleAsync(
         RetrievedSearchContext answerContext,
         IWorkflowContext context,
         CancellationToken ct = default
@@ -109,7 +116,12 @@ public sealed class HraBotExecutor(
             ?? throw new InvalidOperationException(
                 $"Failed to parse HraBot response, {response.Text}."
             );
-        return structuredResponse;
+        return new(
+            structuredResponse.Question,
+            structuredResponse.Answer,
+            structuredResponse.Citations,
+            response.Text
+        );
     }
 
     private static List<ChatMessage> BuildMessagesWithContext(RetrievedSearchContext context)

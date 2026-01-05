@@ -45,13 +45,13 @@ namespace HraBot.Core.Generated.EF
                 sentinel: (byte)0);
             importanceToTakeCommand.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var isPositive = runtimeEntityType.AddProperty(
-                "IsPositive",
-                typeof(bool),
-                propertyInfo: typeof(MessageFeedback).GetProperty("IsPositive", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(MessageFeedback).GetField("<IsPositive>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                sentinel: false);
-            isPositive.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+            var rating = runtimeEntityType.AddProperty(
+                "Rating",
+                typeof(byte),
+                propertyInfo: typeof(MessageFeedback).GetProperty("Rating", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(MessageFeedback).GetField("<Rating>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                sentinel: (byte)0);
+            rating.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
             var messageId = runtimeEntityType.AddProperty(
                 "MessageId",

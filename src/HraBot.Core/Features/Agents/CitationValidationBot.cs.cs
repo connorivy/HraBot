@@ -89,20 +89,20 @@ public record CitationValidationResponse(bool IsValid, List<string> Issues);
 public sealed class CitationValidatorExecutor(
     [FromKeyedServices(AgentNames.CitationValidator)] AIAgent citationValidator,
     ILogger<CitationValidatorExecutor> logger
-) : Executor<HraBotResponse, CitationValidationResponse>(AgentNames.CitationValidator + "Executor")
+)
+    : Executor<HraBotResponseWithRawJson, CitationValidationResponse>(
+        AgentNames.CitationValidator + "Executor"
+    )
 {
     public override async ValueTask<CitationValidationResponse> HandleAsync(
-        HraBotResponse hraBotResponse,
+        HraBotResponseWithRawJson hraBotResponse,
         IWorkflowContext context,
         CancellationToken cancellationToken = default
     )
     {
         logger.LogInformation("Retreiving response from CitationValidator");
         var response = await citationValidator.RunAsync(
-            JsonSerializer.Serialize(
-                hraBotResponse,
-                HraBotJsonSerializerContext.Default.HraBotResponse
-            ),
+            hraBotResponse.RawJson,
             cancellationToken: cancellationToken
         );
         logger.LogInformation("CitationValidatorExecutor response: {response}", response);

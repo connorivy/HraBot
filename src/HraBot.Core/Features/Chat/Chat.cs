@@ -38,7 +38,7 @@ public partial class Chat(
             )),
             ct
         );
-        var newMessage = conversation.AddTrackedMessage(Role.Ai, approvedResponse.Response);
+        var newMessage = conversation.AddTrackedMessage(Role.Ai, approvedResponse.RawJsonResponse);
         await hraBotDbContext.SaveChangesAsync(ct);
         return new ApprovedResponseContract(
             conversation.Id,

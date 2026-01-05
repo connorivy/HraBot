@@ -56,7 +56,7 @@ namespace HraBot.Core.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     MessageId = table.Column<long>(type: "bigint", nullable: false),
-                    IsPositive = table.Column<bool>(type: "boolean", nullable: false),
+                    Rating = table.Column<byte>(type: "smallint", nullable: false),
                     ImportanceToTakeCommand = table.Column<byte>(type: "smallint", nullable: false)
                 },
                 constraints: table =>

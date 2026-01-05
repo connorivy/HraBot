@@ -6,9 +6,9 @@ namespace HraBot.Core.Features.Feedback;
 public class MessageFeedback
 {
     public long Id { get; private set; }
-    public long MessageId { get; set; }
+    public required long MessageId { get; set; }
     public Message? Message { get; set; }
-    public bool IsPositive { get; set; }
+    public byte Rating { get; set; }
     public byte ImportanceToTakeCommand { get; set; }
 }
 

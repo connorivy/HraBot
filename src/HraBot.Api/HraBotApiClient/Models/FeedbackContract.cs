@@ -16,10 +16,10 @@ namespace HraBot.ApiClient.Models
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The importanceToTakeCommand property</summary>
         public byte? ImportanceToTakeCommand { get; set; }
-        /// <summary>The isPositive property</summary>
-        public bool? IsPositive { get; set; }
         /// <summary>The messageId property</summary>
         public long? MessageId { get; set; }
+        /// <summary>The rating property</summary>
+        public byte? Rating { get; set; }
         /// <summary>
         /// Instantiates a new <see cref="global::HraBot.ApiClient.Models.FeedbackContract"/> and sets the default values.
         /// </summary>
@@ -46,8 +46,8 @@ namespace HraBot.ApiClient.Models
             return new Dictionary<string, Action<IParseNode>>
             {
                 { "importanceToTakeCommand", n => { ImportanceToTakeCommand = n.GetByteValue(); } },
-                { "isPositive", n => { IsPositive = n.GetBoolValue(); } },
                 { "messageId", n => { MessageId = n.GetLongValue(); } },
+                { "rating", n => { Rating = n.GetByteValue(); } },
             };
         }
         /// <summary>
@@ -58,8 +58,8 @@ namespace HraBot.ApiClient.Models
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
             writer.WriteByteValue("importanceToTakeCommand", ImportanceToTakeCommand);
-            writer.WriteBoolValue("isPositive", IsPositive);
             writer.WriteLongValue("messageId", MessageId);
+            writer.WriteByteValue("rating", Rating);
             writer.WriteAdditionalData(AdditionalData);
         }
     }
