@@ -3,6 +3,8 @@ using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using HraBot.ApiClient;
 using HraBot.ServiceDefaults;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Kiota.Abstractions.Authentication;
 using Microsoft.Kiota.Http.HttpClientLibrary;
 
@@ -40,6 +42,8 @@ public class SetupTestsE2E
                 ],
                 (options, settings) => { }
             );
+
+        hostBuilder.Services.AddLogging(l => l.AddConsole());
 
         // if (!System.Diagnostics.Debugger.IsAttached)
         // {
