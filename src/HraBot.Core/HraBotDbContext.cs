@@ -22,35 +22,21 @@ public class HraBotDbContext : DbContext
     public DbSet<Conversation> Conversations { get; set; } = null!;
     public DbSet<Message> Messages { get; set; } = null!;
     public DbSet<MessageFeedback> MessageFeedbacks { get; set; } = null!;
-    public DbSet<MessageFeedbackItem> MessageFeedbackItems { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.AddEntityConfigurations();
     }
-
-    // protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    // {
-    //     optionsBuilder.UseNpgsql();
-    // }
 }
 
-public class UnitOfWork(HraBotDbContext dbContext)
-{
-    public Task SaveChangesAsync(CancellationToken ct = default)
-    {
-        return dbContext.SaveChangesAsync(ct);
-    }
-}
+// public class BloggingContextFactory : IDesignTimeDbContextFactory<HraBotDbContext>
+// {
+//     public HraBotDbContext CreateDbContext(string[] args)
+//     {
+//         var optionsBuilder = new DbContextOptionsBuilder<HraBotDbContext>();
+//         optionsBuilder.UseNpgsql("");
+//         // optionsBuilder.UseModel(HraBotDbContextModel.Instance);
 
-public class BloggingContextFactory : IDesignTimeDbContextFactory<HraBotDbContext>
-{
-    public HraBotDbContext CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<HraBotDbContext>();
-        optionsBuilder.UseNpgsql("");
-        // optionsBuilder.UseModel(HraBotDbContextModel.Instance);
-
-        return new HraBotDbContext(optionsBuilder.Options);
-    }
-}
+//         return new HraBotDbContext(optionsBuilder.Options);
+//     }
+// }

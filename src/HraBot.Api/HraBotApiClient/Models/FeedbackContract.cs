@@ -12,26 +12,12 @@ namespace HraBot.ApiClient.Models
     public partial class FeedbackContract : IAdditionalDataHolder, IParsable
     #pragma warning restore CS1591
     {
-        /// <summary>The additionalComments property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public string? AdditionalComments { get; set; }
-#nullable restore
-#else
-        public string AdditionalComments { get; set; }
-#endif
         /// <summary>Stores additional data not described in the OpenAPI description found when deserializing. Can be used for serialization as well.</summary>
         public IDictionary<string, object> AdditionalData { get; set; }
         /// <summary>The importanceToTakeCommand property</summary>
         public byte? ImportanceToTakeCommand { get; set; }
-        /// <summary>The messageFeedbackItemIds property</summary>
-#if NETSTANDARD2_1_OR_GREATER || NETCOREAPP3_1_OR_GREATER
-#nullable enable
-        public List<long?>? MessageFeedbackItemIds { get; set; }
-#nullable restore
-#else
-        public List<long?> MessageFeedbackItemIds { get; set; }
-#endif
+        /// <summary>The isPositive property</summary>
+        public bool? IsPositive { get; set; }
         /// <summary>The messageId property</summary>
         public long? MessageId { get; set; }
         /// <summary>
@@ -59,9 +45,8 @@ namespace HraBot.ApiClient.Models
         {
             return new Dictionary<string, Action<IParseNode>>
             {
-                { "additionalComments", n => { AdditionalComments = n.GetStringValue(); } },
                 { "importanceToTakeCommand", n => { ImportanceToTakeCommand = n.GetByteValue(); } },
-                { "messageFeedbackItemIds", n => { MessageFeedbackItemIds = n.GetCollectionOfPrimitiveValues<long?>()?.AsList(); } },
+                { "isPositive", n => { IsPositive = n.GetBoolValue(); } },
                 { "messageId", n => { MessageId = n.GetLongValue(); } },
             };
         }
@@ -72,9 +57,8 @@ namespace HraBot.ApiClient.Models
         public virtual void Serialize(ISerializationWriter writer)
         {
             if(ReferenceEquals(writer, null)) throw new ArgumentNullException(nameof(writer));
-            writer.WriteStringValue("additionalComments", AdditionalComments);
             writer.WriteByteValue("importanceToTakeCommand", ImportanceToTakeCommand);
-            writer.WriteCollectionOfPrimitiveValues<long?>("messageFeedbackItemIds", MessageFeedbackItemIds);
+            writer.WriteBoolValue("isPositive", IsPositive);
             writer.WriteLongValue("messageId", MessageId);
             writer.WriteAdditionalData(AdditionalData);
         }

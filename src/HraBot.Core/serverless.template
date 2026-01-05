@@ -38,41 +38,6 @@
         }
       }
     },
-    "HraBotCoreFeaturesFeedbackAddFeedbackAddFeedbackLambdaGenerated": {
-      "Type": "AWS::Serverless::Function",
-      "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootPost"
-        ],
-        "SyncedEventProperties": {
-          "RootPost": [
-            "Path",
-            "Method"
-          ]
-        }
-      },
-      "Properties": {
-        "Runtime": "dotnet10",
-        "CodeUri": ".",
-        "MemorySize": 512,
-        "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
-        "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Feedback.AddFeedback_AddFeedbackLambda_Generated::AddFeedbackLambda",
-        "Events": {
-          "RootPost": {
-            "Type": "HttpApi",
-            "Properties": {
-              "Path": "/feedback",
-              "Method": "POST"
-            }
-          }
-        }
-      }
-    },
     "HraBotCoreFeaturesChatChatChatLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
@@ -143,15 +108,15 @@
         }
       }
     },
-    "HraBotCoreFeaturesFeedbackGetFeedbackItemsGetFeedbackItemsLambdaGenerated": {
+    "HraBotCoreFeaturesFeedbackAddFeedbackAddFeedbackLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
         "SyncedEvents": [
-          "RootGet"
+          "RootPut"
         ],
         "SyncedEventProperties": {
-          "RootGet": [
+          "RootPut": [
             "Path",
             "Method"
           ]
@@ -166,13 +131,13 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Feedback.GetFeedbackItems_GetFeedbackItemsLambda_Generated::GetFeedbackItemsLambda",
+        "Handler": "HraBot.Core::HraBot.Core.Features.Feedback.AddFeedback_AddFeedbackLambda_Generated::AddFeedbackLambda",
         "Events": {
-          "RootGet": {
+          "RootPut": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/feedback/items",
-              "Method": "GET"
+              "Path": "/feedback",
+              "Method": "PUT"
             }
           }
         }

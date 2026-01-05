@@ -1,17 +1,10 @@
-using System.Diagnostics;
-using HraBot.Core;
 using HraBot.Core.Common;
 using HraBot.Core.Features.Chat;
 using Microsoft.EntityFrameworkCore;
 
 namespace HraBot.Core.Features.Feedback;
 
-public record FeedbackContract(
-    long MessageId,
-    List<long> MessageFeedbackItemIds,
-    string? AdditionalComments,
-    byte? ImportanceToTakeCommand
-);
+public record FeedbackContract(long MessageId, bool IsPositive, byte ImportanceToTakeCommand);
 
 public record FeedbackItemContract(
     long Id,
@@ -22,7 +15,7 @@ public record FeedbackItemContract(
 
 public record EntityResponse<TId>(TId Id);
 
-[HraBotEndpoint(Http.Post, "/feedback")]
+[HraBotEndpoint(Http.Put, "/feedback")]
 public partial class AddFeedback(HraBotDbContext context)
     : BaseEndpoint<FeedbackContract, EntityResponse<long>>
 {
@@ -31,16 +24,7 @@ public partial class AddFeedback(HraBotDbContext context)
         CancellationToken ct = default
     )
     {
-        if (req.MessageFeedbackItemIds.Count == 0)
-        {
-            return HraBotError.Validation(
-                description: "At least one feedback item id is required."
-            );
-        }
-        if (
-            req.ImportanceToTakeCommand is not null
-            && (req.ImportanceToTakeCommand < 1 || req.ImportanceToTakeCommand > 5)
-        )
+        if (req.ImportanceToTakeCommand is < 1 or > 5)
         {
             return HraBotError.Validation(description: "Importance must be between 1 and 5.");
         }
@@ -57,35 +41,20 @@ public partial class AddFeedback(HraBotDbContext context)
             );
         }
 
-        var hasExistingFeedback = await context.MessageFeedbacks.AnyAsync(
-            feedback => feedback.MessageId == aiMessage.Id,
+        var feedback = await context.MessageFeedbacks.FirstOrDefaultAsync(
+            f => f.MessageId == aiMessage.Id,
             ct
         );
-        if (hasExistingFeedback)
+
+        if (feedback is null)
         {
-            return HraBotError.Conflict(
-                description: $"Feedback already exists for message {aiMessage.Id}."
-            );
+            feedback = new MessageFeedback { MessageId = aiMessage.Id };
+            context.MessageFeedbacks.Add(feedback);
         }
 
-        var feedbackItems = await context
-            .MessageFeedbackItems.Where(item => req.MessageFeedbackItemIds.Contains(item.Id))
-            .ToListAsync(ct);
-        if (feedbackItems.Count != req.MessageFeedbackItemIds.Count)
-        {
-            return HraBotError.Validation(
-                description: "One or more feedback items could not be found."
-            );
-        }
+        feedback.ImportanceToTakeCommand = req.ImportanceToTakeCommand;
+        feedback.IsPositive = req.IsPositive;
 
-        var feedback = new MessageFeedback
-        {
-            MessageId = aiMessage.Id,
-            AdditionalComments = req.AdditionalComments,
-            ImportanceToTakeCommand = req.ImportanceToTakeCommand,
-            MessageFeedbackItems = feedbackItems,
-        };
-        context.MessageFeedbacks.Add(feedback);
         await context.SaveChangesAsync(ct);
         return new EntityResponse<long>(feedback.Id);
     }
@@ -101,55 +70,15 @@ public partial class GetFeedback(HraBotDbContext context) : BaseEndpoint<long, F
     {
         var feedback = await context
             .MessageFeedbacks.AsNoTracking()
-            .Include(m => m.MessageFeedbackItems)
-            .FirstOrDefaultAsync(m => m.Id == req);
+            .FirstOrDefaultAsync(m => m.Id == req, cancellationToken: ct);
         if (feedback is null)
         {
             return HraBotError.NotFound();
         }
-        if (feedback.MessageFeedbackItems is null)
-        {
-            throw new UnreachableException("Cannot happen after proper query");
-        }
         return new FeedbackContract(
             feedback.MessageId,
-            [.. feedback.MessageFeedbackItems.Select(i => i.Id)],
-            feedback.AdditionalComments,
+            feedback.IsPositive,
             feedback.ImportanceToTakeCommand
         );
     }
 }
-
-[HraBotEndpoint(Http.Get, "/feedback/items")]
-public partial class GetFeedbackItems(HraBotDbContext context)
-    : BaseEndpoint<object, IReadOnlyList<FeedbackItemContract>>
-{
-    public override async Task<Result<IReadOnlyList<FeedbackItemContract>>> ExecuteRequestAsync(
-        object req,
-        CancellationToken ct = default
-    )
-    {
-        var items = await context
-            .MessageFeedbackItems.AsNoTracking()
-            .OrderBy(item => item.Id)
-            .Select(item => new FeedbackItemContract(
-                item.Id,
-                item.ShortDescription,
-                item.FeedbackItem.ToString(),
-                item.FeedbackType.ToString()
-            ))
-            .ToListAsync(ct);
-
-        return items;
-    }
-}
-
-// public partial class GetFeedback
-// {
-//     [LambdaFunction()]
-//     [HttpApi(LambdaHttpMethod.Post, "/feedback/{id}")]
-//     public async Task<IHttpResult> FeedbackLambda(int id, ILambdaContext hello)
-//     {
-//         return (await this.ExecuteAsync(request)).ToWebResult();
-//     }
-// }

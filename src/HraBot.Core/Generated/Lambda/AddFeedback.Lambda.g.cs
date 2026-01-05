@@ -7,7 +7,7 @@ namespace HraBot.Core.Features.Feedback;
 public partial class AddFeedback
 {
     [Amazon.Lambda.Annotations.LambdaFunction()]
-    [Amazon.Lambda.Annotations.APIGateway.HttpApi(Amazon.Lambda.Annotations.APIGateway.LambdaHttpMethod.Post, "/feedback")]
+    [Amazon.Lambda.Annotations.APIGateway.HttpApi(Amazon.Lambda.Annotations.APIGateway.LambdaHttpMethod.Put, "/feedback")]
     public async System.Threading.Tasks.Task<Amazon.Lambda.Annotations.APIGateway.IHttpResult> AddFeedbackLambda([FromBody] HraBot.Core.Features.Feedback.FeedbackContract request, Amazon.Lambda.Core.ILambdaContext _)
     {
         return (await this.ExecuteAsync(request)).ToLambdaResult();

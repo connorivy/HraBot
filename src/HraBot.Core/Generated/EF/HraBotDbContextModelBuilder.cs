@@ -12,7 +12,7 @@ namespace HraBot.Core.Generated.EF
     public partial class HraBotDbContextModel
     {
         private HraBotDbContextModel()
-            : base(skipDetectChanges: false, modelId: new Guid("936fcdf2-5120-4150-8a23-82e632fb2de9"), entityTypeCount: 5)
+            : base(skipDetectChanges: false, modelId: new Guid("6211cc65-3c81-48c7-8cb5-3e4a3e665943"), entityTypeCount: 3)
         {
         }
 
@@ -20,23 +20,14 @@ namespace HraBot.Core.Generated.EF
         {
             var conversation = ConversationEntityType.Create(this);
             var messageFeedback = MessageFeedbackEntityType.Create(this);
-            var messageFeedbackItem = MessageFeedbackItemEntityType.Create(this);
             var message = MessageEntityType.Create(this);
-            var messageFeedbackMessageFeedbackItem = MessageFeedbackMessageFeedbackItemEntityType.Create(this);
 
             MessageFeedbackEntityType.CreateForeignKey1(messageFeedback, message);
             MessageEntityType.CreateForeignKey1(message, conversation);
-            MessageFeedbackMessageFeedbackItemEntityType.CreateForeignKey1(messageFeedbackMessageFeedbackItem, messageFeedbackItem);
-            MessageFeedbackMessageFeedbackItemEntityType.CreateForeignKey2(messageFeedbackMessageFeedbackItem, messageFeedback);
-
-            MessageFeedbackEntityType.CreateSkipNavigation1(messageFeedback, messageFeedbackItem, messageFeedbackMessageFeedbackItem);
-            MessageFeedbackItemEntityType.CreateSkipNavigation1(messageFeedbackItem, messageFeedback, messageFeedbackMessageFeedbackItem);
 
             ConversationEntityType.CreateAnnotations(conversation);
             MessageFeedbackEntityType.CreateAnnotations(messageFeedback);
-            MessageFeedbackItemEntityType.CreateAnnotations(messageFeedbackItem);
             MessageEntityType.CreateAnnotations(message);
-            MessageFeedbackMessageFeedbackItemEntityType.CreateAnnotations(messageFeedbackMessageFeedbackItem);
 
             AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
             AddAnnotation("ProductVersion", "10.0.1");

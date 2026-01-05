@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "${BASH_SOURCE[0]}")/../src/HraBot.Core"
+cd "$(dirname "${BASH_SOURCE[0]}")/../src/HraBot.Api"
+
+dotnet build /p:GENERATING_EF=true
+
+cd ../../src/HraBot.Core
 
 rm -rf ./Generated/EF
 # find "./Generated/EF" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +

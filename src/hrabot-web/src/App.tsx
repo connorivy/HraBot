@@ -2,14 +2,9 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import {
   Avatar,
   Box,
-  Button,
   Container,
   CssBaseline,
   Divider,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   IconButton,
   Paper,
   Stack,
@@ -22,6 +17,7 @@ import {
 import SendRoundedIcon from '@mui/icons-material/SendRounded'
 import ThumbDownAltOutlinedIcon from '@mui/icons-material/ThumbDownAltOutlined'
 import ThumbUpAltOutlinedIcon from '@mui/icons-material/ThumbUpAltOutlined'
+import LaunchRoundedIcon from '@mui/icons-material/LaunchRounded'
 import { ApiClientProvider, useApiClient } from './features/ApiClientProvider'
 type ChatRole = 'user' | 'ai'
 
@@ -37,22 +33,6 @@ type ChatMessage = {
   timestamp: number
   citations?: Citation[]
 }
-
-const defaultFeedbackItems = [
-  { id: 1, shortDescription: 'no issues', feedbackItem: 'MessageContent', feedbackType: 'Positive' },
-  { id: 4, shortDescription: 'incorrect', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
-  { id: 5, shortDescription: 'missing information', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
-  { id: 6, shortDescription: 'not applicable to question', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
-  { id: 7, shortDescription: 'not informed by citations', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
-  { id: 8, shortDescription: 'other', feedbackItem: 'MessageContent', feedbackType: 'Negative' },
-  { id: 2, shortDescription: 'no issues', feedbackItem: 'Citation', feedbackType: 'Positive' },
-  { id: 9, shortDescription: 'missing', feedbackItem: 'Citation', feedbackType: 'Negative' },
-  { id: 10, shortDescription: 'incorrect', feedbackItem: 'Citation', feedbackType: 'Negative' },
-  { id: 11, shortDescription: 'not applicable to question', feedbackItem: 'Citation', feedbackType: 'Negative' },
-  { id: 12, shortDescription: 'other', feedbackItem: 'Citation', feedbackType: 'Negative' },
-  { id: 3, shortDescription: 'no issues', feedbackItem: 'Citation', feedbackType: 'Positive' },
-  { id: 15, shortDescription: 'other', feedbackItem: 'Other', feedbackType: 'Negative' },
-]
 
 const theme = createTheme({
   palette: {
@@ -92,15 +72,28 @@ function CitationList({ citations }: { citations: Citation[] }) {
               href={href}
               target="_blank"
               rel="noreferrer"
-              className="rounded-md border border-dashed px-3 py-2 text-left text-xs font-medium hover:border-solid"
-              sx={{ color: 'primary.main', textDecoration: 'none' }}
+              className="group flex items-center justify-between gap-3 rounded-lg border border-dashed px-3 py-2 text-left text-xs font-medium hover:border-solid"
+              sx={{
+                color: 'primary.main',
+                textDecoration: 'none',
+                borderLeft: '3px solid',
+                borderColor: 'primary.main',
+                bgcolor: 'rgba(24, 138, 104, 0.05)',
+              }}
             >
-              <Box component="span" className="block text-[0.65rem] uppercase tracking-[0.24em]">
-                Source
+              <Box className="flex flex-1 flex-col gap-0.5">
+                <Box
+                  component="span"
+                  className="text-[0.65rem] uppercase tracking-[0.24em]"
+                  sx={{ color: 'primary.main' }}
+                >
+                  Source
+                </Box>
+                <Typography variant="body2" className="text-sm text-current">
+                  {quote}
+                </Typography>
               </Box>
-              <Typography variant="body2" className="mt-1 text-sm text-current">
-                {quote}
-              </Typography>
+              <LaunchRoundedIcon fontSize="small" className="opacity-70 transition group-hover:opacity-100" />
             </Box>
           )
         })}
@@ -117,18 +110,22 @@ function ChatPane() {
   const [feedbackMessageId, setFeedbackMessageId] = useState<number | null>(null)
   const [feedbackUiMessageId, setFeedbackUiMessageId] = useState<number | null>(null)
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false)
-  const [feedbackDialogOpen, setFeedbackDialogOpen] = useState(false)
-  const [feedbackItems, setFeedbackItems] = useState<
-    { id?: number | null; shortDescription?: string | null; feedbackItem?: string | null; feedbackType?: string | null }[]
-  >(defaultFeedbackItems)
-  const [feedbackItemsLoading, setFeedbackItemsLoading] = useState(false)
-  const [feedbackItemsFetched, setFeedbackItemsFetched] = useState(false)
-  const [contentSelection, setContentSelection] = useState('no issues')
-  const [citationsSelection, setCitationsSelection] = useState('no issues')
+  const [thumbSelection, setThumbSelection] = useState<'up' | 'down' | ''>('')
   const [importanceSelection, setImportanceSelection] = useState('')
-  const [additionalComments, setAdditionalComments] = useState('')
   const streamRef = useRef<HTMLDivElement | null>(null)
+  const feedbackQueueRef = useRef<{ thumb: 'up' | 'down'; importance: number } | null>(null)
   const apiClient = useApiClient()
+
+  useEffect(() => {
+    const warmUpBackend = async () => {
+      try {
+        await apiClient.pingme.get()
+      } catch (error) {
+        console.warn('Failed to warm up backend.', error)
+      }
+    }
+    void warmUpBackend()
+  }, [apiClient])
 
   useEffect(() => {
     if (!streamRef.current) return
@@ -175,6 +172,9 @@ function ChatPane() {
         setFeedbackMessageId(response.messageId)
         setFeedbackUiMessageId(aiMessage.id)
         setPendingFeedback(true)
+        feedbackQueueRef.current = null
+        setThumbSelection('')
+        setImportanceSelection('')
       }
     } catch (error) {
       console.error('Failed to fetch response from HraBot.', error)
@@ -190,72 +190,43 @@ function ChatPane() {
     }
   }
 
-  const handlePositiveFeedback = async () => {
-    if (feedbackSubmitting || feedbackMessageId == null) return
+  const processQueuedFeedback = async () => {
+    if (feedbackMessageId == null) return
+    const payload = feedbackQueueRef.current
+    if (!payload) return
+    feedbackQueueRef.current = null
     setFeedbackSubmitting(true)
     try {
-      await apiClient.feedback.post({
+      await apiClient.feedback.put({
         messageId: feedbackMessageId,
-        messageFeedbackItemIds: [1, 2, 3],
-        additionalComments: null,
-        importanceToTakeCommand: null,
+        isPositive: payload.thumb === 'up',
+        importanceToTakeCommand: payload.importance,
       })
-      setPendingFeedback(false)
-      setFeedbackUiMessageId(null)
-    } catch (error) {
-      console.error('Failed to submit feedback.', error)
-    } finally {
-      setFeedbackSubmitting(false)
-    }
-  }
-
-  const handleOpenNegativeFeedback = async () => {
-    if (feedbackSubmitting || feedbackMessageId == null) return
-    setFeedbackDialogOpen(true)
-    setContentSelection('no issues')
-    setCitationsSelection('no issues')
-    setImportanceSelection('')
-    setAdditionalComments('')
-    if (feedbackItemsLoading || feedbackItemsFetched) return
-    setFeedbackItemsLoading(true)
-    try {
-      const response = await apiClient.feedback.items.get()
-      if (response?.length) {
-        setFeedbackItems(response)
-        setFeedbackItemsFetched(true)
+      const hasQueuedUpdate = feedbackQueueRef.current !== null
+      if (!hasQueuedUpdate) {
+        setPendingFeedback(false)
+        setFeedbackUiMessageId(null)
+        setFeedbackMessageId(null)
+        setThumbSelection('')
+        setImportanceSelection('')
       }
     } catch (error) {
-      console.error('Failed to load feedback options.', error)
-    } finally {
-      setFeedbackItemsLoading(false)
-    }
-  }
-
-  const handleSubmitNegativeFeedback = async () => {
-    if (feedbackSubmitting || feedbackMessageId == null) return
-    const selectedIds = [contentSelection, citationsSelection]
-      .filter((value) => value !== 'no issues')
-      .map((value) => Number.parseInt(value, 10))
-      .filter((value) => Number.isFinite(value))
-
-    const importanceValue = Number.parseInt(importanceSelection, 10)
-    if (selectedIds.length === 0 || !Number.isFinite(importanceValue)) return
-
-    setFeedbackSubmitting(true)
-    try {
-      await apiClient.feedback.post({
-        messageId: feedbackMessageId,
-        messageFeedbackItemIds: selectedIds,
-        additionalComments: additionalComments.trim() || null,
-        importanceToTakeCommand: importanceValue,
-      })
-      setPendingFeedback(false)
-      setFeedbackUiMessageId(null)
-      setFeedbackDialogOpen(false)
-    } catch (error) {
       console.error('Failed to submit feedback.', error)
     } finally {
       setFeedbackSubmitting(false)
+      if (feedbackQueueRef.current) {
+        void processQueuedFeedback()
+      }
+    }
+  }
+
+  const queueFeedbackSubmission = (thumbValue: 'up' | 'down' | '', importanceValue: string) => {
+    if (!pendingFeedback || feedbackMessageId == null) return
+    const parsedImportance = Number.parseInt(importanceValue, 10)
+    if (!thumbValue || !Number.isFinite(parsedImportance)) return
+    feedbackQueueRef.current = { thumb: thumbValue, importance: parsedImportance }
+    if (!feedbackSubmitting) {
+      void processQueuedFeedback()
     }
   }
 
@@ -264,20 +235,8 @@ function ChatPane() {
     void handleSend()
   }
 
-  const feedbackMessage = messages.find((message) => message.id === feedbackUiMessageId)
-  const negativeFeedbackOptions = feedbackItems.filter(
-    (item) => item.feedbackType?.toLowerCase() === 'negative',
-  )
-  const contentOptions = negativeFeedbackOptions.filter(
-    (item) => item.feedbackItem?.toLowerCase() === 'messagecontent',
-  )
-  const citationOptions = negativeFeedbackOptions.filter(
-    (item) => item.feedbackItem?.toLowerCase() === 'citation',
-  )
-  const canSubmitNegativeFeedback =
-    !feedbackSubmitting &&
-    [contentSelection, citationsSelection].some((value) => value !== 'no issues') &&
-    importanceSelection !== ''
+  const feedbackNeedsInput =
+    pendingFeedback && (thumbSelection === '' || importanceSelection === '')
 
   return (
     <>
@@ -297,7 +256,7 @@ function ChatPane() {
                 HraBot
               </Typography>
               <Typography variant="h4" className="mt-1">
-                HR answers, instantly.
+                HRA answers, instantly.
               </Typography>
               <Typography variant="body2" color="text.secondary" className="mt-1.5">
                 Ask a question and get a fast, friendly response.
@@ -375,23 +334,79 @@ function ChatPane() {
                       {pendingFeedback &&
                         message.role === 'ai' &&
                         feedbackUiMessageId === message.id ? (
-                        <Box className="mt-2 flex gap-1.5">
-                          <IconButton
-                            color="primary"
-                            aria-label="Thumbs up"
-                            disabled={feedbackSubmitting}
-                            onClick={() => void handlePositiveFeedback()}
+                        <Box
+                          className="mt-3 flex flex-col gap-2.5"
+                          sx={{
+                            borderRadius: 3,
+                            border: 1,
+                            // borderColor: feedbackNeedsInput ? '#e0a200' : 'primary.main',
+                            borderColor: 'primary.main',
+                            // bgcolor: feedbackNeedsInput ? '#fff7d6' : 'rgba(24, 138, 104, 0.06)',
+                            // bgcolor: 'rgba(24, 138, 104, 0.06)',
+                            px: { xs: 2, sm: 2.5 },
+                            py: { xs: 1.75, sm: 2.25 },
+                            boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.4)',
+                          }}
+                        >
+                          <Box className="flex items-center gap-1.5">
+                            <Typography variant="subtitle2" color="primary">
+                              Rate this response
+                            </Typography>
+                          </Box>
+                          <Stack
+                            direction={{ xs: 'column', sm: 'row' }}
+                            spacing={2}
+                            alignItems={{ xs: 'stretch', sm: 'center' }}
                           >
-                            <ThumbUpAltOutlinedIcon />
-                          </IconButton>
-                          <IconButton
-                            color="secondary"
-                            aria-label="Thumbs down"
-                            disabled={feedbackSubmitting}
-                            onClick={() => void handleOpenNegativeFeedback()}
-                          >
-                            <ThumbDownAltOutlinedIcon />
-                          </IconButton>
+                            <Box className="flex items-center gap-1.5">
+                              <IconButton
+                                color={thumbSelection === 'up' ? 'primary' : 'default'}
+                                aria-label="Thumbs up"
+                                aria-pressed={thumbSelection === 'up'}
+                                onClick={() => {
+                                  setThumbSelection('up')
+                                  queueFeedbackSubmission('up', importanceSelection)
+                                }}
+                              >
+                                <ThumbUpAltOutlinedIcon />
+                              </IconButton>
+                              <IconButton
+                                color={thumbSelection === 'down' ? 'secondary' : 'default'}
+                                aria-label="Thumbs down"
+                                aria-pressed={thumbSelection === 'down'}
+                                onClick={() => {
+                                  setThumbSelection('down')
+                                  queueFeedbackSubmission('down', importanceSelection)
+                                }}
+                              >
+                                <ThumbDownAltOutlinedIcon />
+                              </IconButton>
+                            </Box>
+                            <TextField
+                              select
+                              label="Importance"
+                              value={importanceSelection}
+                              onChange={(event) => {
+                                setImportanceSelection(event.target.value)
+                                queueFeedbackSubmission(thumbSelection, event.target.value)
+                              }}
+                              SelectProps={{ native: true, displayEmpty: true }}
+                              InputLabelProps={{ shrink: true }}
+                              fullWidth
+                              helperText="How critical is it to get this answer right?"
+                              size="small"
+                              aria-label="Importance"
+                            >
+                              <option value="" disabled>
+                                Select importance
+                              </option>
+                              {[1, 2, 3, 4, 5].map((value) => (
+                                <option key={value} value={value}>
+                                  {value} - {value === 1 ? 'Least' : value === 5 ? 'Most' : 'Moderate'} importance
+                                </option>
+                              ))}
+                            </TextField>
+                          </Stack>
                         </Box>
                       ) : null}
                       <Typography variant="caption" className="opacity-60">
@@ -432,103 +447,6 @@ function ChatPane() {
               )}
             </Box>
             <Divider />
-            <Dialog
-              open={feedbackDialogOpen}
-              onClose={() => {
-                if (feedbackSubmitting) return
-                setFeedbackDialogOpen(false)
-              }}
-              fullWidth
-              maxWidth="sm"
-            >
-              <DialogTitle>Tell us what went wrong</DialogTitle>
-              <DialogContent className="flex flex-col gap-3">
-                <Box className="rounded-xl border px-3 py-2" sx={{ borderColor: 'divider' }}>
-                  <Typography variant="subtitle2" color="text.secondary">
-                    AI response
-                  </Typography>
-                  <Typography variant="body2" className="mt-1">
-                    {feedbackMessage?.text ?? 'Response unavailable.'}
-                  </Typography>
-                  {feedbackMessage?.citations?.length ? (
-                    <CitationList citations={feedbackMessage.citations} />
-                  ) : null}
-                </Box>
-                <p></p>
-                <p></p>
-                <p></p>
-                <Box className="grid gap-3 sm:grid-cols-2">
-                  <TextField
-                    select
-                    label="Content"
-                    value={contentSelection}
-                    onChange={(event) => setContentSelection(event.target.value)}
-                    SelectProps={{ native: true }}
-                    fullWidth
-                  >
-                    <option value="no issues">no issues</option>
-                    {contentOptions.map((item) => (
-                      <option key={item.id} value={item.id ?? ''}>
-                        {item.shortDescription}
-                      </option>
-                    ))}
-                  </TextField>
-                  <TextField
-                    select
-                    label="Citations"
-                    value={citationsSelection}
-                    onChange={(event) => setCitationsSelection(event.target.value)}
-                    SelectProps={{ native: true }}
-                    fullWidth
-                  >
-                    <option value="no issues">no issues</option>
-                    {citationOptions.map((item) => (
-                      <option key={item.id} value={item.id ?? ''}>
-                        {item.shortDescription}
-                      </option>
-                    ))}
-                  </TextField>
-                  <TextField
-                    select
-                    label="Importance"
-                    value={importanceSelection}
-                    onChange={(event) => setImportanceSelection(event.target.value)}
-                    SelectProps={{ native: true, displayEmpty: true }}
-                    InputLabelProps={{ shrink: true }}
-                    fullWidth
-                    helperText="How important is providing a correct answer to this question"
-                  >
-                    <option value="" disabled>
-                      Select importance
-                    </option>
-                    {[1, 2, 3, 4, 5].map((value) => (
-                      <option key={value} value={value}>
-                        {value} - {value === 1 ? 'Least' : value === 5 ? 'Most' : 'Moderate'} importance
-                      </option>
-                    ))}
-                  </TextField>
-                </Box>
-                <TextField
-                  label="Other comments (optional)"
-                  value={additionalComments}
-                  onChange={(event) => setAdditionalComments(event.target.value)}
-                  placeholder="Share anything else about the response"
-                  fullWidth
-                  multiline
-                  minRows={3}
-                />
-              </DialogContent>
-              <DialogActions className="px-6 pb-4">
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => void handleSubmitNegativeFeedback()}
-                  disabled={!canSubmitNegativeFeedback}
-                >
-                  Submit
-                </Button>
-              </DialogActions>
-            </Dialog>
             <Box
               component="form"
               onSubmit={handleSubmit}
