@@ -35,7 +35,6 @@ builder.Services.AddOpenAIResponses();
 builder.Services.AddOpenAIConversations();
 #endif
 
-#if DEBUG
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -43,13 +42,10 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
     });
 });
-#endif
 
 var app = builder.Build();
 
-#if DEBUG
 app.UseCors();
-#endif
 
 app.MapGroup("api").MapEndpoints();
 
