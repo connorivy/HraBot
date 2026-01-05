@@ -48,9 +48,18 @@ public class FeedbackTests : PageTestBase
         await chatBox.FillAsync(message);
         await Expect(sendButton).Not.ToBeDisabledAsync();
 
-        var typingBubbles = this.Page.GetByTestId("assistant-typing");
-        await sendButton.ClickAsync();
-        await Expect(typingBubbles).ToBeHiddenAsync(new() { Timeout = 3000 });
+        var response = await this.Page.RunAndWaitForResponseAsync(
+            async () => await sendButton.ClickAsync(),
+            resp => resp.Url.Contains("/api/chat") && resp.Request.Method == "POST"
+        );
+        var jsonResponse = await response.JsonAsync();
+        Console.WriteLine($"Message send response: {jsonResponse}");
+        if (response.Status is < 200 or >= 300)
+        {
+            throw new InvalidOperationException(
+                $"Message send response returned unexpected status code: {response.Status}"
+            );
+        }
     }
 
     private async Task SendPositiveFeedback()
