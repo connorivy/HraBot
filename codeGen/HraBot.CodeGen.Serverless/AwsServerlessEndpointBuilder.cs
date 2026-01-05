@@ -17,7 +17,7 @@ public class AwsServerlessEndpointBuilder
             );
         }
 
-        var outputDir = Path.Combine(repoRoot, "src", "HraBot.Core", "Generated");
+        var outputDir = Path.Combine(repoRoot, "src", "HraBot.Core", "Generated", "Lambda");
         Directory.CreateDirectory(outputDir);
 
         var coreAssembly = typeof(BaseEndpoint<,>).Assembly;

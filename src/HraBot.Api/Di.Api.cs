@@ -1,11 +1,4 @@
-using System;
-using System.Reflection;
-using HraBot.Api.Features.Agents;
-using HraBot.Api.Features.Workflows;
 using HraBot.Core.Common;
-using HraBot.Core.Features.Chat;
-using HraBot.Shared;
-using Microsoft.Agents.AI.Hosting;
 using ServiceScan.SourceGenerator;
 
 namespace HraBot.Api;
@@ -14,8 +7,7 @@ public static partial class Di_Api
 {
     [GenerateServiceRegistrations(
         AssignableTo = typeof(IBaseEndpoint),
-        CustomHandler = nameof(IBaseEndpoint.Configure),
-        FromAssemblyOf = typeof(BaseEndpoint<,>)
+        CustomHandler = nameof(IBaseEndpoint.Configure)
     )]
     public static partial void MapEndpoints(this IEndpointRouteBuilder app);
 

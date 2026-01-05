@@ -8,6 +8,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
 
     <DefineConstants Condition="'$(GENERATING_OPENAPI)' == 'true'">$(DefineConstants);GENERATING_OPENAPI</DefineConstants>
+    <DefineConstants Condition="'$(GENERATING_EF)' == 'true'">$(DefineConstants);GENERATING_EF</DefineConstants>
 
     <NoWarn>
       TUnit0046 <!-- Data source method should return Func<T> for reference type parameters -->

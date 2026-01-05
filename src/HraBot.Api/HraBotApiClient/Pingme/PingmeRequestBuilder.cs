@@ -8,28 +8,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace HraBot.ApiClient.Ping
+namespace HraBot.ApiClient.Pingme
 {
     /// <summary>
-    /// Builds and executes requests for operations under \ping
+    /// Builds and executes requests for operations under \pingme
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
-    public partial class PingRequestBuilder : BaseRequestBuilder
+    public partial class PingmeRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Ping.PingRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Pingme.PingmeRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public PingRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/ping", pathParameters)
+        public PingmeRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/pingme", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Ping.PingRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Pingme.PingmeRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public PingRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/ping", rawUrl)
+        public PingmeRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/pingme", rawUrl)
         {
         }
         /// <returns>A <see cref="string"/></returns>
@@ -66,11 +66,11 @@ namespace HraBot.ApiClient.Ping
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::HraBot.ApiClient.Ping.PingRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::HraBot.ApiClient.Pingme.PingmeRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::HraBot.ApiClient.Ping.PingRequestBuilder WithUrl(string rawUrl)
+        public global::HraBot.ApiClient.Pingme.PingmeRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::HraBot.ApiClient.Ping.PingRequestBuilder(rawUrl, RequestAdapter);
+            return new global::HraBot.ApiClient.Pingme.PingmeRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

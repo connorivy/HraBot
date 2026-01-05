@@ -2,7 +2,7 @@
 #pragma warning disable CS0618
 using HraBot.ApiClient.Chat;
 using HraBot.ApiClient.Feedback;
-using HraBot.ApiClient.Ping;
+using HraBot.ApiClient.Pingme;
 using Microsoft.Kiota.Abstractions.Extensions;
 using Microsoft.Kiota.Abstractions;
 using Microsoft.Kiota.Serialization.Form;
@@ -31,10 +31,10 @@ namespace HraBot.ApiClient
         {
             get => new global::HraBot.ApiClient.Feedback.FeedbackRequestBuilder(PathParameters, RequestAdapter);
         }
-        /// <summary>The ping property</summary>
-        public global::HraBot.ApiClient.Ping.PingRequestBuilder Ping
+        /// <summary>The pingme property</summary>
+        public global::HraBot.ApiClient.Pingme.PingmeRequestBuilder Pingme
         {
-            get => new global::HraBot.ApiClient.Ping.PingRequestBuilder(PathParameters, RequestAdapter);
+            get => new global::HraBot.ApiClient.Pingme.PingmeRequestBuilder(PathParameters, RequestAdapter);
         }
         /// <summary>
         /// Instantiates a new <see cref="global::HraBot.ApiClient.HraBotApiClient"/> and sets the default values.

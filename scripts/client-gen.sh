@@ -7,10 +7,12 @@ api_openapi_json="$repo_root/src/HraBot.Api/obj/HraBot.Api.json"
 web_output_dir="$repo_root/src/hrabot-web/src/hraBotApiClient"
 back_output_dir="$repo_root/src/HraBot.Api/HraBotApiClient"
 
-generated_dir="$repo_root/src/HraBot.Core/Generated"
-find "$generated_dir" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +
+generated_dir_api="$repo_root/src/HraBot.Api/Generated"
+generated_dir_core="$repo_root/src/HraBot.Core/Generated/Lambda"
+find "$generated_dir_api" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +
+find "$generated_dir_core" -mindepth 1 ! -name '.gitignore' -exec rm -rf {} +
 
-dotnet run --project $repo_root/codeGen/HraBot.CodeGen.Serverless/HraBot.CodeGen.Serverless.csproj
+dotnet run --project $repo_root/codeGen/HraBot.CodeGen.Serverless/HraBot.CodeGen.Serverless.csproj /p:GENERATING_OPENAPI=true
 
 dotnet build "$api_project" /p:GENERATING_OPENAPI=true
 

@@ -17,7 +17,7 @@ public class WebApplicationEndpointBuilder
             );
         }
 
-        var outputDir = Path.Combine(repoRoot, "src", "HraBot.Core", "Generated");
+        var outputDir = Path.Combine(repoRoot, "src", "HraBot.Api", "Generated");
         Directory.CreateDirectory(outputDir);
 
         var coreAssembly = typeof(BaseEndpoint<,>).Assembly;

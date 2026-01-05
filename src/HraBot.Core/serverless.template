@@ -3,7 +3,7 @@
   "Transform": "AWS::Serverless-2016-10-31",
   "Description": "This template is partially managed by Amazon.Lambda.Annotations (v1.8.0.0).",
   "Resources": {
-    "HraBotCoreFeaturesPingPingPingLambdaGenerated": {
+    "HraBotCoreFeaturesPingPingMePingLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
         "Tool": "Amazon.Lambda.Annotations",
@@ -26,83 +26,13 @@
           "AWSLambdaBasicExecutionRole"
         ],
         "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Ping.Ping_PingLambda_Generated::PingLambda",
+        "Handler": "HraBot.Core::HraBot.Core.Features.Ping.PingMe_PingLambda_Generated::PingLambda",
         "Events": {
           "RootGet": {
             "Type": "HttpApi",
             "Properties": {
-              "Path": "/ping",
+              "Path": "/pingme",
               "Method": "GET"
-            }
-          }
-        }
-      }
-    },
-    "HraBotCoreFeaturesFeedbackGetFeedbackItemsGetFeedbackItemsLambdaGenerated": {
-      "Type": "AWS::Serverless::Function",
-      "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootGet"
-        ],
-        "SyncedEventProperties": {
-          "RootGet": [
-            "Path",
-            "Method"
-          ]
-        }
-      },
-      "Properties": {
-        "Runtime": "dotnet10",
-        "CodeUri": ".",
-        "MemorySize": 512,
-        "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
-        "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Feedback.GetFeedbackItems_GetFeedbackItemsLambda_Generated::GetFeedbackItemsLambda",
-        "Events": {
-          "RootGet": {
-            "Type": "HttpApi",
-            "Properties": {
-              "Path": "/feedback/items",
-              "Method": "GET"
-            }
-          }
-        }
-      }
-    },
-    "HraBotCoreFeaturesChatChatChatLambdaGenerated": {
-      "Type": "AWS::Serverless::Function",
-      "Metadata": {
-        "Tool": "Amazon.Lambda.Annotations",
-        "SyncedEvents": [
-          "RootPost"
-        ],
-        "SyncedEventProperties": {
-          "RootPost": [
-            "Path",
-            "Method"
-          ]
-        }
-      },
-      "Properties": {
-        "Runtime": "dotnet10",
-        "CodeUri": ".",
-        "MemorySize": 512,
-        "Timeout": 30,
-        "Policies": [
-          "AWSLambdaBasicExecutionRole"
-        ],
-        "PackageType": "Zip",
-        "Handler": "HraBot.Core::HraBot.Core.Features.Chat.Chat_ChatLambda_Generated::ChatLambda",
-        "Events": {
-          "RootPost": {
-            "Type": "HttpApi",
-            "Properties": {
-              "Path": "/chat",
-              "Method": "POST"
             }
           }
         }
@@ -143,6 +73,41 @@
         }
       }
     },
+    "HraBotCoreFeaturesChatChatChatLambdaGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootPost"
+        ],
+        "SyncedEventProperties": {
+          "RootPost": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet10",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "HraBot.Core::HraBot.Core.Features.Chat.Chat_ChatLambda_Generated::ChatLambda",
+        "Events": {
+          "RootPost": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/chat",
+              "Method": "POST"
+            }
+          }
+        }
+      }
+    },
     "HraBotCoreFeaturesFeedbackGetFeedbackGetFeedbackLambdaGenerated": {
       "Type": "AWS::Serverless::Function",
       "Metadata": {
@@ -172,6 +137,41 @@
             "Type": "HttpApi",
             "Properties": {
               "Path": "/feedback/{id}",
+              "Method": "GET"
+            }
+          }
+        }
+      }
+    },
+    "HraBotCoreFeaturesFeedbackGetFeedbackItemsGetFeedbackItemsLambdaGenerated": {
+      "Type": "AWS::Serverless::Function",
+      "Metadata": {
+        "Tool": "Amazon.Lambda.Annotations",
+        "SyncedEvents": [
+          "RootGet"
+        ],
+        "SyncedEventProperties": {
+          "RootGet": [
+            "Path",
+            "Method"
+          ]
+        }
+      },
+      "Properties": {
+        "Runtime": "dotnet10",
+        "CodeUri": ".",
+        "MemorySize": 512,
+        "Timeout": 30,
+        "Policies": [
+          "AWSLambdaBasicExecutionRole"
+        ],
+        "PackageType": "Zip",
+        "Handler": "HraBot.Core::HraBot.Core.Features.Feedback.GetFeedbackItems_GetFeedbackItemsLambda_Generated::GetFeedbackItemsLambda",
+        "Events": {
+          "RootGet": {
+            "Type": "HttpApi",
+            "Properties": {
+              "Path": "/feedback/items",
               "Method": "GET"
             }
           }

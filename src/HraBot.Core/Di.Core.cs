@@ -16,6 +16,9 @@ using Microsoft.Extensions.VectorData;
 using Microsoft.SemanticKernel.Connectors.Qdrant;
 using Qdrant.Client;
 using ServiceScan.SourceGenerator;
+#if !GENERATING_EF
+using HraBot.Core.Generated.EF;
+#endif
 
 namespace HraBot.Core;
 
@@ -197,6 +200,9 @@ public static partial class Di_Core
         services.AddDbContextPool<HraBotDbContext>(o =>
         {
             o.UseNpgsql(connectionString)
+#if !GENERATING_EF
+                .UseModel(HraBotDbContextModel.Instance)
+#endif
 #if DEBUG
                 .EnableSensitiveDataLogging()
                 .EnableDetailedErrors()
