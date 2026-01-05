@@ -76,7 +76,10 @@ public class FeedbackTests : PageTestBase
             AriaRole.Group,
             new() { Name = "Response importance" }
         );
-        var importanceFive = importanceGroup.GetByRole(AriaRole.Button, new() { Name = "Importance 5" });
+        var importanceFive = importanceGroup.GetByRole(
+            AriaRole.Button,
+            new() { Name = "Importance 5" }
+        );
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () =>
@@ -114,12 +117,18 @@ public class FeedbackTests : PageTestBase
         var ratingGroup = this.Page.GetByRole(AriaRole.Group, new() { Name = "Response rating" });
         await Expect(ratingGroup).ToBeVisibleAsync();
 
-        var twoStarButton = ratingGroup.GetByRole(AriaRole.Button, new() { Name = "Poor" });
+        var twoStarButton = ratingGroup.GetByRole(
+            AriaRole.Button,
+            new() { Name = "Poor", Exact = true }
+        );
         var importanceGroup = this.Page.GetByRole(
             AriaRole.Group,
             new() { Name = "Response importance" }
         );
-        var importanceTwo = importanceGroup.GetByRole(AriaRole.Button, new() { Name = "Importance 2" });
+        var importanceTwo = importanceGroup.GetByRole(
+            AriaRole.Button,
+            new() { Name = "Importance 2" }
+        );
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () =>
