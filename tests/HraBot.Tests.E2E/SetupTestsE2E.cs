@@ -13,7 +13,7 @@ namespace HraBot.Tests.E2E;
 public class SetupTestsE2E
 {
     private static readonly TimeSpan DefaultTimeout = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan SetupTimeout = TimeSpan.FromSeconds(240);
+    private static readonly TimeSpan SetupTimeout = TimeSpan.FromSeconds(60);
     public static DistributedApplication AppHost
     {
         get => field ?? throw new InvalidOperationException("Apphost has not been set");

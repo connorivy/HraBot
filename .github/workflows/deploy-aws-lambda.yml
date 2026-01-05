@@ -44,6 +44,9 @@ jobs:
       - name: Install playwright deps
         run: npx playwright install --with-deps --only-shell chromium
 
+      - name: Trust https certs
+        run: dotnet dev-certs https --trust
+
       - name: Test
         run: dotnet test -c Release --no-build
 
