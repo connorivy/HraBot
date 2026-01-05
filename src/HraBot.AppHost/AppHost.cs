@@ -12,7 +12,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 // You will need to set the connection string to your own value
 //   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>:6334;Key=<qdrant-cloud-key>"
 // Make sure to include the port number!!!
-var vectorDb = builder.AddConnectionString(AppServices.vectorDb);
+IResourceBuilder<IResourceWithConnectionString>? vectorDb = null;
+if (!AppEnv.IsCiEnv())
+{
+    vectorDb = builder.AddConnectionString(AppServices.vectorDb);
+}
 
 // var vectorDb = builder
 //     .AddQdrant(HraServices.qdrantLocal)
@@ -41,8 +45,6 @@ var webApi = builder.AddProject<Projects.HraBot_Api>(AppServices.API);
 webApi
     .WithReference(db)
     .WaitFor(db)
-    .WithReference(vectorDb)
-    // .WaitFor(vectorDb)
     .WithReference(migrationService)
     .WaitForCompletion(migrationService)
     .WithUrls(context =>
@@ -72,6 +74,10 @@ webApi
     })
     // .WithEnvironment("MARKITDOWN_MCP_URL", markitdown.GetEndpoint("http"))
     .ApplyTestEnvironmentOverrides();
+if (vectorDb is not null)
+{
+    webApi.WithReference(vectorDb).WaitFor(vectorDb);
+}
 
 var frontend = builder
     .AddViteApp(AppServices.WEB, "../hrabot-web")
