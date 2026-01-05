@@ -12,7 +12,7 @@ public class UiTests : PageTestBase
     public async Task SendingPositiveFeedback_ShouldCreateCorrectDataInDb()
     {
         await this.Page.RouteAsync(
-            "**/api/chat",
+            "**/chat",
             async route =>
             {
                 Console.WriteLine("hrabot api call intercepted");

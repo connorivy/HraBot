@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace HraBot.ApiClient.Api.Chat
+namespace HraBot.ApiClient.Chat
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\chat
+    /// Builds and executes requests for operations under \chat
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ChatRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Api.Chat.ChatRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Chat.ChatRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ChatRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/chat", pathParameters)
+        public ChatRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/chat", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Api.Chat.ChatRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Chat.ChatRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ChatRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/chat", rawUrl)
+        public ChatRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/chat", rawUrl)
         {
         }
         /// <returns>A <see cref="global::HraBot.ApiClient.Models.ApprovedResponseContract"/></returns>
@@ -72,11 +72,11 @@ namespace HraBot.ApiClient.Api.Chat
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::HraBot.ApiClient.Api.Chat.ChatRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::HraBot.ApiClient.Chat.ChatRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::HraBot.ApiClient.Api.Chat.ChatRequestBuilder WithUrl(string rawUrl)
+        public global::HraBot.ApiClient.Chat.ChatRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::HraBot.ApiClient.Api.Chat.ChatRequestBuilder(rawUrl, RequestAdapter);
+            return new global::HraBot.ApiClient.Chat.ChatRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

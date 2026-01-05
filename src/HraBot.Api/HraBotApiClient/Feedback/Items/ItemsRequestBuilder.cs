@@ -9,28 +9,28 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Threading;
 using System;
-namespace HraBot.ApiClient.Api.Feedback.Items
+namespace HraBot.ApiClient.Feedback.Items
 {
     /// <summary>
-    /// Builds and executes requests for operations under \api\feedback\items
+    /// Builds and executes requests for operations under \feedback\items
     /// </summary>
     [global::System.CodeDom.Compiler.GeneratedCode("Kiota", "1.0.0")]
     public partial class ItemsRequestBuilder : BaseRequestBuilder
     {
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Api.Feedback.Items.ItemsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Feedback.Items.ItemsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="pathParameters">Path parameters for the request</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ItemsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/feedback/items", pathParameters)
+        public ItemsRequestBuilder(Dictionary<string, object> pathParameters, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/feedback/items", pathParameters)
         {
         }
         /// <summary>
-        /// Instantiates a new <see cref="global::HraBot.ApiClient.Api.Feedback.Items.ItemsRequestBuilder"/> and sets the default values.
+        /// Instantiates a new <see cref="global::HraBot.ApiClient.Feedback.Items.ItemsRequestBuilder"/> and sets the default values.
         /// </summary>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
         /// <param name="requestAdapter">The request adapter to use to execute the requests.</param>
-        public ItemsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/api/feedback/items", rawUrl)
+        public ItemsRequestBuilder(string rawUrl, IRequestAdapter requestAdapter) : base(requestAdapter, "{+baseurl}/feedback/items", rawUrl)
         {
         }
         /// <returns>A List&lt;global::HraBot.ApiClient.Models.FeedbackItemContract&gt;</returns>
@@ -68,11 +68,11 @@ namespace HraBot.ApiClient.Api.Feedback.Items
         /// <summary>
         /// Returns a request builder with the provided arbitrary URL. Using this method means any other path or query parameters are ignored.
         /// </summary>
-        /// <returns>A <see cref="global::HraBot.ApiClient.Api.Feedback.Items.ItemsRequestBuilder"/></returns>
+        /// <returns>A <see cref="global::HraBot.ApiClient.Feedback.Items.ItemsRequestBuilder"/></returns>
         /// <param name="rawUrl">The raw URL to use for the request builder.</param>
-        public global::HraBot.ApiClient.Api.Feedback.Items.ItemsRequestBuilder WithUrl(string rawUrl)
+        public global::HraBot.ApiClient.Feedback.Items.ItemsRequestBuilder WithUrl(string rawUrl)
         {
-            return new global::HraBot.ApiClient.Api.Feedback.Items.ItemsRequestBuilder(rawUrl, RequestAdapter);
+            return new global::HraBot.ApiClient.Feedback.Items.ItemsRequestBuilder(rawUrl, RequestAdapter);
         }
     }
 }

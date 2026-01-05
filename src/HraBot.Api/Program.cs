@@ -47,7 +47,7 @@ var app = builder.Build();
 
 app.UseCors();
 
-app.MapGroup("api").MapEndpoints();
+app.MapEndpoints();
 
 #if !GENERATING_OPENAPI
 app.MapOpenAIResponses();

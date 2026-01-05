@@ -50,7 +50,7 @@ public class FeedbackTests : PageTestBase
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () => await sendButton.ClickAsync(),
-            resp => resp.Url.Contains("/api/chat") && resp.Request.Method == "POST"
+            resp => resp.Url.Contains("/chat") && resp.Request.Method == "POST"
         );
         var jsonResponse = await response.JsonAsync();
         Console.WriteLine($"Message send response: {jsonResponse}");
@@ -86,7 +86,7 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not deserialize json: {json}");
 
         var persistedFeedback =
-            await SetupTestsE2E.ApiClient.Api.Feedback[typedResponse.Id].GetAsync()
+            await SetupTestsE2E.ApiClient.Feedback[typedResponse.Id].GetAsync()
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");
@@ -140,7 +140,7 @@ public class FeedbackTests : PageTestBase
 
         var response = await this.Page.RunAndWaitForResponseAsync(
             async () => await submitButton.ClickAsync(),
-            resp => resp.Url.Contains("/api/feedback") && resp.Request.Method == "POST" && resp.Ok
+            resp => resp.Url.Contains("/feedback") && resp.Request.Method == "POST" && resp.Ok
         );
         var json =
             await response.JsonAsync()
@@ -151,7 +151,7 @@ public class FeedbackTests : PageTestBase
             ?? throw new InvalidOperationException($"Could not deserialize json: {json}");
 
         var persistedFeedback =
-            await SetupTestsE2E.ApiClient.Api.Feedback[typedResponse.Id].GetAsync()
+            await SetupTestsE2E.ApiClient.Feedback[typedResponse.Id].GetAsync()
             ?? throw new InvalidOperationException($"Could not find persisted feedback");
 
         Console.WriteLine($"Persisted Feedback: {JsonSerializer.Serialize(persistedFeedback)}");

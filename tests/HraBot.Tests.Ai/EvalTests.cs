@@ -108,3 +108,9 @@ public class AiParallelLimiter : IParallelLimit
 {
     public int Limit => 2;
 }
+
+public class DummyTest
+{
+    [Test]
+    public void Dummy() { }
+}

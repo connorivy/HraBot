@@ -153,7 +153,7 @@ function ChatPane() {
     setIsTyping(true)
 
     try {
-      const response = await apiClient.api.chat.post({
+      const response = await apiClient.chat.post({
         content: trimmed,
         conversationId: conversationId ?? undefined,
       })
@@ -194,7 +194,7 @@ function ChatPane() {
     if (feedbackSubmitting || feedbackMessageId == null) return
     setFeedbackSubmitting(true)
     try {
-      await apiClient.api.feedback.post({
+      await apiClient.feedback.post({
         messageId: feedbackMessageId,
         messageFeedbackItemIds: [1, 2, 3],
         additionalComments: null,
@@ -219,7 +219,7 @@ function ChatPane() {
     if (feedbackItemsLoading || feedbackItemsFetched) return
     setFeedbackItemsLoading(true)
     try {
-      const response = await apiClient.api.feedback.items.get()
+      const response = await apiClient.feedback.items.get()
       if (response?.length) {
         setFeedbackItems(response)
         setFeedbackItemsFetched(true)
@@ -243,7 +243,7 @@ function ChatPane() {
 
     setFeedbackSubmitting(true)
     try {
-      await apiClient.api.feedback.post({
+      await apiClient.feedback.post({
         messageId: feedbackMessageId,
         messageFeedbackItemIds: selectedIds,
         additionalComments: additionalComments.trim() || null,

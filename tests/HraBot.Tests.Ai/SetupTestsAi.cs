@@ -30,18 +30,18 @@ public class SetupTestsAi
         private set;
     }
 
-    [Before(HookType.Assembly)]
-    public static async Task AssemblySetup()
-    {
-        AppHost = await CreateAppHost();
-        ApiClient = AppHost.CreateHttpClient(AppServices.API);
-        await AppHost.ResourceNotifications.WaitForResourceHealthyAsync(
-            AppServices.API,
-            CancellationToken.None
-        );
+    // [Before(HookType.Assembly)]
+    // public static async Task AssemblySetup()
+    // {
+    //     AppHost = await CreateAppHost();
+    //     ApiClient = AppHost.CreateHttpClient(AppServices.API);
+    //     await AppHost.ResourceNotifications.WaitForResourceHealthyAsync(
+    //         AppServices.API,
+    //         CancellationToken.None
+    //     );
 
-        InitOpenAiKeys();
-    }
+    //     InitOpenAiKeys();
+    // }
 
     private static List<string> OpenAiApiKeys = [];
 
@@ -72,14 +72,14 @@ public class SetupTestsAi
         return OpenAiApiKeys[index];
     }
 
-    [After(HookType.Assembly)]
-    public static async Task AssemblyTeardown()
-    {
-        if (AppHost != null)
-        {
-            await AppHost.StopAsync(CancellationToken.None);
-            AppHost.Dispose();
-        }
-        ApiClient?.Dispose();
-    }
+    // [After(HookType.Assembly)]
+    // public static async Task AssemblyTeardown()
+    // {
+    //     if (AppHost != null)
+    //     {
+    //         await AppHost.StopAsync(CancellationToken.None);
+    //         AppHost.Dispose();
+    //     }
+    //     ApiClient?.Dispose();
+    // }
 }
