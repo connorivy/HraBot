@@ -1,6 +1,3 @@
-using System;
-using System.Reflection.Metadata;
-
 namespace HraBot.ServiceDefaults;
 
 public static class AppServices
@@ -36,19 +33,17 @@ public static class AppOptions
         set => Environment.SetEnvironmentVariable(ENV_NAME_IsEphemeralDb, value.ToString());
     }
 
-    private static bool IsEnvVarTrue(string envVar) =>
-        Environment.GetEnvironmentVariable(envVar) is string mockChatClientString
-        && bool.TryParse(mockChatClientString, out var mockChatClient)
-        && mockChatClient;
+    private static bool IsEnvVarTrue(string envVarKey) =>
+        Environment.GetEnvironmentVariable(envVarKey) is string envVarString
+        && bool.TryParse(envVarString, out var envVar)
+        && envVar;
 }
 
 public static class AppEnv
 {
-    public static bool IsCiEnv()
-    {
-        return bool.TryParse(
-                Environment.GetEnvironmentVariable("ContinuousIntegrationEnv"),
-                out bool isCiEnv
-            ) && isCiEnv;
-    }
+    public static bool IsCiEnv =>
+        bool.TryParse(
+            Environment.GetEnvironmentVariable("ContinuousIntegrationEnv"),
+            out bool isCiEnv
+        ) && isCiEnv;
 }

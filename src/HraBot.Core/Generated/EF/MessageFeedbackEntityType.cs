@@ -45,14 +45,6 @@ namespace HraBot.Core.Generated.EF
                 sentinel: (byte)0);
             importanceToTakeCommand.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
-            var rating = runtimeEntityType.AddProperty(
-                "Rating",
-                typeof(byte),
-                propertyInfo: typeof(MessageFeedback).GetProperty("Rating", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                fieldInfo: typeof(MessageFeedback).GetField("<Rating>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
-                sentinel: (byte)0);
-            rating.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
-
             var messageId = runtimeEntityType.AddProperty(
                 "MessageId",
                 typeof(long),
@@ -60,6 +52,14 @@ namespace HraBot.Core.Generated.EF
                 fieldInfo: typeof(MessageFeedback).GetField("<MessageId>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
                 sentinel: 0L);
             messageId.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
+
+            var rating = runtimeEntityType.AddProperty(
+                "Rating",
+                typeof(byte),
+                propertyInfo: typeof(MessageFeedback).GetProperty("Rating", BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                fieldInfo: typeof(MessageFeedback).GetField("<Rating>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly),
+                sentinel: (byte)0);
+            rating.AddAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.None);
 
             var key = runtimeEntityType.AddKey(
                 new[] { id });

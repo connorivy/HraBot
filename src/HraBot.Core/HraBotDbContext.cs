@@ -9,6 +9,7 @@ namespace HraBot.Core;
 /// <summary>
 /// from the hrabot.api directory
 /// dotnet ef migrations add Initial --project ../HraBot.Core/
+/// dotnet ef migrations script {{from?}} {{to?}} --project ../HraBot.Core/
 /// </summary>
 public class HraBotDbContext : DbContext
 {

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HraBot.Core.Migrations
 {
     [DbContext(typeof(HraBotDbContext))]
-    [Migration("20260106174746_Initial")]
+    [Migration("20260106223624_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

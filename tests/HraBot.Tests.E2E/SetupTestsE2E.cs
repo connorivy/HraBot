@@ -1,6 +1,7 @@
 ﻿using Aspire.Hosting;
 using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
+using Google.Protobuf.WellKnownTypes;
 using HraBot.ApiClient;
 using HraBot.ServiceDefaults;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,6 +38,7 @@ public class SetupTestsE2E
         var hostBuilder =
             await DistributedApplicationTestingBuilder.CreateAsync<Projects.HraBot_AppHost>(
                 [
+                    "Headless=true",
                     $"TestOverrides:Resources:{AppServices.API}:Environment:{AppOptions.MockChatClient_bool}=true",
                     $"TestOverrides:Resources:{AppServices.MIGRATION_SERVICE}:Environment:{AppOptions.ENV_NAME_IsEphemeralDb}=true",
                 ],

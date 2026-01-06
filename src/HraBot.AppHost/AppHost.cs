@@ -13,9 +13,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 //   dotnet user-secrets set ConnectionStrings:qdrantCloud "Endpoint=<qdrant-cloud-endpoint>:6334;Key=<qdrant-cloud-key>"
 // Make sure to include the port number!!!
 IResourceBuilder<IResourceWithConnectionString>? vectorDb = null;
-if (!AppEnv.IsCiEnv())
+if (!AppEnv.IsCiEnv)
 {
+    Console.WriteLine("Adding vectorDb connection string");
     vectorDb = builder.AddConnectionString(AppServices.vectorDb);
+    Console.WriteLine("Added vectorDb connection string");
 }
 
 // var vectorDb = builder
@@ -23,10 +25,15 @@ if (!AppEnv.IsCiEnv())
 //     .WithDataVolume()
 //     .WithLifetime(ContainerLifetime.Persistent);
 
-var postgres = builder
-    .AddPostgres(AppServices.postgres)
-    // .WithPgAdmin()
-    .WithLifetime(ContainerLifetime.Persistent);
+var postgres = builder.AddPostgres(AppServices.postgres).WithLifetime(ContainerLifetime.Persistent);
+if (
+    builder.Configuration["Headless"] is not string headlessValue
+    || bool.TryParse(headlessValue, out var headless)
+    || headless
+)
+{
+    postgres = postgres.WithPgAdmin();
+}
 
 var db = postgres.AddDatabase(AppServices.db_hraBot);
 
