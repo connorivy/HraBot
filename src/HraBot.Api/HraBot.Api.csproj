@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <UserSecretsId>ac2ea74c-42fc-401d-a878-ea274e0b6d06</UserSecretsId>
+    <JsonSerializerIsReflectionEnabledByDefault>false</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
   <ItemGroup>

@@ -14,6 +14,7 @@ namespace HraBot.Api.Features.Json;
     PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase,
     WriteIndented = false
 )]
+[JsonSerializable(typeof(ChatRequest))]
 [JsonSerializable(typeof(HraBotResponse))]
 [JsonSerializable(typeof(List<Citation>))]
 [JsonSerializable(typeof(CitationValidationResponse))]
