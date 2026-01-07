@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Amazon.Lambda.APIGatewayEvents;
 using HraBot.Api.Features.Agents;
 using HraBot.Api.Features.Workflows;
 using HraBot.Api.Services;
@@ -26,6 +27,7 @@ namespace HraBot.Api.Features.Json;
 [JsonSerializable(typeof(EntityResponse<long>))]
 [JsonSerializable(typeof(FeedbackContract))]
 [JsonSerializable(typeof(List<FeedbackItemContract>))]
+[JsonSerializable(typeof(APIGatewayHttpApiV2ProxyRequest))]
 public partial class HraBotJsonSerializerContext : JsonSerializerContext
 {
     public static JsonSerializerOptions DefaultOptions { get; }

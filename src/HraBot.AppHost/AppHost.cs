@@ -35,7 +35,7 @@ if (
     postgres = postgres.WithPgAdmin();
 }
 
-var db = postgres.AddDatabase(AppServices.db_hraBot);
+var db = postgres.AddDatabase(AppServices.hraBotDb);
 
 var migrationService = builder
     .AddProject<Projects.HraBot_MigrationService>(AppServices.MIGRATION_SERVICE)

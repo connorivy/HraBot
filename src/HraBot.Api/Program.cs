@@ -27,7 +27,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 builder.Services.RegisterAllServices(
     Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.vectorDb}")
         ?? "Endpoint=dummy;Key=dummy",
-    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.db_hraBot}") ?? ""
+    Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.hraBotDb}") ?? ""
 );
 
 #if !GENERATING_OPENAPI

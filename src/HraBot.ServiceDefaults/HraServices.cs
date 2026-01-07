@@ -19,7 +19,7 @@ public static class AppServices
     public const string MARK_IT_DOWN = "markitdown";
     public const string ALL_SERVICES = nameof(ALL_SERVICES);
     public const string PG_ADMIN = "pgadmin";
-    public const string db_hraBot = "hraBotDb";
+    public const string hraBotDb = "hraBotDb";
     public const string geminiKey = "gemini";
 }
 

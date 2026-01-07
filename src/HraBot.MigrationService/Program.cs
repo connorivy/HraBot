@@ -10,7 +10,7 @@ builder.Services.AddHostedService<Worker>();
 builder.Services.AddOpenTelemetry().WithTracing(t => t.AddSource(Worker.ActivitySourceName));
 builder.Services.AddDbContext<HraBotDbContext>(o =>
     o.UseNpgsql(
-        Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.db_hraBot}")
+        Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.hraBotDb}")
             ?? throw new InvalidOperationException($"Could not read hraBotDb connection string")
     )
 );

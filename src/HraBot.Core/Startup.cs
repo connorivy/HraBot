@@ -15,7 +15,7 @@ public class Startup
                     ?? throw new InvalidOperationException("Could not find connection for vectorDb")
             )
             .AddInfrastructure(
-                Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.postgres}")
+                Environment.GetEnvironmentVariable($"ConnectionStrings__{AppServices.hraBotDb}")
                     ?? throw new InvalidOperationException("Could not find connection for postgres")
             );
     }
