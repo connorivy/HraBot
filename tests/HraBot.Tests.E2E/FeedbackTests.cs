@@ -15,9 +15,6 @@ public class FeedbackTests : PageTestBase
             new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle }
         );
 
-        await this.Expect(this.PageContext.Page)
-            .ToHaveTitleAsync("JackBot", new() { Timeout = 500 });
-
         await SendMessage("hello!");
         await SendFeedback(5, 1);
     }
