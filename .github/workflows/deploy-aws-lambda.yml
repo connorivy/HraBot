@@ -70,7 +70,7 @@ jobs:
       - name: Build frontend
         working-directory: src/hrabot-web
         env:
-          VITE_API_ENDPOINT: https://glxyrc58i4.execute-api.us-east-2.amazonaws.com/
+          VITE_API_ENDPOINT: https://glxyrc58i4.execute-api.us-east-2.amazonaws.com
           VITE_BASE: /HraBot/
         run: npm run build
 
