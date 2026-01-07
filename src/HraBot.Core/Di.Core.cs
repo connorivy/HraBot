@@ -65,8 +65,21 @@ public static partial class Di_Core
         string qdrantConnectionString
     )
     {
+#if DEBUG
+        services.AddSingleton<MultiAiServiceProvider>();
+        services.AddSingleton<AiConfigInfoProvider>();
+#else
+        services.AddSingleton<SingleAiServiceProvider>();
+#endif
+
         services
-            .AddChatClient(sp => sp.GetRequiredService<AiServiceProvider>().GetRandomChatClient())
+            .AddChatClient(sp =>
+#if DEBUG
+                sp.GetRequiredService<MultiAiServiceProvider>().GetChatClient()
+#else
+                sp.GetRequiredService<SingleAiServiceProvider>().GetChatClient()
+#endif
+            )
             .UseFunctionInvocation()
             .UseOpenTelemetry(
 #if DEBUG
@@ -75,7 +88,11 @@ public static partial class Di_Core
             );
 
         services.AddEmbeddingGenerator(sp =>
-            sp.GetRequiredService<AiServiceProvider>().GetRandomEmbeddingGeneratorClient()
+#if DEBUG
+            sp.GetRequiredService<MultiAiServiceProvider>().GetEmbeddingGenerator()
+#else
+            sp.GetRequiredService<SingleAiServiceProvider>().GetEmbeddingGenerator()
+#endif
         );
 
         var (endpoint, key) = ExtractEndpointAndKey(qdrantConnectionString);
@@ -120,8 +137,6 @@ public static partial class Di_Core
         services.AddHraBotAgent();
         services.AddCitationValidationBot();
         // services.AddSearchAgent();
-        services.AddSingleton<AiServiceProvider>();
-        services.AddSingleton<AiConfigInfoProvider>();
         services.AddWorkflowAsAgent(
             WorkflowNames.Review,
             (sp, _) => GetApprovedResponseWorkflow.CreateWorkflow(sp)

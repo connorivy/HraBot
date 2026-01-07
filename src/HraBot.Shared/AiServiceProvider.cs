@@ -6,7 +6,82 @@ using Microsoft.Extensions.Configuration;
 
 namespace HraBot.Shared;
 
-public class AiServiceProvider(AiConfigInfoProvider configInfoProvider)
+public abstract class AiServiceProvider
+{
+    public abstract IChatClient GetChatClient();
+    public abstract IEmbeddingGenerator<string, Embedding<float>> GetEmbeddingGenerator();
+
+    protected static OpenAiConfigInfo ParseOpenAiConnectionString(string connectionString)
+    {
+        string? endpoint = null;
+        string? apiKey = null;
+
+        foreach (var part in connectionString.Split(';', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var segments = part.Split('=', 2);
+            if (segments.Length != 2)
+            {
+                continue;
+            }
+
+            if (segments[0].Equals("Endpoint", StringComparison.OrdinalIgnoreCase))
+            {
+                endpoint = segments[1];
+            }
+            else if (segments[0].Equals("Key", StringComparison.OrdinalIgnoreCase))
+            {
+                apiKey = segments[1];
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(endpoint) || string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new InvalidOperationException(
+                "OpenAI connection string must include Endpoint and Key."
+            );
+        }
+
+        return new OpenAiConfigInfo(endpoint, apiKey);
+    }
+}
+
+public class SingleAiServiceProvider : AiServiceProvider
+{
+    private AzureOpenAIClient OpenAiClient
+    {
+        get
+        {
+            if (field == null)
+            {
+                var openaiConnectionString =
+                    Environment.GetEnvironmentVariable($"ConnectionStrings__openai")
+                    ?? throw new InvalidOperationException(
+                        "Could not find openai connection string"
+                    );
+                var openAiConfig = ParseOpenAiConnectionString(openaiConnectionString);
+                field = new AzureOpenAIClient(
+                    new Uri(openAiConfig.Endpoint),
+                    new System.ClientModel.ApiKeyCredential(openAiConfig.ApiKey)
+                );
+            }
+            return field;
+        }
+    }
+
+    public override IChatClient GetChatClient()
+    {
+        return this.OpenAiClient.GetChatClient("gpt-4o-mini").AsIChatClient();
+    }
+
+    public override IEmbeddingGenerator<string, Embedding<float>> GetEmbeddingGenerator()
+    {
+        return this
+            .OpenAiClient.GetEmbeddingClient("text-embedding-3-small")
+            .AsIEmbeddingGenerator();
+    }
+}
+
+public class MultiAiServiceProvider(AiConfigInfoProvider configInfoProvider) : AiServiceProvider
 {
     private List<IChatClient> AllChatClients
     {
@@ -18,7 +93,7 @@ public class AiServiceProvider(AiConfigInfoProvider configInfoProvider)
         get => field ??= [.. CreateEmbeddingGenerator()];
     }
 
-    public IChatClient GetRandomChatClient()
+    public override IChatClient GetChatClient()
     {
         if (AllChatClients.Count == 0)
         {
@@ -29,7 +104,7 @@ public class AiServiceProvider(AiConfigInfoProvider configInfoProvider)
         return AllChatClients[index];
     }
 
-    public IEmbeddingGenerator<string, Embedding<float>> GetRandomEmbeddingGeneratorClient()
+    public override IEmbeddingGenerator<string, Embedding<float>> GetEmbeddingGenerator()
     {
         var rand = new Random();
         int index = rand.Next(AllEmbeddingGenerators.Count);
