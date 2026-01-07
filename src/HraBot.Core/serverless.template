@@ -6,7 +6,9 @@
     "Function": {
       "Environment": {
         "Variables": {
-          "ConnectionStrings__hraBotDb": "{{resolve:ssm:hraBotDb}}"
+          "ConnectionStrings__hraBotDb": "{{resolve:ssm:hraBotDb}}",
+          "ConnectionStrings__qdrantCloud": "{{resolve:ssm:qdrantCloud}}",
+          "ConnectionStrings__openai": "{{resolve:ssm:openai}}"
         }
       }
     }
