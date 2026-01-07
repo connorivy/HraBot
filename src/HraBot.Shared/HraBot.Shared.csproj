@@ -5,20 +5,9 @@
 
   <ItemGroup>
     <PackageReference Include="Google_GenerativeAI.Microsoft" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
     <PackageReference Include="Aspire.Azure.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
     <PackageReference Include="Microsoft.Extensions.AI" />
-    <PackageReference Include="Microsoft.Extensions.DataIngestion" />
-    <PackageReference Include="Microsoft.Extensions.DataIngestion.Markdig" />
-    <PackageReference Include="Microsoft.Extensions.DataIngestion.MarkItDown" />
-    <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" />
-    <PackageReference Include="Microsoft.ML.Tokenizers.Data.O200kBase" />
-    <PackageReference Include="Aspire.Qdrant.Client" />
-    <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" />
-    <PackageReference Include="Microsoft.SemanticKernel.Core" />
-    <PackageReference Include="PdfPig" />
-    <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
 </Project>

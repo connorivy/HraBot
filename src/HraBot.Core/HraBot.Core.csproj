@@ -3,13 +3,19 @@
   <PropertyGroup>
     <!-- <OutputType>Exe</OutputType> -->
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.EntityFrameworkCore.GeneratedInterceptors</InterceptorsNamespaces>
+    <AWSProjectType>Lambda</AWSProjectType>
+    <!-- This property makes the build directory similar to a publish directory and helps the AWS .NET Lambda Mock Test Tool find project dependencies. -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <!-- Generate ready to run images during publishing to improvement cold starts. -->
+    <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Annotations" />
     <PackageReference Include="Amazon.Lambda.APIGatewayEvents" />
     <PackageReference Include="Amazon.Lambda.Core" />
-    <PackageReference Include="Amazon.Lambda.RuntimeSupport" />
+    <PackageReference Include="Amazon.Lambda.Logging.AspNetCore" />
+    <!-- <PackageReference Include="Amazon.Lambda.RuntimeSupport" /> -->
     <PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -26,7 +32,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Google_GenerativeAI.Microsoft" />
     <PackageReference Include="Microsoft.Agents.AI" />
     <!-- <PackageReference Include="Microsoft.Agents.AI.DevUI" /> -->
     <PackageReference Include="Microsoft.Agents.AI.Workflows" />
@@ -44,7 +49,6 @@
     <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" />
     <PackageReference Include="PdfPig" />
-    <PackageReference Include="Scalar.AspNetCore" />
   </ItemGroup>
 
   <ItemGroup>
@@ -56,4 +60,12 @@
     <Folder Include="Generated/" />
   </ItemGroup>
 
+  <!-- 
+    The FrameworkReference is used to reduce the deployment bundle size by not having to include 
+    dependencies like Microsoft.Extensions.DependencyInjection. The Microsoft.AspNetCore.App
+    which is available in the Managed .NET Lambda runtime already includes those assemblies.
+  -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
 </Project>

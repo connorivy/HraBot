@@ -28,6 +28,7 @@ namespace HraBot.Api.Features.Json;
 [JsonSerializable(typeof(FeedbackContract))]
 [JsonSerializable(typeof(List<FeedbackItemContract>))]
 [JsonSerializable(typeof(APIGatewayHttpApiV2ProxyRequest))]
+[JsonSerializable(typeof(APIGatewayHttpApiV2ProxyResponse))]
 public partial class HraBotJsonSerializerContext : JsonSerializerContext
 {
     public static JsonSerializerOptions DefaultOptions { get; }
