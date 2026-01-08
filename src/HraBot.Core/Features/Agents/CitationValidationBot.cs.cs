@@ -13,9 +13,14 @@ public static class CitationValidationBot
 {
     public static AIAgent Create(IChatClient chatClient)
     {
-        return chatClient.CreateAIAgent(
-            name: AgentNames.CitationValidator,
-            instructions: @"
+        JsonElement responseSchema = AIJsonUtilities.CreateJsonSchema(
+            typeof(CitationValidationResponse),
+            serializerOptions: HraBotJsonSerializerContext.DefaultOptions
+        );
+        ChatOptions chatOptions = new()
+        {
+            Instructions =
+                @"
 You are a quality assurance assistant that validates the citations used in answers
 provided by another AI assistant.
 
@@ -34,7 +39,7 @@ You will be provided with a json object in the following format:
  
 You will evaluate the other agent's answer by following this logical flow
 
-Does the provided ANSWER contain specific information about a health insurance related topic? 
+Does the provided ANSWER contain specific information about one of the following topics? Health insurance, Take Command Health, HRAs, Taxes specific to health expenses
 (Make sure to distiguish between responses that contain words like 'health insurance' versus responses that actually contain information about health insurance)
 IF (YES) {
     Is there at least one provided CITATION?
@@ -66,7 +71,19 @@ Your response should be a json object in the following format:
 Where: 
 - IsValid is true if the citations are valid according to the criteria above, otherwise false.
 - Issues is a list of strings describing any issues found with the citations. If there are no issues, this list should be empty.
-"
+",
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: responseSchema,
+                schemaName: "CitationValidationResponse",
+                schemaDescription: @$"Response from {AgentNames.CitationValidator} which includes ""IsValid"" of type bool value and ""Issues"" of type string"
+            ),
+        };
+        return chatClient.CreateAIAgent(
+            new ChatClientAgentOptions()
+            {
+                Name = AgentNames.CitationValidator,
+                ChatOptions = chatOptions,
+            }
         );
     }
 

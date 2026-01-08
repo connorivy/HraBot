@@ -6,18 +6,25 @@ using Microsoft.Agents.AI;
 using Microsoft.Agents.AI.Workflows;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 
 namespace HraBot.Api.Features.Agents;
 
 public static partial class HraBot
 {
+    public const string OFF_TOPIC_RESPONSE = "I can only answer questions about health insurance";
+
     public static AIAgent Create(IChatClient chatClient)
     {
-        return chatClient
-            .CreateAIAgent(
-                name: AgentNames.HraBot,
-                instructions: @"
+        JsonElement responseSchema = AIJsonUtilities.CreateJsonSchema(
+            typeof(HraBotResponse),
+            serializerOptions: HraBotJsonSerializerContext.DefaultOptions
+        );
+        ChatOptions chatOptions = new()
+        {
+            Instructions =
+                @$"
 You are an assistant who answers questions about health insurance, health reimbursement accounts, ICHRA, QSEHRA, and Take Command Health using provided retrieved snippets.
 
 You will receive:
@@ -25,23 +32,32 @@ You will receive:
 2) A system message that lists retrieved snippets with filenames and text.
 
 Instructions:
-- If the user asks about anything unrelated to the topics above, respond with Answer = ""I can only answer questions about health insurance"" and empty citations.
+- If the user asks about anything unrelated to the topics above, respond with in the required json out with property ""Answer"" = ""{OFF_TOPIC_RESPONSE}"" and property ""Citations"" = [].
 - Otherwise, rely only on the provided snippets; do not make up facts and do not search elsewhere.
 - Set ""Question"" to the user's latest request (summarized if needed).
 - Include up to 3 citations that directly support the answer. Keep each quote to 10 words or fewer and copy exact words from the snippet.
 
 Return JSON with this shape:
-{
+{{
   ""Question"": ""string"",
   ""Answer"": ""string"",
   ""Citations"": [
-    {
+    {{
       ""Filename"": ""string"",
       ""Quote"": ""string""
-    }
+    }}
   ]
-}
-"
+}}
+",
+            ResponseFormat = ChatResponseFormat.ForJsonSchema(
+                schema: responseSchema,
+                schemaName: "HraBotResponse",
+                schemaDescription: "Response from HraBot including the original question, the bot's answer to the question, and citations"
+            ),
+        };
+        return chatClient
+            .CreateAIAgent(
+                new ChatClientAgentOptions() { Name = AgentNames.HraBot, ChatOptions = chatOptions }
             )
             .AsBuilder()
             .UseOpenTelemetry(AgentNames.HraBot

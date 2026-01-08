@@ -16,17 +16,18 @@ public class GetApprovedResponseWorkflow(
         CancellationToken ct
     )
     {
+        using var cancelSource = CancellationTokenSource.CreateLinkedTokenSource(ct);
         await using StreamingRun run = await InProcessExecution.StreamAsync(
             reviewWorkflow,
             messages.Where(m => m.Role != Microsoft.Extensions.AI.ChatRole.System).ToList(),
-            cancellationToken: ct
+            cancellationToken: cancelSource.Token
         );
         await run.TrySendMessageAsync(new TurnToken(emitEvents: true));
         HraBotResponseWithRawJson? finalResponse = null;
         List<CitationValidationResponse> citationValidations = [];
         List<Citation>? citations = null;
 
-        await foreach (WorkflowEvent evt in run.WatchStreamAsync(ct))
+        await foreach (WorkflowEvent evt in run.WatchStreamAsync(cancelSource.Token))
         {
             logger.LogInformation(
                 "Receive workflow event of type {eventType}\nData payload of type {dataType}\nValue = {value}",
@@ -43,6 +44,16 @@ public class GetApprovedResponseWorkflow(
             if (evt.Data is HraBotResponseWithRawJson hraBotResponse)
             {
                 finalResponse = hraBotResponse;
+                if (finalResponse.Answer == HraBot.Api.Features.Agents.HraBot.OFF_TOPIC_RESPONSE)
+                {
+                    cancelSource.Cancel();
+                    return new(
+                        ResponseType.Success,
+                        finalResponse.Answer,
+                        [],
+                        hraBotResponse.RawJson
+                    );
+                }
             }
             if (evt.Data is CitationValidationResponse citationValidation)
             {
